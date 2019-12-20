@@ -1,0 +1,166 @@
+ <ng-container *ngIf="articleId === 1">
+ <!-- Page Header -->
+ <header class="masthead" style="background-image: url('assets/img/post-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+            <h1>Typescript, Basis- Teil 1</h1>
+            <h2 class="subheading">Typescript ist ein stark Typisierter Supersatz von Javascript</h2>
+            <span class="meta">Veröffentlicht von
+              <a href="/">Nils</a>
+              am 21 Dezember, 2019</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 class="section-heading">Basis Typen</h2>
+            <pre>
+              <code>
+// boolean
+let isDone: boolean = false;
+
+// number
+let decimal: number = 8;
+let hex: number = 0xf00d;
+let binary: number = 0b1010;
+let octal: number = Oo744;
+
+// string
+let color: string = 'red';
+color = blue;
+let fullName: string = `Nils-Holger Nägele`;
+let age: number = 48;
+let sentence: string = `Hy my name is $'{{'{fullName}'}}'.
+I'll be ${{'{age + 1}'}} in 7 months.`;
+let sentence: string = 'Hello, my name is ' + fullName + '.\n\n' +
+'I\'ll be ' + (age + 1) + ' years old in seven months.';
+
+// array
+let list: number[] = [1, 2, 3];
+let list: Array<'number'> = [1, 2, 3];
+
+// tuple
+let x: [string, number];
+x = ['hello', 100]; // OK
+x = [1000, 'hello']; // Error
+
+console.log(x[0].substring(1)); // OK
+console.log(x[1].substring(1)); // Error, 'number' does not have 'substring'
+                  
+x[3] = 'world'; // Error, property '3' does not exist on type '[string, number]'
+console.log(x[5].toString()); // Error, property '5' does mot exist on type '[string, number]'
+
+// enum
+enum Color {{'{Red, Green, Blue}'}}
+let c: Color = Color.Green;
+
+enum Color {{'{Red = 1, Green, Blue}'}}
+let c: Color = Color.Blue;
+
+enum Color {{'{Red = 1, Green = 3, Blue= 5}'}}
+let c: Color = Color.Red;
+
+enum Color {{'{Red = 1, Green, Blue}'}}
+let colorName: string = Color[2];
+
+console.log(colorName); // Displays 'Green' as its value is 2 above
+
+let notSure: any = 8;
+
+notSure.ifItExists(); // okay, ifItExists might exist at runtime
+notSure.toFixed(); // okay, toFixed exists (but compiler dioesn't check)
+
+let prettySure: Object = 16;
+prettySure.toFixed(); // Error: property 'toFixed' doesn't exist on type 'Object'
+
+let list: any[] = [100, true, 'free'];
+list[1] = 1000;
+
+function warnUser(): void {{ '{' }} 
+  console.log('this is my warning message');
+  {{ '}' }}
+  let unusable: void = undefined;
+  unusable = null; // OK if `--strictNullChecks` is not given
+  
+// not much else we can assign to these variables!
+let u: undefined = undefined
+let n: null = null;
+  
+// never
+// function returning never must have unreachable end point
+function error(message: string): never {{ '{' }} 
+  throw new Error(message);
+  {{ '}' }} 
+  
+// inferred return type is never
+function fail() {{ '{' }} 
+  return error('something failed');
+  {{ '}' }} 
+  
+// function returning never must have unreahcable end point
+  function infiniteLoop(): never {{ '{' }} 
+    while (true) {{ '{' }} 
+  
+    {{ '}' }} 
+{{ '}' }} 
+  
+  
+// object
+declare function create(o: object | null): void;
+  
+create({{ '{' }}  prop: 0 {{ '}' }}); // OK
+create(null); // OK
+  
+create(42); // Error
+create('string'); // Error
+create(false); // Error
+create(undefined); // Error
+  
+// type assertions
+let someValue: any = 'this is a string';
+let strLength: number =  (<'string'>someValue).length;
+              </code>
+            </pre>
+
+          <blockquote class="blockquote">
+            Die Träume von gestern sind die Hoffnungen und Realitäten von morgen.
+            Wissenshaft kann noch niocht prophezeien. Wir vorhersagen zu viel für das nächste Jahr
+            und viel zu wenig für das nächste Jahrzehnt.
+          </blockquote>
+          <a href="#">
+            <img class="img-fluid" src="assets/img/post1.jpg" alt="">
+          </a>
+          <span class="caption text-muted">
+            Orte zu besuchen und Dinge zu tun die nie zuvor getan wurden - das ist worum es im Leben geht.
+            
+          </span>
+          <p>Bilder von <a href="https://www.flickr.com/photos/nasacommons/" target="_blank">NASA auf dem Gemeingut</a>.</p>
+          <div class="clearfix">
+            <a class="btn btn-primary float-right" routerLink="/">Zurück</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>
+</ng-container>
+
+<ng-container *ngIf="articleId === 2">
+  <h1>hello world 2</h1>
+</ng-container>
+
+<ng-container *ngIf="articleId === 3">
+  <h1>hello world 3</h1>
+</ng-container>
+
+<ng-container *ngIf="articleId === 4">
+  <h1>hello world 4</h1>
+</ng-container>

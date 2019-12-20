@@ -1,0 +1,63 @@
+ <!-- Page Header -->
+ <header class="masthead" style="background-image: url('assets/img/contact-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="page-heading">
+            <h1>Kontaktiere Mich</h1>
+            <span class="subheading">Fragen? Ich habe Antworten.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+          <p>Nils-Holger Nägele <br><a href="mailto:nilsholger1307@gmail.com">nilsholger1307@gmail.com</a></p>
+        <p>Möchtest Du mich kontaktieren? Fülle das Formular aus und ich werde mich zeitnah zurück melden!!</p>
+        <!-- Contact Form - Enter your email address on line 19 of the mail/contact_me.php file to make this form work. -->
+        <!-- WARNING: Some web hosts do not allow emails to be sent through forms to common mail hosts like Gmail or Yahoo. It's recommended that you use a private domain email address! -->
+        <!-- To use the contact form, your site must be on a live web host with PHP! The form will not work locally! -->
+        <form name="sentMessage" id="contactForm" novalidate>
+          <div class="control-group">
+            <div class="form-group floating-label-form-group controls">
+              <label>Name</label>
+              <input type="text" class="form-control" placeholder="Name" id="name" required data-validation-required-message="Bitte Name eingeben.">
+              <p class="help-block text-danger"></p>
+            </div>
+          </div>
+          <div class="control-group">
+            <div class="form-group floating-label-form-group controls">
+              <label>Email Adresse</label>
+              <input type="email" class="form-control" placeholder="Email Adresse" id="email" required data-validation-required-message="Bitte Email Adresse eingeben">
+              <p class="help-block text-danger"></p>
+            </div>
+          </div>
+          <div class="control-group">
+            <div class="form-group col-xs-12 floating-label-form-group controls">
+              <label>Telefon Nummer</label>
+              <input type="tel" class="form-control" placeholder="Telefon Nummer" id="phone" required data-validation-required-message="Bitte Telefon Nummer eingeben.">
+              <p class="help-block text-danger"></p>
+            </div>
+          </div>
+          <div class="control-group">
+            <div class="form-group floating-label-form-group controls">
+              <label>Botschaft</label>
+              <textarea rows="5" class="form-control" placeholder="Botschaft" id="message" required data-validation-required-message="Bitte Nachricht eingeben."></textarea>
+              <p class="help-block text-danger"></p>
+            </div>
+          </div>
+          <br>
+          <div id="success"></div>
+          <div class="form-group">
+            <button type="button" class="btn btn-primary" id="sendMessageButton">Senden</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
