@@ -46,7 +46,7 @@ let sentence: string = 'Hello, my name is ' + fullName + '.\n\n' +
 
 // array
 let list: number[] = [1, 2, 3];
-let list: Array<'number'> = [1, 2, 3];
+let list: Array&lt;number&gt; = [1, 2, 3];
 
 // tuple
 let x: [string, number];
@@ -106,7 +106,7 @@ function fail() {{ '{' }}
   return error('something failed');
   {{ '}' }} 
   
-// function returning never must have unreahcable end point
+// function returning never must have unreachable end point
   function infiniteLoop(): never {{ '{' }} 
     while (true) {{ '{' }} 
   
@@ -127,7 +127,7 @@ create(undefined); // Error
   
 // type assertions
 let someValue: any = 'this is a string';
-let strLength: number =  (<'string'>someValue).length;
+let strLength: number =  (&lt;string&gt;someValue).length;
               </code>
             </pre>
 

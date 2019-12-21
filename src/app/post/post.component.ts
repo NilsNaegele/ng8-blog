@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
 
 @Component({
@@ -10,7 +10,8 @@ import { Location } from '@angular/common';
 export class PostComponent implements OnInit {
   articleId: number;
 
-  constructor( private route: ActivatedRoute, private location: Location) { }
+  constructor( private route: ActivatedRoute, private router: Router,
+               private location: Location) { }
 
   ngOnInit() {
     this.getArticle();
@@ -19,6 +20,9 @@ export class PostComponent implements OnInit {
   getArticle(): void {
     this.articleId = +this.route.snapshot.paramMap.get('id');
     console.log(this.articleId);
+    if (this.articleId !== 1) {
+      this.router.navigate(['page-not-found']);
+    }
   }
 
   goBack(): void {
