@@ -1,3 +1,4 @@
+import { PrivacyComponent } from './privacy/privacy.component';
 import { HomeComponent } from './home/home.component';
 import { PostComponent } from './post/post.component';
 import { ContactComponent } from './contact/contact.component';
@@ -12,6 +13,7 @@ const routes: Routes = [
   { path: 'home', component: HomeComponent },
   { path: 'about', component: AboutComponent },
   { path: 'contact', component: ContactComponent },
+  { path: 'privacy', component: PrivacyComponent },
   { path: 'post/:id', component: PostComponent },
   { path: '**', component: PageNotFoundComponent }
 ];

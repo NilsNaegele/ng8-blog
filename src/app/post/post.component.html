@@ -133,7 +133,7 @@ let strLength: number =  (&lt;string&gt;someValue).length;
 
           <blockquote class="blockquote">
             Die Träume von gestern sind die Hoffnungen und Realitäten von morgen.
-            Wissenshaft kann noch niocht prophezeien. Wir vorhersagen zu viel für das nächste Jahr
+            Wissenschaft kann noch nicht prophezeien. Wir vorhersagen zu viel für das nächste Jahr
             und viel zu wenig für das nächste Jahrzehnt.
           </blockquote>
           <a href="#">
@@ -557,6 +557,64 @@ let myObj = {{ '{' }}size: 100, label: 'Size 100 Object'{{ '}' }};
 printLabel(myObj);
 
 // optional properties
+interface SquareConfig {{ '{' }}
+  color?: string;
+  width?: number;
+  {{ '}' }}
+
+function createSquare(config: SquareConfig): {{ '{' }}color: string, area: number{{ '}' }} {{ '{' }}
+let newSquare = {{ '{' }} color: 'white', area: 100 {{ '}' }};
+if (config.color) {{ '{' }}
+    newSquare.color = config.color;
+    {{ '}' }}
+if (config.width) {{ '}' }}
+    newSquare.area = config.width * config.width;
+    {{ '}' }}
+return newSquare;
+{{ '}' }}
+
+let mySquare = createSquare({{ '{' }}color: 'black'{{ '}' }});
+
+
+interface SquareConfig {{ '{' }}
+  color?: string;
+  width?: number;
+  {{ '}' }}
+
+function createSquare(config: SquareConfig): {{ '{' }}color: string, area: number{{ '}' }} {{ '{' }}
+let newSquare = {{ '{' }} color: 'white', area: 100 {{ '}' }};
+if (config.clor) {{ '{' }}
+// error: property 'clor' does not exist on type 'SquareConfig'
+    newSquare.color = config.color;
+    {{ '}' }}
+if (config.width) {{ '}' }}
+    newSquare.area = config.width * config.width;
+    {{ '}' }}
+return newSquare;
+{{ '}' }}
+
+let mySquare = createSquare({{ '{' }}color: 'black'{{ '}' }});
+
+// readonly properties
+interface Point  {{ '{' }}
+  readonly x: number;
+  readonly y: number;
+  {{ '}' }}
+
+let p1: Point =  {{ '{' }} x: 10, y: 20  {{ '}' }};
+p1.x = 10; // error
+
+let a : number[] = [10, 20, 30, 40, 50];
+let ro: ReadonlyArray&lt;number&gt; = a;
+
+ro[8] = 15; // error
+ro.length = 100; // error
+
+a = ro; // error
+
+a = ro as number[];
+
+// readonly vs const 
 
 
 
@@ -566,7 +624,7 @@ printLabel(myObj);
 
           <blockquote class="blockquote">
             Die Träume von gestern sind die Hoffnungen und Realitäten von morgen.
-            Wissenshaft kann noch niocht prophezeien. Wir vorhersagen zu viel für das nächste Jahr
+            Wissenschaft kann noch nicht prophezeien. Wir vorhersagen zu viel für das nächste Jahr
             und viel zu wenig für das nächste Jahrzehnt.
           </blockquote>
           <a href="#">
