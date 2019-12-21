@@ -510,7 +510,80 @@ clone.m(); // error
 </ng-container>
 
 <ng-container *ngIf="articleId === 3">
-  <h1>hello world 3</h1>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('assets/img/post3-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+            <h1>Typescript, Basis- Teil 3</h1>
+            <h2 class="subheading">Schnittstellen und Klassen</h2>
+            <span class="meta">Veröffentlicht von
+              <a href="/">Nils</a>
+              am 22 Dezember, 2019</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 class="section-heading">Schnittstellen, Klassen</h2>
+            <pre>
+              <code>
+// first interface
+function printLabel(labeldObject: {{ '{' }}label: string{{ '}' }}) {{ '{' }}
+console.log(labeledObj.label);
+{{ '}' }}
+
+let myObj = {{ '{' }}size: 100, label: 'Size 100 Object'{{ '}' }};
+printLabel(myObj);
+
+// rewritten with interface
+interface LabeledValue {{ '{' }}
+  label: string;
+  {{ '}' }}
+
+function printLabel(labeledObj: LabeledValue) {{ '{' }}
+    console.log(labeledObj.label);
+{{ '}' }}
+
+let myObj = {{ '{' }}size: 100, label: 'Size 100 Object'{{ '}' }};
+printLabel(myObj);
+
+// optional properties
+
+
+
+
+              </code>
+            </pre>
+
+          <blockquote class="blockquote">
+            Die Träume von gestern sind die Hoffnungen und Realitäten von morgen.
+            Wissenshaft kann noch niocht prophezeien. Wir vorhersagen zu viel für das nächste Jahr
+            und viel zu wenig für das nächste Jahrzehnt.
+          </blockquote>
+          <a href="#">
+            <img class="img-fluid" src="assets/img/post3.jpg" alt="">
+          </a>
+          <span class="caption text-muted">
+            Orte zu besuchen und Dinge zu tun die nie zuvor getan wurden - das ist worum es im Leben geht.
+            
+          </span>
+          <p>Bilder von <a href="https://www.flickr.com/photos/nasacommons/" target="_blank">NASA auf dem Gemeingut</a>.</p>
+          <div class="clearfix">
+            <a class="btn btn-primary float-right" routerLink="/">Zurück</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>
 </ng-container>
 
 <ng-container *ngIf="articleId === 4">
