@@ -180,7 +180,7 @@ let strLength: number =  (&lt;string&gt;someValue).length;
           <h2 class="section-heading">Variablen Deklarationen</h2>
             <pre>
               <code>
-// var decalations
+// var declarations
 var a = 1000;
 
 function f() {{ '{' }} 
@@ -489,7 +489,7 @@ clone.m(); // error
             </pre>
 
           <blockquote class="blockquote">
-            Mißerfolg ist keine Option. Viele sagen Entdeckung is ein Teil unseres Schicksals. 
+            Mißerfolg ist keine Option. Viele sagen Entdeckung ist ein Teil unseres Schicksals. 
             Nein, es ist unsere Verpflichtung für zukünftige Generationen.
           </blockquote>
           <a href="#">
@@ -708,6 +708,149 @@ myArray[2] = 'Maria'; // error: Index signature in type 'ReadonlyStringArray' on
 
 
 // class types
+interface ClockInterface {{ '{' }}
+  currentTime: Date;
+  {{ '}' }}
+
+class Clock implements ClockInterface {{ '{' }}
+  currentTime: Date = new Date();
+  constructor(h: number, m: number) {{ '{' }} {{ '}' }}
+  {{ '}' }}
+
+  interface ClockInterface {{ '{' }}
+    currentTime: Date;
+    setTime(d: Date): void;
+    {{ '}' }}
+  
+  class Clock implements ClockInterface {{ '{' }}
+    currentTime: Date = new Date();
+    setTime(d: Date) {{ '{' }}
+      this.currentTime = d;
+      {{ '}' }}
+    constructor(h: number, m: number) {{ '{' }} {{ '}' }}
+    {{ '}' }}
+
+    interface ClockConstructor {{ '{' }}
+      new (hour: number, minute: number): ClockInterface;
+      {{ '}' }}
+    
+    interface ClockInterface {{ '{' }}
+      tick(): void;
+      {{ '}' }}
+    
+    function createClock(ctor: ClockConstructor, hour: number, minute: number): ClockInterface {{ '{' }}
+      return new ctor(hour, minute);
+      {{ '}' }}
+    
+    class DigitalClock implements ClockInterface {{ '{' }}
+      constructor(h: number, m: number) {{ '{' }} {{ '}' }}
+      tick() {{ '{' }}
+        console.log('beep, beep');
+        {{ '}' }}
+  {{ '}' }}
+    
+    class AnalogClock implements ClockInterface {{ '{' }}
+      constructor(h: number, m: number) {{ '{' }} {{ '}' }}
+      tick() {{ '{' }}
+        console.log('tick tock');
+        {{ '}' }}
+  {{ '}' }}
+    
+    let digital = createClock(DigitalClock, 16, 10);
+    let analog = createClock(AnalogClock, 7, 42);
+
+// use class expressions
+interface ClockConstructor {{ '{' }}
+  new (hour: number, minute: number): ClockInterface;
+  {{ '}' }}
+
+interface ClockInterface {{ '{' }}
+  tick(): void;
+{{ '}' }}
+
+const Clock: ClockConstructor = class Clock implements ClockInterface {{ '{' }}
+  constructor(h: number, m: number) {{ '{' }} {{ '}' }}
+  tick() {{ '{' }}
+    console.log('beep beep');
+  {{ '}' }}
+{{ '}' }};
+
+// extending interfaces
+interface Shape {{ '{' }}
+  color: string;
+  {{ '}' }}
+
+interface Square extends Shape {{ '{' }}
+  sideLength: number;
+  {{ '}' }}
+
+let square = {{ '{' }} {{ '}' }} as Square;
+square.color = 'red';
+square.sideLength = 4;
+
+interface Shape {{ '{' }}
+  color: string;
+  {{ '}' }}
+
+interface PenStroke {{ '{' }}
+  penWidth: number;
+  {{ '}' }}
+
+interface Square extends Shape, PenStroke {{ '{' }}
+  sideLength: number;
+  {{ '}' }}
+
+let square = {{ '{' }} {{ '}' }} as Square;
+square.color = 'red';
+square.sideLength = 4;
+square.penWidth = 6.0;
+
+// hybrid types
+interface Counter {{ '{' }}
+  (start: number): string;
+  interval: number;
+  reset(): void;
+  {{ '}' }}
+
+function getCounter(): Counter {{ '{' }}
+  let counter = ((start: number) => {{ '{' }} {{ '}' }}) as Counter;
+  counter.interval = 123;
+  counter.reset = () => {{ '{' }} {{ '}' }};
+  return counter;
+}
+
+let c = getCounter();
+c(10);
+c.interval = 6.0;
+
+// interfaces extending classes
+class Control {{ '{' }}
+  private state: any;
+  {{ '}' }}
+
+interface SelectableControl extends Control {{ '{' }}
+  select(): void;
+  {{ '}' }}
+
+class Button extends Control implements SelectableControl {{ '{' }}
+  select() {{ '{' }} {{ '}' }}
+  {{ '}' }}
+
+class TextBox extends Control {{ '{' }}
+  select() {{ '{' }} {{ '}' }}
+  {{ '}' }}
+// error: Class 'Image' incorrectly implements interface 'SelectableControl'.
+//  Types have separate declarations of a private property 'state'.
+class Image implements SelectableControl {{ '{' }}
+  private state: any;
+  select() {{ '{' }} {{ '}' }}
+  {{ '}' }}
+
+class Location {{ '{' }}
+
+{{ '}' }}
+
+// classes
 
 
 
@@ -715,16 +858,16 @@ myArray[2] = 'Maria'; // error: Index signature in type 'ReadonlyStringArray' on
             </pre>
 
           <blockquote class="blockquote">
-            Die Träume von gestern sind die Hoffnungen und Realitäten von morgen.
-            Wissenschaft kann noch nicht prophezeien. Wir vorhersagen zu viel für das nächste Jahr
-            und viel zu wenig für das nächste Jahrzehnt.
+            Greife nach den Sternen. Das Weltall, die letzte Front. Dieses sind die Reisen
+            des Sternenschiffes Enterprise, eine Fünf Jahres Mission: neue Welten entdecken,
+            neues Leben und Zivilisationen zu erkunden, mutig da hin zu gehen wo keiner jeh
+            gewesen ist.
           </blockquote>
           <a href="#">
             <img class="img-fluid" src="assets/img/post3.jpg" alt="">
           </a>
           <span class="caption text-muted">
-            Orte zu besuchen und Dinge zu tun die nie zuvor getan wurden - das ist worum es im Leben geht.
-            
+            Mann muss entdecken und das Weltall erforschen ist Entdeckung an seinem Höhepunkt.
           </span>
           <p>Bilder von <a href="https://www.flickr.com/photos/nasacommons/" target="_blank">NASA auf dem Gemeingut</a>.</p>
           <div class="clearfix">
