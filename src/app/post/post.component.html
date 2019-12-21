@@ -615,7 +615,99 @@ a = ro; // error
 a = ro as number[];
 
 // readonly vs const 
+interface SquareConfig{{ '{' }} 
+  color?: string;
+  width?: number;
+  {{ '}' }} 
 
+function createSquare(config: SquareConfig): {{ '{' }}  color: string; area: number {{ '}' }}  {{ '{' }}
+  // ...
+  {{ '{' }} 
+// error: object literal may only specify known properties, but 'colour' doesn't exist in type ...
+let mySquare = createSquare({{ '{' }}  colour: "red", width: 100 {{ '}' }} );
+
+// get around these checks with type assertion
+let mySquare = createSquare({{ '{' }}  width: 100, opacity: 0.5 {{ '}' }}  as SquareConfig);
+
+// add string index signature
+interface SquareConfig {{ '{' }} 
+  color?: string;
+  width?: number;
+  [propName: string]: any;
+  {{ '}' }}
+
+
+  // function types
+  interface SearchFunc {{ '{' }} 
+    (source: string, subString: string): boolean;
+    {{ '}' }} 
+  
+  let mySearch: SearchFunc;
+  mySearch = (src: string, sub: string): boolean => {{ '{' }} 
+    let result = src.search(sub);
+    return result > -1;
+    {{ '}' }};
+
+let mySearch: SearchFunc;
+mySearch = (src, sub) => {{ '{' }} 
+    let result = src.search(sub);
+    return result > -1;
+    {{ '}' }};
+
+let mySearch: SearchFunc;
+// Type '(src: string, sub: string) => string' is not assignable to type 'SearchFunc'.
+// Type 'string' is not assignable to type 'boolean'.
+mySearch = (src, sub) => {{ '{' }} 
+  let result = src.search(sub);
+  return 'string';
+  {{ '{' }};
+
+  // indexable types
+  interface StringArray {{ '{' }} 
+    [index: number]: string;
+    {{ '}' }} 
+  
+  let myArray: StringArray;
+  myArray = ['JavaScript', 'TypeScript'];
+  
+  let myStr: string = myArray[0];
+
+  class Animal {{ '{' }} 
+    name: string;
+    {{ '}' }} 
+  
+  class Dog extends Animal {{ '{' }} 
+    breed: string;
+    {{ '}' }} 
+  
+  // error: Numeric index type 'Animal' is not assignable to string index type 'Dog'.ts(2413)
+  
+  interface NotOkay {{ '{' }} 
+    [x: number]: Animal;
+    [x: string]: Dog;
+    {{ '}' }}
+
+interface NumberDictionary {{ '{' }} 
+  [index: string]: number;
+  length: number; // ok, is a number
+  name: string; // error: Property 'name' of type 'string' is not assignable to string index type 'number'.
+  {{ '}' }} 
+
+interface NumberOrStringDictionary {{ '{' }} 
+  [index: string]: number | string;
+  length: number; // ok, is a number
+  name: string; // ok, is a string
+  {{ '}' }}
+
+// readonly index signature
+interface ReadonlyStringArray {{ '{' }} 
+  readonly [index: number]: string;
+  {{ '}' }} 
+let myArray: ReadonlyStringArray = ['Julia', 'Vanessa'];
+myArray[2] = 'Maria'; // error: Index signature in type 'ReadonlyStringArray' only permits reading.
+
+
+// class types
 
 
 
