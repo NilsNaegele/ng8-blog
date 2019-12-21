@@ -154,7 +154,359 @@ let strLength: number =  (&lt;string&gt;someValue).length;
 </ng-container>
 
 <ng-container *ngIf="articleId === 2">
-  <h1>hello world 2</h1>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('assets/img/post2-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+            <h1>Typescript, Basis- Teil 2</h1>
+            <h2 class="subheading">Typescript bietet viele interessante Instruktionen</h2>
+            <span class="meta">Veröffentlicht von
+              <a href="/">Nils</a>
+              am 21 Dezember, 2019</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 class="section-heading">Variablen Deklarationen</h2>
+            <pre>
+              <code>
+// var decalations
+var a = 1000;
+
+function f() {{ '{' }} 
+var message = 'hello world';
+return message;
+{{ '}' }}
+
+function f() {{ '{' }} 
+var a = 100;
+return function g() {{ '{' }}
+    var b = a + 10;
+    return b;
+  {{ '}' }}
+{{ '}' }} 
+
+var g = f();
+g(); // returns '110'
+
+function f() {{ '{' }}
+var a = 100;
+a = 200;
+var b = g();
+a = 300;
+return b;
+
+function g() {{ '{' }}
+         return a;       
+  {{ '}' }}
+{{ '}' }}
+
+f(); // returns '200'
+
+// scoping rules
+function f(shouldInitialize: boolean) {{ '{' }}
+if (shouldInitialize) {{ '{' }}
+      var x = 100;
+  {{ '}' }}
+    return x;
+{{ '}' }}
+
+f(true); // returns '100'
+f(false); // returns 'undefined'
+
+function sumMatrix(matrix: number) {{ '{' }}
+    var sum = 0;
+    for (var i = 0; i &lt; matrix.length; i++) {{ '{' }}
+      var currentRow = matrix[i];
+      for (var i = 0; i &lt; currentRow.length; i++) {{ '{' }}
+          sum += currentRow[i];
+        {{ '}' }}
+      {{ '}' }}
+      return sum;
+{{ '}' }}
+
+// variable capturing quirks
+for (var i = 0; i < 10; i++) {{ '{' }}
+    setTimeout(function() {{ '{' }} console.log(i); {{ '}' }}, 100 * i);
+
+{{ '}' }}
+
+// IIFE - immediately invoked function expression
+for (var i = 0; i < 10; i++) {{ '{' }}
+(function(i) {{ '{' }}
+    setTimeout(function() {{ '{' }} console.log(i); {{ '}' }}, 100 * i);
+    {{ '}' }})(i);
+{{ '}' }}
+
+// let declarations
+let hello = 'Hello';
+
+// block scoping
+function f(input: boolean) {{ '{' }}
+    let a = 1000;
+    
+    if (input) {{ '{' }}
+      // still ok to reference 'a'
+      let b = a + 100;
+      return b;
+    {{ '}' }}
+      // Error: 'b' doesn't exist here
+      return b;
+{{ '}' }}
+
+try {{ '{' }}
+  throw 'Oh No!';
+{{ '}' }}
+catch(e) {{ '{' }}
+  console.log('Oh Well.');
+{{ '}' }}
+
+// Error: 'e' doesn't exist here 
+console.log(e);
+
+a++; // illegal to use 'a' before it is declared
+let a;
+
+
+function foo() {{ '{' }}
+    return a;
+{{ '}' }}
+
+// illegal call 'foo' before 'a' is declared
+// runtimes should throw an error here
+foo();
+let a;
+
+// re-declarations and shadowing
+function f(x) {{ '{' }}
+    var x;
+    var x;
+    
+    if (true) {{ '{' }}
+        var x;
+    {{ '}' }}
+{{ '}' }}
+
+let x = 100;
+let x = 200; // error: can't redeclare 'x' in the same scope
+
+function f(x) {{ '{' }}
+  let x = 1000; // error: interferes with parameter declaration
+{{ '}' }}
+
+function g() {{ '{' }}
+  let x = 2000;
+  var x = 3000; // error: can't have both declarations of 'x'
+{{ '}' }}
+
+function f(condition, x) {{ '{' }}
+  if (condition) {{ '{' }}
+      let x = 1000;
+      return x;
+  {{ '}' }}
+   return x;
+{{ '}' }}
+
+f(false, 0); // returns '0'
+f(true, 0); // returns '1000'
+
+function sumMatrix(matrix: number) {{ '{' }}
+    let sum = 0;
+    for (let i = 0; i &lt; matrix.length; i++) {{ '{' }}
+      var currentRow = matrix[i];
+      for (let i = 0; i &lt; currentRow.length; i++) {{ '{' }}
+          sum += currentRow[i];
+        {{ '}' }}
+      {{ '}' }}
+      return sum;
+{{ '}' }}
+
+function theCityThatIsAwesome() {{ '{' }}
+        let getCity;
+        
+        if (true) {{ '{' }}
+            let city = 'Berlin';
+            getCity = () => {{ '{' }}
+                return city;
+            {{ '}' }}
+          {{ '}' }}
+      return getCity();
+{{ '}' }}
+
+for (let i = 0; i &lt; 10; i++) {{ '{' }}
+        setTimeout(() => {{ '{' }}console.log(i);{{ '}' }}, 100 * i );
+{{ '}' }}
+
+// const declarations
+const numLivesForCat = 9;
+const kitty = {{ '{' }}
+  name: 'Debian',
+  numLives: numLivesForCat
+  {{ '}' }}
+
+  // error
+  kitty = {{ '{' }}
+    name: 'Aurora',
+    numLives: numLivesForCat
+    {{ '}' }}
+
+  // all 'ok'
+  kitty.name = 'Ubuntu';
+  kitty.name = 'Zorin';
+  kitty.name = 'Mint';
+  kitty.numLives++;
+
+  // Destructuring
+
+  // array destructuring
+let input = [100, 200];
+let [first, second] = input;
+
+console.log(first); // outputs 100
+console.log(second); // outputs 200
+
+// equivalent
+first = input[0];
+second = input[1];
+
+// swap variables
+[first, second] = [second, first];
+
+function f([first, second]: [number, number]) {{ '{' }}
+    console.log(first);
+    console.log(second);
+{{ '}' }}
+
+f([100, 200]);
+
+// ...
+let [first, ...rest] = [100, 200, 300, 400];
+
+console.log(first); // outputs 100
+console.log(rest); // outputs [200, 300, 400]
+
+let [first] = [10, 20, 30, 40, 50];
+console.log(first); // outputs 10
+
+let [, second, , fourth] = [10, 20, 30, 40];
+console.log(second); // outputs 20
+console.log(fourth); // outputs 40
+
+// tuple destructuring
+let tuple: [number, string, boolean] = [77, 'hello', true];
+
+let [a, b, c] = tuple; //a: number, b: string, c: boolean
+
+let [a, b, c, d] = tuple; // error, no element at index 3
+
+let [a, ...bc] = tuple; // bc: [string, boolean]
+
+
+let [a, b, c, ...d] = tuple; // d: [], the empty tuple
+
+let [a] = tuple; // a: number
+let [, b] = tuple; // b: string
+
+// object destructuring
+
+
+let o = {{ '{' }}
+  a: 'foo',
+  b: 16,
+  c: 'bar'
+{{ '}' }}
+let {{ '{' }}a, b {{ '}' }} = o;
+
+({{ '{' }}a, b{{ '}' }} = {{ '{' }}a: 'baz', b: 16 {{ '}' }});
+
+let {{ '{' }} a, ...passthrough{{ '}' }} = o;
+let total = passthrough.b + passthrough.c.length;
+
+// property renaming
+let {{ '{' }} a: newName1, b: newName2{{ '}' }} = o;
+
+// same as 
+let newName1 = o.a;
+let newName2 = o.b;
+
+let {{ '{' }}a, b{{ '}' }}: {{ '{' }}a: string, b: number{{ '}' }} = o;
+
+function keepWholeObject(wholeObject: {{ '{' }}a: string, b?: number {{ '}' }}) {{ '{' }}
+        let {{ '{' }}a, b = 10001{{ '}' }} = wholeObject;
+{{ '}' }}
+
+// functiond declarations
+type C = {{ '{' }}a: string, b?: number{{ '}' }}
+function f({{ '{' }}a, b{{ '}' }}: C): void {{ '{' }}
+              // ...
+{{ '}' }}
+
+function f({{ '{' }}a = '', b = 0{{ '}' }} = {{ '{' }}{{ '}' }}): void {{ '{' }}
+          // ...
+{{ '}' }}
+f();
+
+function f({{ '{' }}a, b = 0{{ '}' }} = {{ '{' }}a: ''{{ '}' }}): void {{ '{' }}
+            // ...
+{{ '}' }}
+
+f({{ '{' }}a: 'yes'{{ '}' }}); // ok, default b = 0
+f(); // ok, default to {{ '{' }}a: ''{{ '}' }}, which then defaults b = 0
+f({{ '{' }}{{ '}' }}); // error, 'a' is required if you supply an argument
+
+// spread
+let first = [10, 20];
+let second = [30, 40];
+let bothPlus = [0, ...first, ...second, 50];
+
+let defaults = {{ '{' }}food: 'spicy', price: '€€', ambiance: 'noisy'{{ '}' }};
+let search = {{ '{' }}...defaults, food: 'rich'{{ '}' }};
+
+let defaults = {{ '{' }}food: 'spicy', price: '€€', ambiance: 'noisy'{{ '}' }};
+let search = {{ '{' }}food: 'rich', ...defaults{{ '}' }};
+
+class C {{ '{' }}
+    p = 120;
+    m(){{ '{' }}
+    {{ '}' }}
+{{ '}' }}
+
+let c = new C();
+let clone = {{ '{' }}...c{{ '}' }};
+clone.p; // ok
+clone.m(); // error
+              </code>
+            </pre>
+
+          <blockquote class="blockquote">
+            Mißerfolg ist keine Option. Viele sagen Entdeckung is ein Teil unseres Schicksals. 
+            Nein, es ist unsere Verpflichtung für zukünftige Generationen.
+          </blockquote>
+          <a href="#">
+            <img class="img-fluid" src="assets/img/post2.jpg" alt="">
+          </a>
+          <span class="caption text-muted">
+           Ich glaube jeder Mensch hat eine begrenzte Anzahl von Herzschlägen. Ich habe nicht vor meine zu verschwenden.
+            
+          </span>
+          <p>Bilder von <a href="https://www.flickr.com/photos/nasacommons/" target="_blank">NASA auf dem Gemeingut</a>.</p>
+          <div class="clearfix">
+            <a class="btn btn-primary float-right" routerLink="/">Zurück</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>
 </ng-container>
 
 <ng-container *ngIf="articleId === 3">

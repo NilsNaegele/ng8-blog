@@ -20,7 +20,7 @@ export class PostComponent implements OnInit {
   getArticle(): void {
     this.articleId = +this.route.snapshot.paramMap.get('id');
     console.log(this.articleId);
-    if (this.articleId !== 1) {
+    if (this.articleId > 2) {
       this.router.navigate(['page-not-found']);
     }
   }
