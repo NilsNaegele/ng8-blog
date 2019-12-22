@@ -32,8 +32,8 @@ function add(x, y){
     }
 // anonymous function
 let myAdd = (x, y) => x + y;
-// higher oder functions javascript
 
+// higher order functions javascript
 // map
 const numbers = [1, 4, 9];
 const doubles = numbers.map((num) => num * 2);
@@ -311,16 +311,36 @@ for (let i = 0; i < a.length; i++) {
   }
 }
 
+// for in
+const car = {
+  make: 'BMW',
+  model: 'X4'
+};
 
+for (let i in car) {
+  console.log(i, car[i]);
+}
+
+// for of
+const arr = ['BMW', 'Porsche', 'Mercedes', 'Audi'];
+arr['foo'] = 'Volkswagen';
+
+for (let i in arr) {
+  console.log(i); // logs 0 1 2 3 foo
+}
+
+for (let i of arr) {
+  console.log(i); // logs BMW Porsche Mercedes Audi
+}
       `,
       blockQuote: `
       Wir beabsichtigen zum Mond zu fliegen in diesem Jahrzehnt und andere Sachen zu tun, nicht weil sie einfach sind,
       sondern weil sie schwer sind, weil das Ziel uns dienen wird zu organisieren und messen die Beste unserer Energien
-      und Komepetenzen, weil diese Herausforderung ist eine welche wir annehmen, eine die wir nicht vertagen wollen
+      und Kompetenzen, weil diese Herausforderung ist eine welche wir annehmen, eine die wir nicht vertagen wollen
       und eine die wir vorhaben zu gewinnen.
       `,
       imageFooterUrl: 'assets/img/post4.jpg',
-      footerQuote:  'Wir sind alle miteinander verbunden; zueinander biologisch. Zu der Erde, chemisch. Zum Rest des Universums atomar.',
+      footerQuote:  'Wir sind alle miteinander verbunden; zueinander biologisch. Zu der Erde, chemisch. Zum Rest des Universums, atomar.',
     }
   ];
 
@@ -343,6 +363,3 @@ for (let i = 0; i < a.length; i++) {
     this.location.back();
   }
 }
-
-
-
