@@ -1199,18 +1199,23 @@ let point3D: Point3D = {{ '{' }}x: 10, y: 20, z: 30{{ '}' }};
   </article>
 </ng-container>
 
-<ng-container *ngIf="articleId === 4">
-  <header class="masthead" style="background-image: url('assets/img/post4-bg.jpg')">
+<!-- dynamic template -->
+<ng-container *ngIf="!isNotFound && articleId > 3">
+  <ng-container [ngSwitch]="articleId">
+    <ng-container *ngSwitchCase="articleId">
+<!-- Page Header -->
+  <header class="masthead" [style.background-image]="this.sanitization.bypassSecurityTrustStyle(posts[articleId]?.imageHeaderUrl)">
     <div class="overlay"></div>
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
           <div class="post-heading">
-            <h1>Typescript, Basis- Teil 4</h1>
-            <h2 class="subheading">Funktionen</h2>
+            <h1>
+              {{ posts[articleId]?.heading }}
+            </h1>
+            <h2 class="subheading">{{ posts[articleId]?.subHeading }}</h2>
             <span class="meta">Veröffentlicht von
-              <a href="/">Nils</a>
-              am 23 Dezember, 2019</span>
+              <a href="/">Nils</a> {{ posts[articleId]?.metaPublishedDate }}</span>
           </div>
         </div>
       </div>
@@ -1222,64 +1227,18 @@ let point3D: Point3D = {{ '{' }}x: 10, y: 20, z: 30{{ '}' }};
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-          <h2 class="section-heading">Funktionen</h2>
+          <h2 class="section-heading">{{ posts[articleId]?.sectionHeading }}</h2>
             <pre>
-              <code>
-// named function
-function add(x, y){{ '{' }}
-  return x + y;
-{{ '}' }}
-// anonymous function
-let myAdd = (x, y) => x + y;
-
-// higher oder functions javascript
-
-// map
-const numbers = [1, 4, 9];
-const doubles = numbers.map((num) => num * 2);
-console.log(doubles); // [2, 8, 18]
-
-// filter
-const isAboveMyRange = (value) => value >= 50;
-const filtered = [12, 150, 49, 77, 99, 13, 38, 101].filter(isAboveMyRange);
-console.log(filtered); // [150, 77, 99, 101]
-
-// reduce
-const sum = [1, 2, 3, 4, 5].reduce((accumulator, currentValue) => accumulator + currentValue);
-console.log(sum); // 15
-
-let z = 100;
-function addToZ(x, y){{ '{' }}
-  return x + y + z;
-  {{ '}' }}
-
-// function types
-function add(x: number, y: number): number{{ '{' }}
-  return x + y;
-  {{ '}' }}
-
-const myAdd = (x: number, y: number): number => x + y;
-
-// function type
-const myAdd: (x: number, y: number) => number = (x: number, y: number): number => x + y;
-console.log(myAdd(2, 3)); // 5
-
-
-
-
-              </code>
+              <code>{{ posts[articleId]?.code }}</code>
             </pre>
           <blockquote class="blockquote">
-          Wir beabsichtigen zum Mond zu fliegen in diesem Jahrzehnt und andere Sachen zu tun, nicht weil sie einfach sind,
-          sondern weil sie schwer sind, weil das Ziel uns dienen wird zu organisieren und messen die Beste unserer Energien
-          und Komepetenzen, weil diese Herausforderung ist eine welche wir annehmen, eine die wir nicht vertagen wollen
-          und eine die wir vorhaben zu gewinnen.
+            {{ posts[articleId]?.blockQuote}}
           </blockquote>
           <a href="#">
-            <img class="img-fluid" src="assets/img/post4.jpg" alt="">
+            <img class="img-fluid" [src]="posts[articleId]?.imageFooterUrl" alt="">
           </a>
           <span class="caption text-muted">
-          Wir sind alle miteinander verbunden; zueinander biologisch. Zu der Erde, chemisch. Zum Rest des Universums atomar. 
+         {{ posts[articleId]?.footerQuote}}
           </span>
           <p>Bilder von <a href="https://www.flickr.com/photos/nasacommons/" target="_blank">NASA auf dem Gemeingut</a>.</p>
           <div class="clearfix">
@@ -1290,3 +1249,5 @@ console.log(myAdd(2, 3)); // 5
     </div>
   </article>
 </ng-container>
+</ng-container>
+</ng-container> 
