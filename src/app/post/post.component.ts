@@ -726,6 +726,133 @@ for (let i of arr) {
     metaPublishedDate: 'am 24 Dezember, 2019',
     sectionHeading: ' Generics, Enums, Fortgeschrittene Typen',
     code: `
+// generics
+// before
+const identity = (arg: number): number => arg;
+const identity1 = (arg: any): any => arg;
+
+// after
+function identity2<T>(arg: T): T {
+  return arg;
+}
+const identity3 = <U>(arg: U): U => arg;
+
+const output = identity3<string>('myString');
+const output1 = identity3('testString');
+console.log(output1);
+
+const loggingIdentity = <V>(arg: V[]): V[] => {
+  console.log(arg.length);
+  return arg;
+};
+
+const loggigIdentity1 = <W>(arg: Array<W>): Array<W> => {
+  console.log(arg.length);
+  return arg;
+};
+
+const identity4 = <Y>(arg: Y) => arg;
+
+// generic types
+const myIdentity: {<X>(arg: X): X} = identity4;
+
+// first generic interface
+interface GenericIdentityFn {
+  <T>(arg: T): T;
+}
+
+type GenericIdentityFn1 = <T>(arg: T) => T;
+
+function identity<T>(arg: T): T {
+  return arg;
+}
+
+const myIdentity: GenericIdentityFn1 = identity;
+
+// generic paramter of whole interface now
+interface GenericIdentityFn<T> {
+  (arg: T): T;
+}
+
+type GenericIdentityFn1 = <T>(arg: T) => T;
+
+function identity<T>(arg: T): T {
+  return arg;
+}
+
+const myIdentity: GenericIdentityFn<number> = identity;
+
+// generic classes
+class GenericNumber<T> {
+  zeroValue: T;
+  add: (x: T, y: T) => T;
+}
+
+const myGenericNumber = new GenericNumber<number>();
+myGenericNumber.zeroValue = 0;
+myGenericNumber.add = (x, y) => x + y;
+
+const stringNumeric = new GenericNumber<string>();
+stringNumeric.zeroValue = '';
+stringNumeric.add = (x, y) => x + y;
+
+console.log(stringNumeric.add(stringNumeric.zeroValue, 'test'));
+
+// generic constraints
+const loggingIdentity = <T>(arg: T) => {
+  console.log(arg.length); // error: Property 'length' does not exist on type 'T'.
+  return arg;
+};
+
+interface Lengthwise {
+  length: number;
+}
+
+const loggingIdentity = <T extends Lengthwise>(arg: T): T => {
+    console.log(arg.length);
+    return arg;
+};
+
+console.log(loggingIdentity(3)); // error: Argument of type '3' is not assignable to parameter of type 'Lengthwise'.
+console.log(loggingIdentity({length: 10, value: 3}));
+
+// type parameters in generic constraints
+const getProperty = <T, K extends keyof T>(obj: T, key: K) => obj[key];
+
+const x = { a: 1, b: 2, c: 3, d: 4 };
+
+console.log(getProperty(x, 'c'));
+console.log(getProperty(x, 'z')); // error: Argument of type '"z"'
+// is not assignable to parameter of type '"c" | "a" | "b" | "d"'
+
+// class types in generics
+const create = <T>(c: new() => T): T => new c();
+
+
+class BeeKeeper {
+  hasMask: boolean;
+}
+
+class ZooKeeper {
+  nametag: string;
+}
+
+class Animal {
+  numLegs: number;
+}
+
+class Bee extends Animal {
+  keeper: BeeKeeper;
+}
+
+class Lion extends Animal {
+  keeper: ZooKeeper;
+}
+
+const createInstance = <A extends Animal>(c: new() => A): A => new c();
+
+console.log(createInstance(Lion).keeper.nametag); // type checks
+console.log(createInstance(Bee).keeper.hasMask); // type checks
 
     `,
     blockQuote: `
@@ -758,8 +885,6 @@ for (let i of arr) {
     this.location.back();
   }
 }
-
-// generics
 
 
 
