@@ -3,8 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { DomSanitizer } from '@angular/platform-browser';
 
-// default parameter values
-
+// symbol type
 
 @Component({
   selector: 'app-post',
@@ -86,6 +85,300 @@ this.evens.forEach(v => {
 });
 console.log(this.threes);
 
+// default parameter values
+const f = (x, y = 7, z = 42) => x + y + z;
+console.log(f(1) === 50);
+
+// rest parameter
+const g = (x, y, ...a) => (x + y) * a.length;
+
+console.log(g(1, 2, 'hello', true, 7) === 9);
+
+// spread operator
+const params = ['hello', true];
+const other = [1, 2, ...params]; // 1, 2, 'hello', true
+
+const h = (x, y, ...a) => (x + y) * a.length;
+
+console.log(h(1, 2, ...params) === 6); // true
+
+const str = 'foo';
+const chars = [...str]; // f o o
+
+// template literals, string interpolation + custom with back ticks
+
+// extended literals binary and octal
+console.log(0b111110111 === 503);
+console.log(0o767 === 503);
+
+// unicode string and regexp literal
+console.log('𠮷'.length === 2);
+console.log('𠮷'.match(/./u)[0].length === 2);
+console.log('𠮷' === '\uD842\uDFB7');
+console.log('𠮷' === '\u{20BB7}');
+console.log('𠮷'.codePointAt(0) === 0x20BB7);
+for (const codepoint of '𠮷') {
+  console.log(codepoint);
+}
+
+// regular expression sticky matching
+const parser = (input, match) => {
+  for (let pos = 0, lastPos = input.length; pos < lastPos; ) {
+      for (let i = 0; i < match.length; i++) {
+          match[i].pattern.lastIndex = pos;
+          let found;
+          if ((found = match[i].pattern.exec(input)) !== null) {
+              match[i].action(found);
+              pos = match[i].pattern.lastIndex;
+              break;
+          }
+      }
+  }
+};
+
+const report = (match) => {
+  console.log(JSON.stringify(match));
+};
+parser('Foo 1 Bar 7 Baz 42', [
+  { pattern: /Foo\s+(\d+)/y, action: (match) => report(match) },
+  { pattern: /Bar\s+(\d+)/y, action: (match) => report(match) },
+  { pattern: /Baz\s+(\d+)/y, action: (match) => report(match) },
+  { pattern: /\s*/y,         action: (match) => {}            }
+]);
+
+// object properties property shorthand
+const x = 0, y = 0;
+const obj = { x, y };
+
+// computed property names
+const quux = () => 'foo';
+const obj1 = {
+  foo: 'bar',
+  ['baz' + quux()]: 42
+};
+
+// method properties
+const obj2 = {
+  foo(a, b) {},
+  bar(x, y) {},
+  *quux(x, y) {}
+};
+
+// array matching
+const list = [1, 2, 3];
+let [a, , b] = list;
+[b, a] = [a, b];
+
+// object matching shorthand notation
+const { op, lhs, rhs } = getASTNode();
+
+// object matching, deep matching
+const { op: d, lhs: { op: e }, rhs: f } = getASTNode();
+
+// object/array matching, default values
+const obj1 = { g: 1 };
+const list1 = [1];
+const {g, h = 2} = obj1;
+const [x, y = 2] = list1;
+
+// parameter context matching
+const i = ([name, val]) => console.log(name, val);
+const j = ({name: n, val: v}) => console.log(n, v);
+const k = ({name, val}) => console.log(name, val);
+
+i(['bar', 42]);
+j({name: 'foo', val: 7});
+k({name: 'bar', val: 42});
+
+// fall soft destructuring
+const list = [7, 42];
+const [a = 1, b = 2, c = 3, d] = list;
+console.log(a === 7);
+console.log(b === 42);
+console.log(c === 3);
+console.log(d === undefined);
+
+// modules export/import
+//  lib/math.js
+export function sum (x, y) { return x + y }
+export const pi = 3.141593;
+
+//  some-app.js
+import * as math from 'lib/math';
+console.log('2π = ' + math.sum(math.pi, math.pi));
+
+//  other-app.js
+import { sum, pi } from 'lib/math';
+console.log('2π = ' + sum(pi, pi));
+
+
+// modules default & wildcard
+//  lib/mathplusplus.js
+export * from 'lib/math';
+export const e = 2.71828182846;
+export default (x) => Math.exp(x);
+
+//  some-app.js
+import exp, { pi, e } from 'lib/mathplusplus';
+console.log('e^{π} = ' + exp(pi));
+
+// class definition
+class Shape {
+  private id: number;
+  private x: number;
+  private y: number;
+  constructor(id, x, y) {
+    this.id = id;
+    this.move(x, y);
+  }
+  move(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+}
+
+// class inheritance
+class Rectangle extends Shape {
+  private width: number;
+  private height: number;
+  constructor(id, x, y, width, height) {
+    super(id, x, y);
+    this.width = width;
+    this.height = height;
+  }
+}
+
+class Circle extends Shape {
+  private radius: number;
+  constructor(id, x, y, radius) {
+    super(id, x, y);
+    this.radius = radius;
+  }
+}
+
+
+// class inheritance from expressions
+const aggregation = (baseClass, ...mixins) => {
+  const base = class Combined extends baseClass {
+      constructor(...args) {
+          super(...args);
+          mixins.forEach((mixin) => {
+              mixin.prototype.initializer.call(this);
+          })
+      }
+  };
+  const copyProps = (target, source) => {
+      Object.getOwnPropertyNames(source)
+          .concat(Object.getOwnPropertySymbols(source))
+          .forEach((prop) => {
+          if (prop.match(/^(?:constructor|prototype|arguments|caller|name|bind|call|apply|toString|length)$/)) {
+              return;
+          }
+          Object.defineProperty(target, prop, Object.getOwnPropertyDescriptor(source, prop))
+      });
+  };
+  mixins.forEach((mixin) => {
+      copyProps(base.prototype, mixin.prototype);
+      copyProps(base, mixin);
+  });
+  return base;
+};
+
+class Colored {
+  private colour: string;
+  initializer() {
+    this.colour = 'white';
+  }
+  get color(){
+    return this.colour;
+  }
+  set color(v){
+    this.colour = v;
+  }
+}
+
+class ZCoord {
+  private zz: number;
+  initializer() {
+    this.zz = 0;
+   }
+  get z() {
+    return this.zz;
+   }
+  set z(v) {
+    this.zz = v;
+   }
+}
+
+class Shape {
+  private xx: number;
+  private yy: number;
+  constructor(x, y) {
+    this.xx = x;
+    this.yy = y;
+  }
+  get x() {
+    return this.xx;
+  }
+  set x(v) {
+    this.xx = v;
+   }
+  get y() {
+    return this.yy;
+   }
+  set y(v) {
+    this.yy = v;
+   }
+}
+
+class Rectangle extends aggregation(Shape, Colored, ZCoord) {}
+
+const rect = new Rectangle(2, 8);
+rect.z = 1000;
+rect.color = 'red';
+console.log(rect.x, rect.y, rect.z, rect.color);
+
+// static class members
+class Rectangle extends Shape {
+  static defaultRectangle() {
+      return new Rectangle('default', 0, 0, 100, 100);
+  }
+}
+class Circle extends Shape {
+  static defaultCircle() {
+      return new Circle('default', 0, 0, 100);
+  }
+}
+const defRectangle = Rectangle.defaultRectangle();
+const defCircle = Circle.defaultCircle();
+
+// classes getter/setter
+class Rectangle {
+  private width: number;
+  private height: number;
+  constructor(width, height) {
+      this.width  = width;
+      this.height = height;
+  }
+  set Width(width)  {
+    this.width = width;
+    }
+  get Width() {
+    return this.width;
+    }
+  set Height(height) {
+    this.height = height;
+  }
+  get Height() {
+    return this.height;
+    }
+  get Area() {
+    return this.width * this.height;
+  }
+}
+const rec = new Rectangle(50, 20);
+console.log(rec.Area === 1000);
+
 
 
 
@@ -148,7 +441,7 @@ const myAdd: (x: number, y: number) => number = (x: number, y: number): number =
 console.log(myAdd(2, 3)); // 5
 
 // destructuring within parameter list
-const f = ([a, b] = [1, 2], {x: c{{ '}' }} = {x: a + b{{ '}' }}) => a + b + c;
+const f = ([a, b] = [1, 2], {x: c} = {x: a + b}) => a + b + c;
 console.log(f());  // 6
 
 // myAdd has the full function type
