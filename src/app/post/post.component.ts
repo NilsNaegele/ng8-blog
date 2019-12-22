@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { DomSanitizer } from '@angular/platform-browser';
-import { promise } from 'protractor';
+
+// default parameter values
+
 
 @Component({
   selector: 'app-post',
@@ -17,7 +19,88 @@ export class PostComponent implements OnInit {
     {},
     {},
     {},
-    {},
+    {
+      id: 3,
+      imageHeaderUrl: 'url(assets/img/post3-bg.jpg)',
+      heading: 'Javascript, Basis- Teil 1',
+      subHeading: 'ES6, ES7, ES8 ...',
+      metaPublishedDate: 'am 22 Dezember, 2019',
+      sectionHeading: 'EcmaScript 6, 7, 8 ...',
+      code: `
+// constants
+const PI = 3.141593;
+console.log(PI > 3);
+
+// block-scoped variables without hoisting
+const a = [1, 2, 3];
+const b = [3, 5, 7, 9, 11];
+for (let i = 0; i < alert.length; i++) {
+    let x = a[i];
+  }
+for (let i = 0; i < b.length; i++) {
+    let y = b[i];
+  }
+
+
+let callbacks = [];
+  for (let i = 0; i <= 3; i++) {
+    callbacks[i] = () => i * 2;
+  }
+
+console.log(callbacks[0]() === 0); // true
+console.log(callbacks[1]() === 2); // true
+console.log(callbacks[2]() === 4); // true
+
+// blocked scoped functions
+{
+  function foo () { return 1 }
+  foo() === 1
+  {
+      function foo () { return 2 }
+      foo() === 2
+  }
+  foo() === 1
+}
+
+// arrow functions expression bodies
+const evens = [0, 2, 4, 6, 8];
+const odds = evens.map(v => v + 1);
+const pairs = evens.map(v => ({ even: v, odd: v + 1}));
+const nums = evens.map((v, i) => v + i);
+console.log(nums);
+
+// arrow functions statement bodies
+const threes = [];
+evens.forEach(v => {
+  if ( v % 3 === 0) {
+    threes.push(v);
+  }
+});
+console.log(threes);
+
+// lexical this
+this.evens.forEach(v => {
+  if ( v % 3 === 0) {
+    this.threes.push(v);
+  }
+});
+console.log(this.threes);
+
+
+
+
+
+`,
+      blockQuote: `
+Greife nach den Sternen. Das Weltall, die letzte Front. Dieses sind die Reisen
+des Sternenschiffes Enterprise, eine Fünf Jahres Mission: neue Welten entdecken,
+neues Leben und Zivilisationen zu erkunden, mutig da hin zu gehen wo keiner jeh
+gewesen ist.
+`,
+    imageFooterUrl: 'assets/img/post3.jpg',
+    footerQuote:  'Mann muss entdecken und das Weltall erforschen ist Entdeckung an seinem Höhepunkt.',
+
+    },
     {
       id: 4,
       imageHeaderUrl: 'url(assets/img/post4-bg.jpg)',
