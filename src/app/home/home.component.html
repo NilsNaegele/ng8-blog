@@ -46,7 +46,7 @@
         <div class="post-preview">
           <a routerLink="/post/3">
             <h2 class="post-title">
-              Javascript, Basis - Teil 1
+              Javascript, Basis- Teil 1
             </h2>
             <h3 class="post-subtitle">
               ES6, ES7, ES8 ...
@@ -60,10 +60,10 @@
         <div class="post-preview">
           <a routerLink="/post/4">
             <h2 class="post-title">
-              Typescript, Basis - Teil 4
+              Typescript, Basis- Teil 3
             </h2>
             <h3 class="post-subtitle">
-             Typescript alles Javascript, Funktionen
+             Funktionen && Schleifen
             </h3>
           </a>
           <p class="post-meta">Veröffentlicht von
@@ -71,9 +71,30 @@
             am 23 Dezember, 2019</p>
         </div>
         <hr>
+        <ng-container *ngIf="previewsAreVisible">
+        <div class="post-preview">
+          <a routerLink="/post/5">
+            <h2 class="post-title">
+              Typescript, Basis- Teil 4
+            </h2>
+            <h3 class="post-subtitle">
+             Generics, Enums, Fortgeschrittene Typen
+            </h3>
+          </a>
+          <p class="post-meta">Veröffentlicht von
+            <a href="/">Nils</a>
+            am 24 Dezember, 2019</p>
+        </div>
+        <hr>
+      </ng-container>
         <!-- Pager -->
-        <div class="clearfix">
-          <a class="btn btn-primary float-right" href="/">Weitere Artikel &rarr;</a>
+        <div class="clearfix color-white">
+          <a *ngIf="!previewsAreVisible"  class="btn btn-primary float-right" (click)="toggleMoreLessPreview()">
+            Weitere Artikel &rarr;
+          </a>
+          <a *ngIf="previewsAreVisible" class="btn btn-primary float-right" (click)="toggleMoreLessPreview()">
+           &larr; Weniger Artikel
+          </a>
         </div>
       </div>
     </div>

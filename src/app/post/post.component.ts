@@ -397,7 +397,7 @@ gewesen ist.
     {
       id: 4,
       imageHeaderUrl: 'url(assets/img/post4-bg.jpg)',
-      heading: 'Typescript, Basis- Teil 4',
+      heading: 'Typescript, Basis- Teil 3',
       subHeading: 'Funktionen && Schleifen',
       metaPublishedDate: 'am 23 Dezember, 2019',
       sectionHeading: 'Funktionen && Schleifen',
@@ -717,7 +717,26 @@ for (let i of arr) {
       `,
       imageFooterUrl: 'assets/img/post4.jpg',
       footerQuote:  'Wir sind alle miteinander verbunden; zueinander biologisch. Zu der Erde, chemisch. Zum Rest des Universums, atomar.',
-    }
+    },
+    {
+    id: 5,
+    imageHeaderUrl: 'url(assets/img/post5-bg.jpg)',
+    heading: 'Typescript, Basis- Teil 4',
+    subHeading: ' Generics, Enums, Fortgeschrittene Typen',
+    metaPublishedDate: 'am 24 Dezember, 2019',
+    sectionHeading: ' Generics, Enums, Fortgeschrittene Typen',
+    code: `
+
+    `,
+    blockQuote: `
+    Wir beabsichtigen zum Mond zu fliegen in diesem Jahrzehnt und andere Sachen zu tun, nicht weil sie einfach sind,
+    sondern weil sie schwer sind, weil das Ziel uns dienen wird zu organisieren und messen die Beste unserer Energien
+    und Kompetenzen, weil diese Herausforderung ist eine welche wir annehmen, eine die wir nicht vertagen wollen
+    und eine die wir vorhaben zu gewinnen.
+    `,
+    imageFooterUrl: 'assets/img/post5.jpg',
+    footerQuote:  'Wir sind alle miteinander verbunden; zueinander biologisch. Zu der Erde, chemisch. Zum Rest des Universums, atomar.',
+    },
   ];
 
   constructor( private route: ActivatedRoute, private router: Router,
@@ -729,7 +748,7 @@ for (let i of arr) {
   getArticle(): void {
     this.articleId = +this.route.snapshot.paramMap.get('id');
     // console.log(this.articleId);
-    if (!this.articleId || this.articleId > 4) {
+    if (!this.articleId || this.articleId > 5) {
       this.isNotFound = true;
       this.router.navigate(['page-not-found']);
     }
@@ -739,3 +758,51 @@ for (let i of arr) {
     this.location.back();
   }
 }
+
+// generics
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// {
+//   id: 6,
+//   imageHeaderUrl: 'url(assets/img/post5-bg.jpg)',
+//   heading: 'Typescript, Basis- Teil 5',
+//   subHeading: ' Generics, Enums, Fortgeschrittene Typen',
+//   metaPublishedDate: 'am 25 Dezember, 2019',
+//   sectionHeading: ' Generics, Enums, Fortgeschrittene Typen',
+//   code: `
+//   `,
+//   blockQuote: `
+//   Wir beabsichtigen zum Mond zu fliegen in diesem Jahrzehnt und andere Sachen zu tun, nicht weil sie einfach sind,
+//   sondern weil sie schwer sind, weil das Ziel uns dienen wird zu organisieren und messen die Beste unserer Energien
+//   und Kompetenzen, weil diese Herausforderung ist eine welche wir annehmen, eine die wir nicht vertagen wollen
+//   und eine die wir vorhaben zu gewinnen.
+//   `,
+//   imageFooterUrl: 'assets/img/post5.jpg',
+//   footerQuote: 'Wir sind alle miteinander verbunden; zueinander biologisch. Zu der Erde, chemisch. Zum Rest des Universums, atomar.'
+// }
