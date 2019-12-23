@@ -854,6 +854,168 @@ const createInstance = <A extends Animal>(c: new() => A): A => new c();
 console.log(createInstance(Lion).keeper.nametag); // type checks
 console.log(createInstance(Bee).keeper.hasMask); // type checks
 
+// enums
+enum Direction {
+  Up = 1,
+  Down,
+  Left,
+  Right,
+}
+
+// without initializers
+enum DirectionOne {
+  Up,
+  Down,
+  Left,
+  Right,
+}
+
+enum Response {
+  No = 0,
+  Yes = 1,
+}
+
+const respond = (recipient: string, message: Response): void => void 0;
+console.log('Princess Anna', Response.Yes);
+
+// string enums
+enum DirectionTwo {
+  Up = 'UP',
+  Down = 'DOWN',
+  Left = 'LEFT',
+  Right = 'RIGHT'
+}
+
+// heterogeneous enums
+enum BooleanLikeHeterogeneeousEnum {
+  No = 0,
+  Yes = 'YES'
+}
+
+// computed and constant members
+// E.X is a constant
+enum E { X }
+
+enum E1 { X, Y, Z }
+enum E2 {
+  A = 1,
+  B,
+  C
+}
+
+enum FileAccess {
+  // constant members
+  None,
+  Read = 1 << 1,
+  Write = 1 << 2,
+  ReadWrite = Read | Write,
+  // computed member length
+  G = '123'.length
+}
+
+enum ShapeKind {
+  Circle,
+  Square
+}
+
+interface Circle {
+  kind: ShapeKind.Circle;
+  radius: number;
+}
+
+interface Square {
+  kind: ShapeKind.Square;
+  sideLength: number;
+}
+
+const c: Circle = {
+  kind: ShapeKind.Square, // error: Type 'ShapeKind.Square' is not assignable to type 'ShapeKind.Circle'.ts(2322)
+  radius: 100
+};
+
+enum E {
+  Foo,
+  Bar,
+}
+
+
+const f = (x: E) => {
+  if ( x !== E.Foo || x !== E.Bar) {
+    // error: This condition will always return 'true' since the types 'E.Foo' and 'E.Bar' have no overlap.ts(2367)
+  }
+};
+
+// enums at runtime
+enum EZ {
+  X, Y, Z
+}
+
+const f1 = (obj: { X: number}) => obj.X;
+
+console.log(f1(EZ));
+
+// enums at compile time
+enum LogLevel {
+  ERROR, WARN, INFO, DEBUG
+}
+
+// equivalent to: type LogLevelStrings = "ERROR" | "WARN" | "INFO" | "DEBUG"
+type LogLevelStrings = keyof typeof LogLevel;
+
+const printImportant = (key: LogLevelStrings, message: string): void => {
+            const num = LogLevel[key];
+            if (num <= LogLevel.WARN) {
+              console.log('Log level key is: ', key);
+              console.log('Log level value is: ', num);
+              console.log('Log level message is: ', message);
+            }
+};
+
+printImportant('ERROR', 'this is a message');
+
+// reverse mappings
+enum Enum {
+    A
+}
+
+let a = Enum.A;
+let nameOfA = Enum[a]; // A
+
+// typescript compiles this to
+var Enum;
+(function (Enum) {
+    Enum[Enum["A"] = 0] = "A";
+})(Enum || (Enum = {}));
+var a = Enum.A;
+var nameOfA = Enum[a]; // "A"
+
+// const enums
+const enum Enum {
+  A = 1,
+  B = A * 2
+}
+
+const enum Directions {
+  Up,
+  Down,
+  Left,
+  Right,
+}
+
+const directions = [Directions.Up, Directions.Down, Directions.Left, Directions.Right];
+
+// this is generated code
+var directions = [0 /* Up */, 1 /* Down */, 2 /* Left */, 3 /* Right */];
+
+// ambient enums
+declare enum Enum1 {
+  A = 1,
+  B,
+  C = 2,
+}
+
+
+
     `,
     blockQuote: `
     Wir beabsichtigen zum Mond zu fliegen in diesem Jahrzehnt und andere Sachen zu tun, nicht weil sie einfach sind,
@@ -885,12 +1047,6 @@ console.log(createInstance(Bee).keeper.hasMask); // type checks
     this.location.back();
   }
 }
-
-
-
-
-
-
 
 
 
