@@ -1107,6 +1107,109 @@ export class AppComponent  {
     myTechnology = this.technologies[0];
 }
 
+// create technology class
+import { Component } from '@angular/core';
+
+export class Technology {
+  constructor(public id: number, public name: string) { }
+}
+
+@Component({
+  selector: 'app-root',
+  template: \`
+      <h1>{{ title }}</h1>
+      <h2>My favorite technology is: {{ myTechnology.name }}</h2>
+      <p>Technologies:</p>
+      <ul>
+        <li *ngFor="let technology of technologies">
+                  {{ technology.name }}
+        </li>
+      </ul>
+  \`
+})
+export class AppComponent  {
+    title = 'Tour of Technologies';
+    technologies = [
+      new Technology(1, 'JavaScript'),
+      new Technology(2, 'TypeScript'),
+      new Technology(3, 'HTML'),
+      new Technology(4, 'CSS')
+      ];
+    myTechnology = this.technologies[0];
+}
+
+// *ngIf conditional display
+<p *ngIf="technologies.length > 3">There are many technologies!</p>
+
+// template syntax
+// interpolation
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: \`
+      <h1>{{technique}}</h1>
+      <h3>{{currentTechnology}}</h3>
+      <div><img src="{{imageUrl}}"></div>
+      <p>The sum of 1 + 1 is {{1 + 1}}</p>
+      <p>The sum of 1 + 1 is not {{1 + 1 + getVal()}}</p>
+  \`
+})
+export class AppComponent  {
+    technique = 'Interpolation';
+    currentTechnology = 'Angular 8.2';
+    imageUrl = '../assets/image1.jpg';
+    getVal() {
+      return 4;
+    }
+}
+
+// template expressions
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: \`
+      <h1>{{technique}}</h1>
+      <h4>{{recommended}}</h4>
+      <img [src]="imageUrl2">
+      <ul>
+        <li *ngFor="let hero of heroes">
+        {{ hero }}
+        </li>
+      </ul>
+      <label (keyup)="0">Type something:
+      <input #userInput>{{userInput.value}}
+      </label>
+      <button (click)="deleteHero()">Delete hero</button>
+      <button (click)="onSave($event)">Save</button>
+      <button *ngFor="let hero of heroes" (click)="delete(hero)">
+      {{hero}}
+      </button>
+      <form #heroForm (ngSubmit)="onSubmit(heroForm)">...</form>
+  \`
+})
+export class AppComponent  {
+    technique = 'Expression context';
+    recommended = 'Angular 8.2';
+    imageUrl2 = '../assets/image2.jpg';
+    heroes = ['Nils-Holger', 'Andre', 'Dominique', 'Martin'];
+    deleteHero() {
+     alert('delete the hero.');
+    }
+
+    onSave(event?: MouseEvent) {
+      const evtMsg = event ? ' Event target is ' + (event.target as HTMLElement).textContent : '';
+    alert('Saved' + evtMsg);
+    }
+    onSubmit(data) {
+      // referenced but not used
+    }
+    delete(hero: string) {
+      alert('Delete ' + hero);
+    }
+}
+
 
 
   `,
