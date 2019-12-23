@@ -381,7 +381,7 @@ console.log(rec.Area === 1000);
 
 
 
-
+// continue here http://es6-features.org/#SymbolType
 
 `,
       blockQuote: `
@@ -708,6 +708,41 @@ for (let i in arr) {
 for (let i of arr) {
   console.log(i); // logs BMW Porsche Mercedes Audi
 }
+
+// higher order functions
+const arr1 = [2, 4, 8];
+const arr2 = arr1.map(item => item * 2);
+console.log(arr2); // 4, 18, 16
+const birthYears = [1971, 1978, 1981, 1990];
+const ages = birthYears.map(year => 2019 - year);
+console.log(ages); // 48, 41, 38, 29
+
+const persons = [
+  { name: 'Peter', age: 16 },
+  { name: 'Mark', age: 18 },
+  { name: 'Bertram', age: 17 },
+  { name: 'Tim', age: 25 }
+];
+
+const fullAge = persons.filter(person => person.age >= 18); // Mark, Tim
+console.log(fullAge);
+
+const arr = [5, 7, 1, 8, 4];
+const sum = arr.reduce((accumulator, currentValue) => accumulator + currentValue);
+console.log(sum); // 25
+
+const strArray = ['JavaScript', 'HTML', 'CSS', 'Java', 'C'];
+const mapForEach = (arr, fn) => {
+  const newArray = [];
+  for (let i = 0; i < arr.length; i++) {
+    newArray.push(fn(arr[i]));
+  }
+  return newArray;
+};
+
+const lenArray = mapForEach(strArray, (item) => item.length);
+console.log(lenArray); // 10, 4, 3, 4, 1
+
       `,
       blockQuote: `
       Wir beabsichtigen zum Mond zu fliegen in diesem Jahrzehnt und andere Sachen zu tun, nicht weil sie einfach sind,
@@ -1014,6 +1049,7 @@ declare enum Enum1 {
   C = 2,
 }
 
+// continue here: https://www.typescriptlang.org/docs/handbook/advanced-types.html
 
 
     `,
@@ -1026,6 +1062,63 @@ declare enum Enum1 {
     imageFooterUrl: 'assets/img/post5.jpg',
     footerQuote:  'Wir sind alle miteinander verbunden; zueinander biologisch. Zu der Erde, chemisch. Zum Rest des Universums, atomar.',
     },
+    {
+  id: 6,
+  imageHeaderUrl: 'url(assets/img/post6-bg.jpg)',
+  heading: 'Angular 8/9, Superheroisches Javascript Framework',
+  subHeading: 'Angular 8/9, hier die Welt zu retten!',
+  metaPublishedDate: 'am 27 Dezember, 2019',
+  sectionHeading: 'Basis - Einleitung in Angular 8/9',
+  code: `
+// displaying data - interpolation
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: \`
+      <h1>{{ title }}</h1>
+      <h2>My favorite technology is: {{ myTechnology }}</h2>
+  \`
+})
+export class AppComponent  {
+    title = 'Tour of Technologies';
+    myTechnology = 'JavaScript';
+}
+
+// *ngFor showing an array property
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: \`
+      <h1>{{ title }}</h1>
+      <h2>My favorite technology is: {{ myTechnology }}</h2>
+      <p>Technologies:</p>
+      <ul>
+        <li *ngFor="let technology of technologies">
+                  {{ technology }}
+        </li>
+      </ul>
+  \`
+})
+export class AppComponent  {
+    title = 'Tour of Technologies';
+    technologies = ['JavaScript', 'TypeScript', 'HTML', 'CSS'];
+    myTechnology = this.technologies[0];
+}
+
+
+
+  `,
+  blockQuote: `
+  Wir beabsichtigen zum Mond zu fliegen in diesem Jahrzehnt und andere Sachen zu tun, nicht weil sie einfach sind,
+  sondern weil sie schwer sind, weil das Ziel uns dienen wird zu organisieren und messen die Beste unserer Energien
+  und Kompetenzen, weil diese Herausforderung ist eine welche wir annehmen, eine die wir nicht vertagen wollen
+  und eine die wir vorhaben zu gewinnen.
+  `,
+  imageFooterUrl: 'assets/img/post6.jpg',
+  footerQuote: 'Wir sind alle miteinander verbunden; zueinander biologisch. Zu der Erde, chemisch. Zum Rest des Universums, atomar.'
+},
   ];
 
   constructor( private route: ActivatedRoute, private router: Router,
@@ -1037,7 +1130,7 @@ declare enum Enum1 {
   getArticle(): void {
     this.articleId = +this.route.snapshot.paramMap.get('id');
     // console.log(this.articleId);
-    if (!this.articleId || this.articleId > 5) {
+    if (!this.articleId || this.articleId > 6) {
       this.isNotFound = true;
       this.router.navigate(['page-not-found']);
     }

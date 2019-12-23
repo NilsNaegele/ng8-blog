@@ -22,7 +22,7 @@ import { PrivacyComponent } from './privacy/privacy.component';
     FooterComponent,
     HomeComponent,
     PageNotFoundComponent,
-    PrivacyComponent
+    PrivacyComponent,
   ],
   imports: [
     BrowserModule,
