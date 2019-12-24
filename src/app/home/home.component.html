@@ -102,12 +102,12 @@
       </ng-container>
         <!-- Pager -->
         <div class="clearfix color-white">
-          <a *ngIf="!previewsAreVisible"  class="btn btn-primary float-right" (click)="toggleMoreLessPreview()">
+          <button *ngIf="!previewsAreVisible"  class="btn btn-primary float-right" (click)="toggleMoreLessPreview()">
             Weitere Artikel &rarr;
-          </a>
-          <a *ngIf="previewsAreVisible" class="btn btn-primary float-right" (click)="toggleMoreLessPreview()">
+          </button>
+          <button *ngIf="previewsAreVisible" class="btn btn-primary float-right" (click)="toggleMoreLessPreview()">
            &larr; Weniger Artikel
-          </a>
+          </button>
         </div>
       </div>
     </div>

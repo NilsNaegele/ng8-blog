@@ -1065,10 +1065,10 @@ declare enum Enum1 {
     {
   id: 6,
   imageHeaderUrl: 'url(assets/img/post6-bg.jpg)',
-  heading: 'Angular 8/9, Superheroisches Javascript Framework',
+  heading: 'Angular, Superheroisches Javascript Framework',
   subHeading: 'Angular 8/9, hier die Welt zu retten!',
   metaPublishedDate: 'am 24 Dezember, 2019',
-  sectionHeading: 'Basis - Einleitung in Angular 8/9, Template Syntax',
+  sectionHeading: 'Basis - Einleitung in Angular 8/9, Template Syntax, Lifecycle Hooks',
   code: `
 // displaying data - interpolation
 import { Component } from '@angular/core';
@@ -1658,6 +1658,747 @@ Are you as confused as {{ currentHero.name }}
       Undeclared members is {{ $any(this).member }}
 </div>
 
+// lifecycle hooks parent
+import { Component } from '@angular/core';
+import { LoggerService } from '../logger.service';
+
+@Component({
+  selector: 'app-peek-a-boo-parent',
+  template: \`
+          <div class="parent">
+              <h2>Peek-A-Boo</h2>
+              <button (click)="toggleChild()">
+                {{ hasChild ? 'Destroy' : 'Create' }} PeekABooComponent
+              </button>
+              <button (click)="updateHero()" [hidden]="!hasChild">Update Hero</button>
+              <app-peek-a-boo *ngIf="hasChild" [name]="heroName">
+              </app-peek-a-boo>
+              <h4>-- Lifecycle Hook Log --</h4>
+              <div *ngFor="let message of hookLog">
+              {{ message }}
+              </div>
+          </div>
+  \`,
+  styles: ['.parent { background: moccasin; }'],
+  providers: [LoggerService]
+})
+export class PeekABooParentComponent {
+  hasChild = false;
+  hookLog: string[];
+  heroName = 'Flash';
+
+  constructor(private logger: LoggerService) {
+    this.hookLog = logger.logs;
+   }
+
+   toggleChild() {
+     this.hasChild = !this.hasChild;
+     if (this.hasChild) {
+       this.heroName = 'Flash';
+       this.logger.clear();
+     }
+     this.updateLog();
+   }
+
+   updateHero() {
+     this.heroName += '!';
+     this.updateLog();
+   }
+
+   updateLog() {
+    this.logger.tick();
+    this.hookLog = this.logger.logs;
+   }
+
+}
+
+// lifecycle hook child
+
+import { Component, Input } from '@angular/core';
+  import { AfterContentChecked,
+           AfterContentInit,
+           AfterViewChecked,
+           AfterViewInit,
+           DoCheck,
+           OnChanges,
+           OnDestroy,
+           OnInit,
+           SimpleChanges } from '@angular/core';
+
+  import { LoggerService } from '../logger.service';
+
+  let nextId = 1;
+
+  export class PeekABoo implements OnInit {
+
+  constructor(private logger: LoggerService) { }
+
+  ngOnInit() {
+    this.logIt('OnInit');
+  }
+
+  logIt(message: string) {
+    this.logger.log(\`#\${nextId++} \${message}\`);
+  }
+
+}
+
+  @Component({
+  selector: 'app-peek-a-boo',
+  template: '<p>Now you see my hero, {{ name }}</p>',
+  styles: ['p {background: LightYellow; padding: 8px;}']
+    })
+  export class PeekABooComponent extends PeekABoo
+                               implements OnChanges, OnInit, DoCheck, AfterContentInit,
+                                          AfterContentChecked, AfterViewInit, AfterViewChecked,
+                                          OnDestroy {
+  @Input() name: string;
+
+  private verb = 'initialized';
+
+  constructor(logger: LoggerService) {
+    super(logger);
+    const is = this.name ? 'is' : 'is not';
+    this.logIt(\`name \${is} known at construction\`);
+  }
+
+  // only called for if there is an @input variable set by parent
+  ngOnChanges(changes: SimpleChanges) {
+      const changesMessages: string[] = [];
+      for (const propertyName in changes) {
+        if (propertyName === 'name') {
+          const name = changes['name'].currentValue;
+          changesMessages.push(\`name \${this.verb} to "\${name}"\`);
+        } else {
+          changesMessages.push(propertyName + ' ' + this.verb);
+        }
+      }
+      this.logIt(\`OnChanges: \${changesMessages.join('; ')}\`);
+      this.verb = 'changed';
+  }
+
+  // called in every change detection cycle anywhere on the page
+  ngDoCheck() {
+    this.logIt('DoCheck');
+  }
+
+  ngAfterContentInit() {
+    this.logIt('AfterContentInit');
+  }
+
+  // called in every change detection cycle anywhere on the page
+  ngAfterContentChecked() {
+    this.logIt('AfterContentChecked');
+  }
+
+  ngAfterViewInit() {
+    this.logIt('AfterViewInit');
+  }
+
+  // called in every change detection cycle anywhere on the page
+  ngAfterViewChecked() {
+    this.logIt('AfterViewChecked');
+  }
+
+  ngOnDestroy() {
+    this.logIt('OnDestroy');
+  }
+
+}
+
+// logger service
+import { Injectable } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root'
+})
+  export class LoggerService {
+    logs: string[] = [];
+    previousMessage = '';
+    previousMessageCount = 1;
+
+    log(message: string) {
+      if (message === this.previousMessage) {
+        this.logs[this.logs.length - 1] = message + \` (\${this.previousMessageCount += 1}x)\`;
+      } else {
+        this.previousMessage = message;
+        this.previousMessageCount = 1;
+        this.logs.push(message);
+      }
+    }
+
+    clear() {
+      this.logs = [];
+    }
+
+    tick() {
+      this.tick_then(() => { });
+    }
+
+    tick_then(fn: () => any) { setTimeout(fn, 0); }
+  }
+
+ // spy directive
+ import { Directive, OnInit, OnDestroy } from '@angular/core';
+
+ import { LoggerService } from '../logger.service';
+
+ let nextId = 1;
+
+ @Directive({
+ selector: '[appISpy]'
+ })
+ export class SpyDirective implements OnInit, OnDestroy {
+
+ private logIt(message: string) {
+   this.logger.log(\`Spy #\${nextId++} \${message}\`);
+ }
+
+ constructor(private logger: LoggerService) { }
+
+ ngOnInit() {
+   this.logIt('onInit');
+ }
+
+ ngOnDestroy() {
+   this.logIt('onDestroy');
+ }
+
+}
+
+// spy component
+import { Component } from '@angular/core';
+
+  import { LoggerService } from '../logger.service';
+
+  @Component({
+    selector: 'app-spy',
+    template: \`
+              <div class="parent">
+                    <h2>Spy Directive</h2>
+
+                    <input [(ngModel)]="newName" (keyup.enter)="addHero()">
+                    <button (click)="addHero()">Add Hero</button>
+                    <button (click)="reset()">Reset Heroes</button>
+
+                    <p></p>
+                    <div *ngFor="let hero of heroes" appISpy class="heroes">
+                        {{ hero }}
+                        <span (click)="removeHero(hero)">x</span>
+                    </div>
+                    <h4>-- Spy Lifecycle Hook Log --</h4>
+                    <div *ngFor="let message of logger.logs">
+                        {{ message }}
+                    </div>
+              </div>
+    \`,
+    styles: [
+             '.parent { background: khaki; }',
+             '.heroes { background: LightYellow; padding: 0 8px; }'
+  ],
+  })
+  export class SpyComponent {
+    newName = 'Mickey';
+    heroes: string[] = ['Wonderwoman', 'Superman'];
+
+    constructor(public logger: LoggerService) { }
+
+    addHero() {
+      if (this.newName.trim()) {
+        this.heroes.push(this.newName.trim());
+        this.newName = '';
+        this.logger.tick();
+      }
+    }
+
+    removeHero(hero: string) {
+      this.heroes.splice(this.heroes.indexOf(hero), 1);
+      this.logger.tick();
+    }
+
+    reset() {
+      this.logger.log('-- reset --');
+      this.heroes = [];
+      this.logger.tick();
+    }
+  }
+
+// onchanges component
+import { Component, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
+
+  class Hero {
+    constructor(public name: string) { }
+  }
+
+
+  @Component({
+    selector: 'app-on-changes',
+    template: \`
+      <div class="hero">
+          <p>{{ hero.name }} can {{ power }}</p>
+
+          <h4>-- Change Log --</h4>
+          <div *ngFor="let change of changeLog">
+                  {{ change }}
+          </div>
+      </div>
+    \`,
+    styles: [
+            '.hero { background: LightYellow; padding: 8px; margin-top: 8px;',
+            'p { background: Yellow; padding: 8px; margin-top: 8px; }'
+  ]
+  })
+  export class OnChangesComponent implements OnChanges {
+    @Input() hero: Hero;
+    @Input() power: string;
+
+    changeLog: string[] = [];
+
+    ngOnChanges(changes: SimpleChanges) {
+      for (const propertyName of Object.keys(changes)) {
+        const change = changes[propertyName];
+        const current = JSON.stringify(change.currentValue);
+        const previous = JSON.stringify(change.previousValue);
+        this.changeLog.push(\`\${propertyName}: currentValue = \${current},
+                                              previousValue= \${previous}\`);
+      }
+    }
+
+    reset() { this.changeLog = []; }
+
+  }
+
+
+  /**********************************************************************************/
+
+  @Component({
+    selector: 'app-on-changes-parent',
+    template: \`
+          <div class="parent">
+              <h2>{{ title }}</h2>
+
+              <table>
+                    <tr><td>Power: </td><td><input [(ngModel)]="power"></td></tr>
+                    <tr><td>Hero.name: </td><td><input [(ngModel)]="hero.name"></td></tr>
+              </table>
+              <p><button (click)="reset()">Reset Log</button></p>
+
+              <app-on-changes [hero]="hero" [power]="power"></app-on-changes>
+          </div>
+    \`,
+    styles: ['.parent { background: Lavender;']
+  })
+  export class OnChangesParentComponent {
+    hero: Hero;
+    power: string;
+    title = 'OnChanges';
+    @ViewChild(OnChangesComponent) childView: OnChangesComponent;
+
+    constructor() {
+      this.reset();
+    }
+
+    reset() {
+      this.hero = new Hero('Flash');
+      this.power = 'sing';
+      if (this.childView) { this.childView.reset(); }
+    }
+
+  }
+
+  // docheck component
+  import { Component, DoCheck, Input, ViewChild } from '@angular/core';
+
+  class Hero {
+    constructor(public name: string) { }
+  }
+
+  @Component({
+    selector: 'app-do-check',
+    template: \`
+          <div class="hero">
+                <p>{{ hero.name }} can {{ power }} </p>
+                <h4>-- Change Log --</h4>
+                <div *ngFor="let change of changeLog">
+                          {{ change }}
+                </div>
+          </div>
+    \`,
+    styles: [
+              '.hero { background: LightYellow; padding: 8px; margin-top: 8px; }',
+              'p { background: Yellow; padding: 8px; margin-top: 8px; }'
+            ]
+  })
+  export class DoCheckComponent implements DoCheck {
+    @Input() hero: Hero;
+    @Input() power: string;
+
+    changeDetected = false;
+    changeLog: string[] = [];
+    oldHeroName = '';
+    oldPower = '';
+    oldLogLength = 0;
+    noChangeCount = 0;
+
+    constructor() { }
+
+    ngDoCheck() {
+        if (this.hero.name !== this.oldHeroName) {
+          this.changeDetected = true;
+          this.changeLog.push(\`DoCheck: Hero name changed to "\${this.hero.name}"
+                               from "\${this.oldHeroName}"\`);
+          this.oldHeroName = this.hero.name;
+        }
+
+        if (this.power !== this.oldPower) {
+          this.changeDetected = true;
+          this.changeLog.push(\`DoCheck: Power changed to "\${this.power}"
+                               from "\${this.oldPower}"\`);
+          this.oldPower = this.power;
+        }
+
+        if (this.changeDetected) {
+          this.noChangeCount = 0;
+        } else {
+          const count = this.noChangeCount += 1;
+          const noChangeMessage = \`DoCheck called \${count}x when no change to hero or power\`;
+          if (count === 1) {
+            this.changeLog.push(noChangeMessage);
+          } else {
+            this.changeLog[this.changeLog.length - 1] = noChangeMessage;
+          }
+        }
+        this.changeDetected = false;
+
+    }
+
+    reset() {
+      this.changeDetected = true;
+      this.changeLog = [];
+    }
+
+  }
+
+  /*********************************************************************************/
+
+  @Component({
+    selector: 'app-do-check-parent',
+    template: \`
+          <div class="parent">
+              <h2>{{ title }}</h2>
+
+              <table>
+                    <tr><td>Power: </td><td><input [(ngModel)]="power"></td></tr>
+                    <tr><td>Hero.name: </td><td><input [(ngModel)]="hero.name"></td></tr>
+              </table>
+              <p><button (click)="reset()">Reset Log</button></p>
+
+              <app-do-check [hero]="hero" [power]="power"></app-do-check>
+
+          </div>
+    \`,
+    styles: ['.parent { background: Lavender; }']
+  })
+  export class DoCheckParentComponent {
+      hero: Hero;
+      power: string;
+      title = 'DoCheck';
+      @ViewChild(DoCheckComponent) childView: DoCheckComponent;
+
+      constructor() {
+        this.reset();
+      }
+
+      reset() {
+        this.hero = new Hero('Flash');
+        this.power = 'sing';
+        if (this.childView) {
+          this.childView.reset();
+        }
+      }
+
+  }
+
+// afterview component
+import { Component, AfterViewChecked, AfterViewInit, ViewChild } from '@angular/core';
+
+  import { LoggerService } from '../logger.service';
+
+  /*****************************************************/
+  @Component({
+    selector: 'app-child-view',
+    template: '<input [(ngModel)]="hero">'
+  })
+  export class ChildViewComponent {
+    hero = 'Flash';
+  }
+
+  /*****************************************************/
+  @Component({
+    selector: 'app-after-view',
+    template: \`
+        <div>-- child view begins --</div>
+        <app-child-view></app-child-view>
+        <div>-- child view ends --</div>
+    <p *ngIf="comment" class="comment">
+        {{ comment }}
+    </p>
+    \`
+  })
+  export class AfterViewComponent implements AfterViewChecked, AfterViewInit {
+    private previousHero = '';
+    comment = '';
+
+    @ViewChild(ChildViewComponent) viewChild: ChildViewComponent;
+
+    constructor(private logger: LoggerService) {
+      this.logIt('AfterView constructor');
+    }
+
+    ngAfterViewInit() {
+      // viewchild is set after view has been initialized
+      this.logIt('AfterViewInit');
+      this.doSomething();
+    }
+
+    ngAfterViewChecked() {
+      // viewchild is updated after view has been checked
+      if (this.previousHero === this.viewChild.hero) {
+            this.logIt('AfterViewChecked (no change)');
+      } else {
+        this.previousHero = this.viewChild.hero;
+        this.logIt('AfterViewChecked');
+        this.doSomething();
+      }
+    }
+
+    private doSomething() {
+          const come = this.viewChild.hero.length > 10 ? \`That's a long name\` : '';
+          if (come !== this.comment) {
+            this.logger.tick_then(() => this.comment = come);
+          }
+    }
+
+    private logIt(method: string) {
+      const child = this.viewChild;
+      const message = \`\${method}: \${child ? child.hero : 'no'} child view\`;
+      this.logger.log(message);
+    }
+
+  }
+
+  /*****************************************************/
+  @Component({
+    selector: 'app-after-view-parent',
+    template: \`
+          <div class="parent">
+              <h2>AfterView</h2>
+              <app-after-view *ngIf="show"></app-after-view>
+
+              <h4>-- AfterView Logs --</h4>
+              <p><button (click)="reset()">Reset</button></p>
+              <div *ngFor="let message of logger.logs">{{ message }}</div>
+          </div>
+    \`,
+    styles: ['.parent { background: burlywood; }'],
+  })
+  export class AfterViewParentComponent {
+          show = true;
+
+          constructor(public logger: LoggerService) { }
+
+          reset() {
+            this.logger.clear();
+            this.show = false;
+            this.logger.tick_then(() => this.show = true);
+          }
+
+  }
+
+// aftercontent component
+import { Component,
+  AfterContentChecked,
+  AfterContentInit,
+  ContentChild } from '@angular/core';
+
+import { LoggerService } from '../logger.service';
+
+/*****************************************************/
+@Component({
+selector: 'app-child',
+template: '<input [(ngModel)]="hero">'
+})
+export class ChildComponent {
+hero = 'Flash';
+}
+
+/*****************************************************/
+@Component({
+selector: 'app-after-content',
+template: \`
+<div>-- projected content begins --</div>
+   <ng-content></ng-content>
+<div>-- projected content ends --</div>
+\`
++
+\`
+<p *ngIf="comment" class="comment">
+{{ comment }}
+</p>
+\`
+})
+export class AfterContentComponent implements AfterContentChecked, AfterContentInit {
+private previousHero = '';
+comment = '';
+
+@ContentChild(ChildComponent) contentChild: ChildComponent;
+
+constructor(private logger: LoggerService) {
+this.logIt('AfterContent constructor');
+}
+
+ngAfterContentInit() {
+// contentchild is set after content has been initialized
+this.logIt('AfterContentInit');
+this.doSomething();
+}
+
+ngAfterContentChecked() {
+// contentchild is updated after content has been checked
+if (this.previousHero === this.contentChild.hero) {
+   this.logIt('AfterContentChecked (no change)');
+} else {
+this.previousHero = this.contentChild.hero;
+this.logIt('AfterContentChecked');
+this.doSomething();
+}
+}
+
+private doSomething() {
+ this.comment = this.contentChild.hero.length > 10 ? \`That's a long name\` : '';
+}
+
+private logIt(method: string) {
+const child = this.contentChild;
+const message = \`\${method}: \${child ? child.hero : 'no'} child content\`;
+this.logger.log(message);
+}
+
+}
+
+/*****************************************************/
+@Component({
+selector: 'app-after-content-parent',
+template: \`
+ <div class="parent">
+     <h2>AfterContent</h2>
+
+     <div *ngIf="show">
+       <app-after-content>
+           <app-child></app-child>
+       </app-after-content>
+
+     <h4>-- AfterView Logs --</h4>
+     <p><button (click)="reset()">Reset</button></p>
+     <div *ngFor="let message of logger.logs">{{ message }}</div>
+ </div>
+\`,
+styles: ['.parent { background: burlywood; }']
+})
+export class AfterContentParentComponent {
+ show = true;
+
+ constructor(public logger: LoggerService) { }
+
+ reset() {
+   this.logger.clear();
+   this.show = false;
+   this.logger.tick_then(() => this.show = true);
+ }
+}
+
+// counter component
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+
+import { LoggerService } from '../logger.service';
+
+@Component({
+  selector: 'app-counter',
+  template: \`
+          <div class="counter">
+                  Counter = {{ counter }}
+            <h5>-- Counter Change Log --</h5>
+            <div *ngFor="let change of changeLog" appISpy>
+                  {{ change }}
+            </div>
+          </div>
+  \`,
+  styles: ['.counter { background: LightYellow; padding: 8px; margin-top: 8px; }']
+})
+export class MyCounterComponent implements OnChanges {
+       @Input() counter: number;
+       changeLog: string[] = [];
+
+      ngOnChanges(changes: SimpleChanges) {
+        // empty changelog whenever counter hits zero
+        // hint: this is a way to respond programmatically to external value changes.
+        if (this.counter === 0) {
+          this.changeLog = [];
+        }
+
+        // change to counter is the only thing we care about
+        const change = changes['counter'];
+        const current = change.currentValue;
+        // first time is {}; after is integer
+        const previous = JSON.stringify(change.previousValue);
+        this.changeLog.push(\`counter: currentValue = \${current},
+                                       previousValue = \${previous}\`);
+      }
+}
+
+/******************************************************/
+@Component({
+  selector: 'app-counter-parent',
+  template: \`
+          <div class="parent">
+              <h2>Counter</h2>
+
+              <button (click)="updateCounter()">Update Counter</button>
+              <button (click)="reset()">Reset Counter</button>
+
+              <app-counter [counter]="value"></app-counter>
+
+              <h4>-- Spy Lifecycle Hook Log --</h4>
+              <div *ngFor="let message of spyLog">
+                    {{ message }}
+              </div>
+          </div>
+  \`,
+  styles: ['.parent { background: gold; }'],
+})
+export class CounterParentComponent {
+      value: number;
+      spyLog: string[] = [];
+
+      constructor(private logger: LoggerService) {
+        this.spyLog = logger.logs;
+        this.reset();
+      }
+
+      updateCounter() {
+        this.value += 1;
+        this.logger.tick();
+      }
+
+      reset() {
+        this.logger.log('-- reset --');
+        this.value = 0;
+        this.logger.tick();
+      }
+
+}
+
+
   `,
   blockQuote: `
   Wir beabsichtigen zum Mond zu fliegen in diesem Jahrzehnt und andere Sachen zu tun, nicht weil sie einfach sind,
@@ -1688,10 +2429,6 @@ Are you as confused as {{ currentHero.name }}
   goBack(): void {
     this.location.back();
   }
-
-  // goToTop() {
-  //   document.body.scrollTop = document.documentElement.scrollTop = 0;
-  // }
 }
 
 
