@@ -6,5 +6,9 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'ng8-blog';
+  title = 'ng8-blog-nasa';
+
+  goToTop() {
+    document.body.scrollTop = document.documentElement.scrollTop = 0;
+  }
 }

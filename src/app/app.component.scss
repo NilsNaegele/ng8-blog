@@ -1,0 +1,15 @@
+.sticky-button {
+    bottom: 1%;
+    right: 2%;
+    position: fixed;
+    z-index: 1;
+}
+
+.btn-circle.btn-sm { 
+    width: 70px; 
+    height: 70px; 
+    padding: 10px 16px; 
+    border-radius: 35px; 
+    font-size: 12px;
+    text-align: center; 
+} 

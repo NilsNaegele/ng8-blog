@@ -1067,8 +1067,8 @@ declare enum Enum1 {
   imageHeaderUrl: 'url(assets/img/post6-bg.jpg)',
   heading: 'Angular 8/9, Superheroisches Javascript Framework',
   subHeading: 'Angular 8/9, hier die Welt zu retten!',
-  metaPublishedDate: 'am 27 Dezember, 2019',
-  sectionHeading: 'Basis - Einleitung in Angular 8/9',
+  metaPublishedDate: 'am 24 Dezember, 2019',
+  sectionHeading: 'Basis - Einleitung in Angular 8/9, Template Syntax',
   code: `
 // displaying data - interpolation
 import { Component } from '@angular/core';
@@ -1210,7 +1210,453 @@ export class AppComponent  {
     }
 }
 
+// binding syntax
+import { Component, ViewChild, ElementRef } from '@angular/core';
 
+@Component({
+  selector: 'app-root',
+  template: \`
+  <div>
+  <h1>Binding syntax</h1>
+  <hr>
+
+  <div>
+    <h2>Button disabled state bound to isUnachanged property</h2>
+    <button [disabled]="isUnchanged">
+        Save
+    </button>
+  </div>
+  <hr>
+
+  <div (keyup)="0">
+    <h2>HTML attributes and DOM properties</h2>
+    <p>1. Use the inspector to see the HTML attribute and DOM property values.
+      Click the buttons to log values to the console.
+    </p>
+    <label>HTML Attribute Initializes to Sarah
+    <input type="text" value="Sarah" #bindingInput>
+  </label>
+
+  <div>
+    <button (click)="getHTMLAttributeValue()">
+      Get HTML attribut value
+    </button>
+     Won't change
+  </div>
+
+  <div>
+    <button (click)="getDOMPropertyValue()">
+      Get DOM property value
+    </button>
+     Changeable. Angular works with these.
+  </div>
+
+  <p>2. Change the name in the input and click the buttons again.</p>
+</div>
+
+<hr>
+
+<div>
+  <h3>Disabled property vs. attributes</h3>
+  <p>
+    Use the inspector to see the Test Button work and its disabled property toggle.
+  </p>
+<div>
+<button id="testButton" (click)="working()">Test Button</button>
+</div>
+<div>
+  <button (click)="toggleDisabled()">
+      Toggle disabled property for Test Button
+  </button>
+</div>
+</div>
+</div>
+  \`,
+  styleUrls: ['./app.component.scss']
+})
+export class AppComponent {
+  @ViewChild('bindingInput', { static: false }) bindingInput: ElementRef;
+
+  isUnchanged = true;
+
+  getHTMLAttributeValue(): any {
+    console.warn('HTML attribute value: ' + this.bindingInput.nativeElement.getAttribute('value'));
+  }
+
+  getDOMPropertyValue(): any {
+    console.warn('DOM property value: ' + this.bindingInput.nativeElement.value);
+  }
+
+  working(): any {
+    console.warn('Test Button works');
+  }
+
+  toggleDisabled(): any {
+    const testButton = document.getElementById('testButton') as HTMLInputElement;
+    testButton.disabled = !testButton.disabled;
+    console.warn(testButton.disabled);
+  }
+}
+
+// property binding
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: \`
+  <img [src]="imageUrl" style="width:200px;">
+  <table>
+  <tr><td [colSpan]="2">Span 2 columns</td></tr>
+  </table>
+  <button [disabled]="isUnchanged">Disabled Button</button>
+  <p [ngClass]="classes">[ngClass] binding to the classes property making this blue</p>
+  \`,
+  styles: [
+    '.special {color: blue}'
+  ]
+})
+export class AppComponent {
+  imageUrl = '../assets/images/image1.jpg';
+  isUnchanged = true;
+  classes = 'special';
+}
+
+// interpolation revisited
+<p>My current hero name is {{ currentHero.name }}</p>
+<h3>
+    {{ title }}
+    <img src="{{ heroImageUrl }}" style="height: 100px">
+</h3>
+<p>The sum of 1 + 1 is {{ 1 + 1 }}</p>
+<p>The sum of 1 + 1 is not {{ 1 + 1 + getNumber() }}</p>
+
+// template expressions expression context revisited
+{{ title }}
+<span [hidden]="isUnchanged">changed</span>
+<div *ngFor="let hero of heroes">{{ hero.name }}</div>
+<input #heroInput>{{ heroInput.value }}
+
+// template statements statement context revisited
+<button (click)="deleteHero()">Delete Hero</button>
+<button (click)="onSaveHer($event)">Save Her</button>
+<button *ngFor="let hero of heroes" (click)="deleteHero(hero)">
+{{ hero.name }}
+</button>
+<form #heroForm (ngSubmit)="onSubmit(heroForm)"> ... </form>
+
+// binding syntax overview revisited
+// one way from component to view
+{{ expression }}
+[target]="expression"
+bind-target="expression"
+
+// one way from view to component
+(target)="statement"
+on-target="statement"
+
+// two way
+[(target)]="expression"
+bindon-target="expression"
+
+// new mental model
+<div [class.special]="isSpecial">New Mental Model</div>
+<app-hero-detail></app-hero-detail>
+<button [disabled]="isUnchanged">Save Her</button>
+<img [src]="heroImageUrl">
+<app-hero-detail [hero]="currentHero"></app-hero-detail>
+<div [ngClass]="{ 'special': isSpecial }"></div>
+<button (click)="onSave()">Save</button>
+<app-hero-detail (deleteRequest)="deleteHero()"></app-hero-detail>
+<div (myClick)="clicked=$event" clickable>Click Me</div>
+{{ clicked }}
+<div>
+    Hero Name:
+    <input [(ngModel)]="name">
+</div>
+<button [attr.aria-label]="help">Help</button>
+<div [class.red]="isRed">Favorite</div>
+<button [style.color]="isSpecial ? 'red' : 'blue'">Special</button>
+
+// binding targets revisited
+// property
+<img [src]="heroImageUrl">
+<app-hero-detail [hero]="currentHero"></app-hero-detail>
+<div [ngClass]="{ 'special': isSpecial }"></div>
+
+// event
+<button (click)="onSave()">Save</button>
+<app-hero-detail (deleteRequest)="deleteHero()"></app-hero-detail>
+<div (myClick)="clicked="$event" clickable>Click Me</div>
+
+// two way
+<input [(ngModel)]="name">
+
+// attribute
+<button [attr.aria-label]="help">Help</button>
+
+// class
+<div [class.special]="isSpecial">Special</div>
+
+// style
+<button [style.color]="isSpecial ? 'red' : 'green'">
+
+// property binding revisited
+<img [src]="heroImageUrl">
+<img bind-src="heroImageUrl"> // canonical form
+<button [disabled]="isUnchanged">Cancel is disabled</button>
+<div [ngClass]="classes">[ngClass] binding to the classes property</div>
+<app-hero-detail [hero]="currentHero"></app-hero-detail>
+<app-hero-detail prefix="You are my" [hero]="currentHero"></app-hero-detail>
+
+<p><img src="{{ heroImageUrl }}"> is the <i>interpolated</i> image.</p>
+<p><img [src]="heroImageUrl"> is the <i>property bound</i> image.</p>
+
+<p><span>"{{ title }}" is the <i>interpolated</i> title.</span></p>
+<p>"<span [innerHTML]="title"></span>" is the <i>property bound</i> title.</p>
+
+evilTitle = 'Template <script>alert("evil never sleeps")</script>Syntax';
+
+<p><span>"{{ evilTitle }}" is the <i>interpolated</i> evil title.</span></p>
+<p><span [innerHTML]="evilTitle"></span> is the <i>property bound</i> evil title.</p>
+
+// attribute binding
+<table border=1>
+<tr><td [attr.colspan]="1 + 1">One-Two</td></tr>
+<tr><td>Three</td><td>Four</td></tr>
+</table>
+<button [attr.aria-label]="actionName">{{ actionName }} with Aria</button>
+
+// class binding
+<div class="nice curly special" [class]="niceCurly">Nice curly</div>
+<div [class.special]="isSpecial">This class binding is special</div>
+<div class="special" [class.special]="!isSpecial">This one is not so special</div>
+
+// style binding
+<button [style.color]="isSpecial ? 'red' : 'green'">Red</button>
+<button [style.background-color]="canSave ? 'yellow' : 'blue'">Save Her</button>
+<button [style.font-size.em]="isSpecial ? 3 : 1">Big</button>
+<button [style.font-size.%]="!isSpecial ? 150 : 50">Small</button>
+
+// event binding
+<button (click)="onSave()">Save Her</button>
+<button on-click="onSave()">Save Her</button>
+<div (myClick)="clickMessage=$event" clickable>Click with myClick</div>
+{{ clickMessage }}
+
+<input [value]="currentHero.name" (input)="currentHero.name=$event.target.value">
+
+// custom events with eventemitter
+template: \`
+<div>
+  <img src="{{ heroImageUrl }}">
+  <span [style.text-decoration]="lineThrough">
+      {{ prefix }} {{ hero?.name }}
+  </span>
+  <button (click)="delete()">Delete</button>
+</div>
+\`
+deleteRequest = new EventEmitter<Hero>();
+delete() {
+this.deleteRequest.emit(this.hero);
+}
+
+<app-hero-detail (deleteRequest)="deleteHero($event)" [hero]="currentHero">
+</app-hero-detail>
+
+
+// two way binding
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+
+@Component({
+  selector: 'app-sizer',
+  template: \`
+      <div>
+          <button (click)="decrease()" title="smaller">-</button>
+          <button (click)="increase()" title="bigger">+</button>
+          <label [style.font-size.px]="size">FontSize: {{ size }}px</label>
+      </div>
+  \`
+})
+export class SizerComponent {
+  @Input() size: number | string;
+  @Output() sizeChange = new EventEmitter<number>();
+
+  decrease() {
+    this.resize(-1);
+  }
+
+  increase() {
+    this.resize(+1);
+  }
+
+
+  resize(delta: number) {
+    this.size = Math.min(40, Math.max(8, +this.size + delta));
+    this.sizeChange.emit(this.size);
+  }
+
+}
+
+<app-sizer [(size)]="fontSizePx"></app-sizer>
+<div [style.font-size.px]="fontSizePx">Resizable Text</div>
+
+// desugared
+<app-sizer [size]="fontSizePx" (sizeChange)="fontSizePx=$event"></app-sizer>
+
+// ngClass
+<div [class.special]="isSpecial">This class binding is special.</div>
+
+<div [ngClass]="currentClasses">
+This div is initially saveable, unchanged, and special.
+</div>
+
+currentClasses: {};
+setCurrentClasses() {
+  this.currentClasses = {
+    'saveable': this.canSave,
+    'modified': !this.isUnchanged,
+    'special': this.isSpecial
+  };
+}
+
+// ngStyle
+<div [style.font-size]="isSpecial ? 'x-large' : 'smaller'">
+This div is x-large or smaller.
+</div>
+<div [ngStyle]="currentStyles">
+This div is initially italic, normal weight, and extra large (24px).
+</div>
+currentStyles: {};
+setCurrentStyles() {
+this.currentStyles = {
+  'font-style': this.canSave ? 'italic' : 'normal',
+  'font-weight': !this.isUnchanged ? 'bold' : 'normal',
+  'font-size': this.isSpecial ? '24px' : '12px'
+};
+}
+
+// ngModel
+import { FormsModule } from '@angular/forms';
+
+<input [(ngModel)]="currentHero.name">
+
+<input [value]="currentHero.name" (input)="currentHero.name=$event.target.value">
+
+<input [ngModel]="currentHero.name" (ngModelChange)="currentHero.name=$event">
+
+<input [ngModel]="currentHero.name" (ngModelChange)="setUppercaseName($event)">
+
+// ngIf
+<app-hero-detail *ngIf="isActive"></app-hero-detail>
+
+<div [class.hidden]="!isSpecial">Show with class</div>
+<div [class.hidden]="isSpecial">Hide with class</div>
+<app-hero-detail [class.hidden]="isSpecial"></app-hero-detail>
+
+<div [style.display]="isSpecial ? 'block' : 'none'">Show with style</div>
+<div [style.display]="isSpecial ? 'none' : 'block'">Hide with style</div>
+
+<div *ngIf="currentHero">Hello, {{ currentHero.name }}</div>
+<div *ngIf="nullHero">Hello, {{ nullHero.name }}</div>
+
+// ngForOf
+<div *ngFor="let hero of heroes">{{ hero.name }}</div>
+<app-hero-detail *ngFor="let hero of heroes" [hero]="hero"></app-hero-detail>
+
+<div *ngFor="let hero of heroes; let i = index;">{{ i + 1 }} - {{ hero.name }}</div>
+
+<div *ngFor="let hero of heroes; trackBy: trackByHeroes">
+    ({{ hero.id }}) {{ hero.name }}
+</div>
+
+trackByHeroes(index: number, hero: Hero) {
+  return hero.id;
+}
+
+// ngSwitch
+<div [ngSwitch]="currentHero.emotion">
+<app-happy-hero *ngSwitchCase="'happy'" [hero]="currentHero">
+</app-happy-hero>
+<app-sad-hero *ngSwitchCase="'sad'" [hero]="currentHero">
+</app-sad-hero>
+<app-confused-hero *ngSwitchCase="'confused'" [hero]="currentHero">
+</app-confused-hero>
+<div *ngSwitchCase="'confused'">
+Are you as confused as {{ currentHero.name }}
+</div>
+<app-unknown-hero *ngSwitchDefault [hero]="currentHero">
+</app-unknown-hero>
+</div>
+
+// template reference variable (#var)
+<input #phone placeholder="phone number">
+<button (click)="callPhone(phone.value)">Call</button>
+
+<form (ngSubmit)="onSubmit(heroForm)" #heroForm="ngForm">
+    <div class="form-group">
+        <label for="name">Name
+            <input class="form-control" name="name" required [(ngModel)]="hero.name">
+        </label>
+    </div>
+    <button type="submit" [disabled]="!heroForm.form.valid">Submit</button>
+</form>
+<div [hidden]="!heroForm.form.valid">
+    {{ submitMessage }}
+</div>
+
+<input ref-fax placeholder="fax number">
+<button (click)="callFax(fax.value)">Fax</button>
+
+// input and output properties
+<img [src]="iconUrl">
+<button (click)="onSave()">Save</button>
+
+<app-hero-detail [hero]="currentHero" (deleteRequest)="deleteHero($event)">
+</app-hero-detail>
+
+@Input() hero: Hero;
+@Output() deleteRequest = new EventEmitter<Hero>();
+
+@Component({
+  inputs: ['hero'],
+  outputs: ['deleteRequest']
+})
+
+<div (myClick)="clickMessage=$event" clickable>click with myClick</div>
+@Output('myClick') clicks = new EventEmitter<string>();
+
+@Directive({
+  outputs: ['clicks:myClick']
+})
+
+// template expression operators
+<div>Title through uppercase pipe: {{ title | uppercase }}</div>
+<div>
+      Title through a pipe chain:
+      {{ title | uppercase | lowercase }}
+</div>
+<div>
+      Birthdate: {{ currentHero?.birthDate | date:'longDate' }}
+</div>
+<div> {{ currentHero | json }}</div>
+
+<div>The current hero's name is {{ currentHero?.name }}</div>
+
+<div *ngIf="nullHero">The null hero's name is {{ nullHero.name }}</div>
+<div>The null hero's name is {{ nullHero && nullHero.name }}</div>
+<div>The null hero's name is {{ nullHero?.name }}</div>
+
+<div *ngIf="hero">
+      The hero's name is {{ hero!.name }}
+</div>
+
+<div>
+      The hero's marker is {{ $any(hero).marker }}
+</div>
+
+<div>
+      Undeclared members is {{ $any(this).member }}
+</div>
 
   `,
   blockQuote: `
@@ -1242,6 +1688,10 @@ export class AppComponent  {
   goBack(): void {
     this.location.back();
   }
+
+  // goToTop() {
+  //   document.body.scrollTop = document.documentElement.scrollTop = 0;
+  // }
 }
 
 
