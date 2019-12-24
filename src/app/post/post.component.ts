@@ -11,7 +11,7 @@ import { DomSanitizer } from '@angular/platform-browser';
   styleUrls: ['./post.component.scss']
 })
 export class PostComponent implements OnInit {
-  articleId: number;
+  articleId: any;
   isNotFound: boolean;
 
   posts = [
@@ -1068,7 +1068,7 @@ declare enum Enum1 {
   heading: 'Angular, Superheroisches Javascript Framework',
   subHeading: 'Angular 8/9, hier die Welt zu retten!',
   metaPublishedDate: 'am 24 Dezember, 2019',
-  sectionHeading: 'Basis - Einleitung in Angular 8/9, Template Syntax, Lifecycle Hooks',
+  sectionHeading: 'Template Syntax, Lifecycle Hooks, Component Interactions',
   code: `
 // displaying data - interpolation
 import { Component } from '@angular/core';
@@ -2399,6 +2399,8 @@ export class CounterParentComponent {
 }
 
 
+
+
   `,
   blockQuote: `
   Wir beabsichtigen zum Mond zu fliegen in diesem Jahrzehnt und andere Sachen zu tun, nicht weil sie einfach sind,
@@ -2418,9 +2420,27 @@ export class CounterParentComponent {
     this.getArticle();
   }
   getArticle(): void {
-    this.articleId = +this.route.snapshot.paramMap.get('id');
+    this.articleId = this.route.snapshot.paramMap.get('id');
     // console.log(this.articleId);
-    if (!this.articleId || this.articleId > 6) {
+    if (+this.articleId === 1 || this.articleId === 'typescript-basics-1') {
+      this.articleId = 1;
+    }
+    if (+this.articleId === 2 || this.articleId === 'typescript-basics-2') {
+      this.articleId = 2;
+    }
+    if (this.articleId === 'javascript-basics-1') {
+      this.articleId = 3;
+    }
+    if (this.articleId === 'typescript-basics-3') {
+      this.articleId = 4;
+    }
+    if (this.articleId === 'typescript-basics-4') {
+      this.articleId = 5;
+    }
+    if (this.articleId === 'angular-superheroic-javascript-framework') {
+      this.articleId = 6;
+    }
+    if (!(+this.articleId) || +this.articleId > 6) {
       this.isNotFound = true;
       this.router.navigate(['page-not-found']);
     }
