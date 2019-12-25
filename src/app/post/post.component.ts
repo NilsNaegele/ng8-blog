@@ -1068,7 +1068,7 @@ declare enum Enum1 {
   heading: 'Angular, Superheroisches Javascript Framework',
   subHeading: 'Angular 8/9, hier die Welt zu retten!',
   metaPublishedDate: 'am 24 Dezember, 2019',
-  sectionHeading: 'Template Syntax, Lifecycle Hooks, Component Interactions',
+  sectionHeading: 'Template Syntax, Lifecycle Hooks, Component Interactions, Component Styles, Dynamic Components',
   code: `
 // displaying data - interpolation
 import { Component } from '@angular/core';
@@ -3005,7 +3005,311 @@ import { Component } from '@angular/core';
     }
   }
 
+  // component styles in component metadata
+  import { Component, HostBinding } from '@angular/core';
 
+  import { Hero } from '../hero';
+
+  @Component({
+    selector: 'app-hero-app',
+    template: \`
+          <h1>Tour of Heroes</h1>
+          <app-hero-app-main [hero]="hero"></app-hero-app-main>
+    \`,
+    styles: ['h1 { font-weight: normal; }']
+  })
+  export class HeroAppComponent {
+    hero = new Hero(
+      'Flash',
+      ['Polymer Princess', 'Superman', 'Spiderman']
+    );
+
+    @HostBinding('class') get themeClass() {
+      return 'theme-light';
+    }
+
+  }
+
+  // host selector
+  :host {
+    display: block;
+    border: 1px solid black;
+  }
+
+  :host(.active) {
+    border-width: 3px;
+  }
+
+  :host-context(.theme-light) h2 {
+    background-color: #eef;
+  }
+
+  :host /deep/ h3 {
+    font-style: italic;
+  }
+
+// css inline revisited
+import { Component, HostBinding } from '@angular/core';
+
+  import { Hero } from '../hero';
+
+  @Component({
+    selector: 'app-hero-app',
+    template: \`
+          <h1>Tour of Heroes</h1>
+          <app-hero-app-main [hero]="hero"></app-hero-app-main>
+    \`,
+    styles: ['h1 { font-weight: normal; }']
+  })
+  export class HeroAppComponent {
+    hero = new Hero(
+      'Flash',
+      ['Polymer Princess', 'Superman', 'Spiderman']
+    );
+
+    @HostBinding('class') get themeClass() {
+      return 'theme-light';
+    }
+
+  }
+
+// css (scss less, stylus) external file
+import { Component, HostBinding } from '@angular/core';
+
+import { Hero } from '../hero';
+
+
+@Component({
+  selector: 'app-hero-app',
+  template: \`
+        <h1>Tour of Heroes</h1>
+        <app-hero-app-main [hero]="hero"></app-hero-app-main>
+  \`,
+  styles: ['./hero-app.component.css']
+})
+export class HeroAppComponent {
+  hero = new Hero(
+    'Flash',
+    ['Polymer Princess', 'Superman', 'Spiderman']
+  );
+
+  @HostBinding('class') get themeClass() {
+    return 'theme-light';
+  }
+
+}
+
+
+h1 {
+  font-weight: normal;
+}
+
+// template inline styles
+import { Component, Input } from '@angular/core';
+
+  import { Hero } from '../hero';
+
+  @Component({
+    selector: 'app-hero-controls',
+    template: \`
+        <style>
+            button {
+              background-color: white;
+              border: 1px solid #777;
+            }
+        </style>
+        <h3>Controls</h3>
+        <button (click)="activate()">Activate</button>
+    \`,
+  })
+  export class HeroControlsComponent {
+    @Input() hero: Hero;
+
+    activate() {
+      this.hero.active = true;
+    }
+
+  }
+
+// template link tags
+import { Component, Input } from '@angular/core';
+
+  import { Hero } from '../hero';
+
+  @Component({
+    selector: 'app-hero-team',
+    template: \`
+          <!-- we must use a relative URL so that the AOT compiler can find the stylesheet -->
+          <link rel="../../assets/hero-team.component.css">
+          <h3>Team</h3>
+          <ul>
+            <li *ngFor="let member of hero.team">
+                {{ member }}
+            </li>
+          </ul>
+    \`,
+  })
+  export class HeroTeamComponent {
+    @Input() hero: Hero;
+
+  }
+
+// css @imports
+/* the aot compiler needs the ./ to show that this is local */
+/* @import './hero-detail.box.css'; */
+
+// view encapuslation
+
+import { Component, ViewEncapsulation } from '@angular/core';
+
+@Component({
+  selector: 'app-quest-summary',
+  templateUrl: './quest-summary.component.html',
+  styleUrls: ['./quest-summary.component.css'],
+  encapsulation: ViewEncapsulation.Native
+})
+export class QuestSummaryComponent {
+  // careful: few browsers support shadow DOM encapsulation at this time
+
+}
+
+<p>
+      angular, it's all about you ... my baby ...
+</p>
+
+
+// dynamic components: anchor directive
+import { Directive, ViewContainerRef } from '@angular/core';
+
+@Directive({
+  selector: '[appAdHost]'
+})
+export class AdDirective {
+
+  constructor(public viewContainerRef: ViewContainerRef) { }
+
+}
+
+
+// loading components
+import { Component,
+  Input,
+  AfterViewInit,
+  ViewChild,
+  ChangeDetectorRef,
+  ComponentFactoryResolver,
+  OnDestroy } from '@angular/core';
+
+import { AdDirective } from '../ad.directive';
+import { AdComponent } from '../ad.component';
+import { AdItem } from '../ad-item';
+
+@Component({
+  selector: 'app-ad-banner',
+  template: \`
+     <div class="ad-banner">
+           <h3>Advertisements</h3>
+           <ng-template appAdHost></ng-template>
+     </div>
+\`
+})
+export class AdBannerComponent implements AfterViewInit, OnDestroy  {
+    @Input() ads: AdItem[];
+    currentAddIndex: number = -1;
+    @ViewChild(AdDirective) adHost: AdDirective;
+    subscription: any;
+    interval: any;
+
+    constructor(private componentFactoryResolver: ComponentFactoryResolver,
+    private cdr: ChangeDetectorRef) { }
+
+    ngAfterViewInit() {
+      this.loadComponent();
+      this.getAds();
+      this.cdr.detectChanges();
+    }
+
+  loadComponent() {
+  this.currentAddIndex = (this.currentAddIndex + 1) % this.ads.length;
+  const adItem = this.ads[this.currentAddIndex];
+
+  const componentFactory =
+            this.componentFactoryResolver.resolveComponentFactory(adItem.component);
+  const viewContainerRef = this.adHost.viewContainerRef;
+  viewContainerRef.clear();
+
+  const componentRef = viewContainerRef.createComponent(componentFactory);
+  (<AdComponent>componentRef.instance).data = adItem.data;
+
+  }
+
+  getAds() {
+      this.interval = setInterval(() => {
+      this.loadComponent();
+  }, 3000);
+}
+
+  ngOnDestroy() {
+    clearInterval(this.interval);
+  }
+}
+
+// selector reference
+import { NgModule } from '@angular/core';
+  import { CommonModule } from '@angular/common';
+
+  import { AdDirective } from './ad.directive';
+  import { AdBannerComponent } from './ad-banner/ad-banner.component';
+  import { TechnologyAdComponent } from './technology-ad/technology-ad.component';
+  import { TechnologyProfileComponent }
+         from './technology-profile/technology-profile.component';
+
+  import { AdService } from './ad.service';
+
+  @NgModule({
+    imports: [
+      CommonModule
+    ],
+    declarations: [AdDirective,
+                  AdBannerComponent,
+                  TechnologyAdComponent,
+                  TechnologyProfileComponent],
+    providers: [ AdService ],
+    entryComponents: [ TechnologyAdComponent, TechnologyProfileComponent ],
+    exports: [ AdBannerComponent ]
+  })
+  export class DynamicComponentModule { }
+
+  // ad service
+  import { Injectable } from '@angular/core';
+
+  import { AdItem } from './ad-item';
+  import { TechnologyProfileComponent }
+  from './technology-profile/technology-profile.component';
+  import { TechnologyAdComponent } from './technology-ad/technology-ad.component';
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class AdService {
+
+    getAds() {
+      return [
+            new AdItem(TechnologyProfileComponent,
+              { name: 'Angular CLI', feature: 'Create your dream app'}),
+            new AdItem(TechnologyProfileComponent,
+              { name: 'Angular', feature: 'One Platform. Mobile && desktop'}),
+            new AdItem(TechnologyProfileComponent,
+              { name: 'Angular Material', feature: 'Material Design CSS Framework'}),
+            new AdItem(TechnologyAdComponent,
+              { headline: 'Angular 8.2.4 released', body: 'Get the newest version now!'}),
+            new AdItem(TechnologyAdComponent,
+              { headline: 'Angular 8.2.4 available', body: 'Try this command line tool.'})
+      ];
+    }
+  }
+
+  // happy coding, frohes programmieren, joyeux programmation... :-)
   `,
   blockQuote: `
   Wir beabsichtigen zum Mond zu fliegen in diesem Jahrzehnt und andere Sachen zu tun, nicht weil sie einfach sind,
@@ -3014,6 +3318,2012 @@ import { Component } from '@angular/core';
   und eine die wir vorhaben zu gewinnen.
   `,
   imageFooterUrl: 'assets/img/post6.jpg',
+  footerQuote: 'Wir sind alle miteinander verbunden; zueinander biologisch. Zu der Erde, chemisch. Zum Rest des Universums, atomar.'
+},
+{
+  id: 7,
+  imageHeaderUrl: 'url(assets/img/post7-bg.jpg)',
+  heading: 'Angular 8/9, Basis- Teil 1',
+  subHeading: 'Helden bauen Lösungen mit dieser Technologie',
+  metaPublishedDate: 'am 26 Dezember, 2019',
+  sectionHeading: 'Attribute Directives, Pipes, Animations, Template-Driven Forms, Reactive Forms, Dynamic Forms, Validation',
+  code: `
+// attribute directive
+import { Directive, ElementRef, HostListener, Input } from '@angular/core';
+
+@Directive({
+  selector: '[appHighlight]'
+})
+export class HighlightDirective {
+  @Input() defaultColor: string;
+  @Input() appHighlight: string;
+
+  constructor(private el: ElementRef) { }
+
+  @HostListener('mouseenter') onmouseenter() {
+    this.highlight(this.appHighlight || this.defaultColor || 'red');
+  }
+
+  @HostListener('mouseleave') onmouseleave() {
+    this.highlight(null);
+  }
+
+  private highlight(color: string) {
+    this.el.nativeElement.style.backgroundColor = color;
+  }
+
+}
+
+// host component
+import { Component } from '@angular/core';
+
+
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
+})
+export class AppComponent {
+ color: string;
+
+}
+
+/******************************************************/
+
+<h1>My first Attribute Directive</h1>
+
+  <h4>Pick a highlight color</h4>
+<div>
+  <input type="radio" name="colors" (click)="color='lightgreen'">Green
+  <input type="radio" name="colors" (click)="color='yellow'">Yellow
+  <input type="radio" name="colors" (click)="color='cyan'">Cyan
+</div>
+<p [appHighlight]="color">Highlight me!</p>
+<p [appHighlight]="color" defaultColor="violet">
+  Highlight me too!
+</p>
+<hr>
+<p><i>Mouse over following lines to see fixed highlights</i></p>
+
+<p [appHighlight]="'yellow'">Highlighted in yellow</p>
+<p appHighlight="red">Highlighted in red</p>
+
+// birthday pipe
+import { Component } from '@angular/core';
+
+  @Component({
+    selector: 'app-hero-birthday1',
+    template: \`
+              <p>The hero's birthday is {{ birthday | date }}</p>
+              <p>The hero's birthday is {{ birthday | date:"dd/MM/yy" }}</p>
+    \`
+  })
+  export class HeroBirthday1Component {
+
+    birthday = new Date(1971, 6, 13);
+
+  }
+
+  // parameterizing a pipe
+  import { Component } from '@angular/core';
+
+  @Component({
+    selector: 'app-hero-birthday2',
+    template: \`
+          <p>The hero's birthday is {{ birthday | date:format }}</p>
+          <button (click)="toggleFormat()">Toggle Format</button>
+    \`,
+  })
+  export class HeroBirthday2Component {
+        birthday = new Date(1971, 6, 13);
+        toggle = true;
+
+        get format() { return this.toggle ? 'shortDate' : 'fullDate'; }
+
+        toggleFormat() {
+          this.toggle = !this.toggle;
+        }
+
+  }
+
+  // chaining pipes
+  <app-hero-birthday1></app-hero-birthday1>
+
+  <hr>
+
+  <app-hero-birthday2></app-hero-birthday2>
+
+  <hr>
+
+  <p>
+      The chained hero's birthday is
+      {{ birthday | date | uppercase }}
+  </p>
+  <p>
+    The chained hero's birthday is
+    {{ birthday | date:'fullDate' | uppercase }}
+  </p>
+  <p>
+    The chained hero's birthday is
+    {{ ( birthday | date:'fullDate' ) | uppercase }}
+  </p>
+
+  <hr>
+
+  <app-power-booster></app-power-booster>
+
+  <hr>
+
+  <app-power-boost-calculator></app-power-boost-calculator>
+
+  <hr>
+
+  <app-flying-heroes></app-flying-heroes>
+
+  <hr>
+
+  <app-flying-heroes-impure></app-flying-heroes-impure>
+
+  <hr>
+
+  <app-hero-async-message></app-hero-async-message>
+
+  <hr>
+
+  <app-hero-list></app-hero-list>
+
+// custom pipe
+import { Pipe, PipeTransform } from '@angular/core';
+
+  @Pipe({
+    name: 'exponentialStrength'
+  })
+  export class ExponentialStrengthPipe implements PipeTransform {
+
+    transform(value: number, exponent: string): number {
+      const exp = parseFloat(exponent);
+      return Math.pow(value, isNaN(exp) ? 1 : exp);
+    }
+
+  }
+
+// power booster
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-power-booster',
+  template: \`
+          <h2>Power Booster</h2>
+          <p>Super power boost: {{ 2 | exponentialStrength: 10 }}</p>
+  \`
+})
+export class PowerBoosterComponent { }
+
+// power boost calculator
+
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-power-boost-calculator',
+  template: \`
+      <h2>Power Boost Calculator</h2>
+      <div>Normal power: <input [(ngModel)]="power"></div>
+      <div>Boost factor: <input [(ngModel)]="factor"></div>
+      <p>
+          Super Hero Power: {{power | exponentialStrength: factor }}
+      </p>
+  \`,
+})
+export class PowerBoostCalculatorComponent {
+      power = 2;
+      factor = 8;
+}
+
+// impure and pure pipes
+import { Pipe, PipeTransform } from '@angular/core';
+
+  import { Flyer } from './heroes';
+
+  @Pipe({
+    name: 'flyingHeroes'
+  })
+  export class FlyingHeroesPipe implements PipeTransform {
+
+    transform(allHeroes: Flyer[]): Flyer[] {
+      return allHeroes.filter(hero => hero.canFly);
+    }
+
+  }
+
+  @Pipe({
+    name: 'flyingHeroesImpure',
+    pure: false
+  })
+  export class FlyingHeroesImpurePipe extends FlyingHeroesPipe { }
+
+
+  /******************************************************/
+
+  export interface Flyer { canFly: boolean; }
+
+  export const HEROES = [
+    { name: 'Flash', canFly: true },
+    { name: 'Wonderwoman', canFly: true },
+    { name: 'Bombasto', canFly: false },
+    { name: 'Spiderman', canFly: false }
+  ];
+
+// component pipes
+import { Component } from '@angular/core';
+
+import { HEROES } from '../heroes';
+
+@Component({
+  selector: 'app-flying-heroes',
+  template: \`
+    <h2>{{ title }}</h2>
+    <p>
+      New hero:
+          <input type="text" #box
+          (keyup.enter)="addHero(box.value); box.value='';"
+          placeholder="hero name">
+      <input id="can-fly" type="checkbox" [(ngModel)]="canFly"> can fly
+    </p>
+
+    <p>
+    <input id="mutate" type="checkbox" [(ngModel)]="mutate"> Mutate array
+    <button (click)="reset()">Reset</button>
+    </p>
+
+    <h4>Heroes who fly (piped)</h4>
+    <div id="flyer">
+      <div *ngFor="let hero of heroes | flyingHeroes">
+          {{ hero.name }}
+      </div>
+    </div>
+
+    <h4>All Heroes (no pipe)</h4>
+    <div id="all">
+        <div *ngFor="let hero of heroes">
+              {{ hero.name }}
+        </div>
+    </div>
+  \`,
+  styles: ['#flyers, #all { font-style: italic; }']
+})
+export class FlyingHeroesComponent {
+  title = 'Flying Heroes (pure pipe)';
+  heroes: any[] = [];
+  canFly = true;
+  mutate = true;
+
+  constructor() {
+    this.reset();
+  }
+
+  addHero(name: string) {
+    name = name.trim();
+    if (!name) {
+      return;
+    }
+    const hero = { name, canFly: this.canFly };
+    if (this.mutate) {
+      // pure pipe won't update because heroes array reference is unchanged
+      // impure pipe will
+      this.heroes.push(hero);
+    } else {
+      // pipe updates because heroes array is a new object
+      this.heroes = this.heroes.concat(hero);
+    }
+  }
+
+  reset() {
+    this.heroes = HEROES.slice();
+  }
+
+}
+
+/////////// Identical except for impure pipe /////////////
+@Component({
+  selector: 'app-flying-heroes-impure',
+  template: \`
+  <h2>{{ title }}</h2>
+  <p>
+    New hero:
+        <input type="text" #box
+        (keyup.enter)="addHero(box.value); box.value='';"
+        placeholder="hero name">
+    <input id="can-fly" type="checkbox" [(ngModel)]="canFly"> can fly
+  </p>
+
+  <p>
+  <input id="mutate" type="checkbox" [(ngModel)]="mutate"> Mutate array
+  <button (click)="reset()">Reset</button>
+  </p>
+
+  <h4>Heroes who fly (piped)</h4>
+  <div id="flyer">
+    <div *ngFor="let hero of heroes | flyingHeroesImpure">
+        {{ hero.name }}
+    </div>
+  </div>
+
+  <h4>All Heroes (no pipe)</h4>
+  <div id="all">
+      <div *ngFor="let hero of heroes">
+            {{ hero.name }}
+      </div>
+  </div>
+\`,
+styles: ['#flyers, #all { font-style: italic; }']
+})
+export class FlyingHeroesImpureComponent extends FlyingHeroesComponent {
+  title = 'Flying Heroes (impure pipe)';
+}
+
+// impure async pipe
+import { Component } from '@angular/core';
+
+  import { Observable } from 'rxjs/Observable';
+  import 'rxjs/add/observable/interval';
+  import 'rxjs/add/operator/map';
+  import 'rxjs/add/operator/take';
+
+  @Component({
+    selector: 'app-hero-async-message',
+    template: \`
+          <h2>Async Hero Message and AsyncPipe</h2>
+          <p>Message: {{ message$ | async }}</p>
+          <button (click)="resend()">Resend</button>
+    \`
+  })
+  export class HeroAsyncMessageComponent {
+         message$: Observable<string>;
+
+         private messages = [
+            'You are my hero!',
+            'You are the best hero!',
+            'Will you be my hero?',
+            'I will save you, my polymer princess.'
+         ];
+
+         constructor() {
+           this.resend();
+         }
+
+         resend() {
+           this.message$ = Observable.interval(1000)
+                           .map(i => this.messages[i])
+                           .take(this.messages.length);
+         }
+
+  }
+
+// impure caching pipe
+import { Pipe, PipeTransform } from '@angular/core';
+  import { HttpClient } from '@angular/common/http';
+
+  @Pipe({
+    name: 'fetch',
+    pure: false
+  })
+  export class FetchJsonPipe implements PipeTransform {
+    private cachedData: any = null;
+    private cachedUrl = '';
+
+    constructor(private http: HttpClient) {}
+
+    transform(url: string): any {
+      if (url !== this.cachedUrl) {
+        this.cachedData = null;
+        this.cachedUrl = url;
+        this.http.get<any>(url).subscribe(result => this.cachedData = result);
+      }
+      return this.cachedData;
+    }
+
+  }
+
+// hero list component
+import { Component } from '@angular/core';
+
+  @Component({
+    selector: 'app-hero-list',
+    template: \`
+          <h2>Heroes from JSON File</h2>
+          <div *ngFor="let hero of ('assets/heroes.json' | fetch)">
+                {{ hero.name }}
+          </div>
+
+          <p>Heroes as JSON:
+              {{ 'assets/heroes.json' | fetch | json }}
+          </p>
+
+    \`,
+  })
+  export class HeroListComponent { }
+
+  /******************************************************/
+
+  [
+    {"name": "Andreas", "canFly": true},
+    {"name": "Martin", "canFly": false},
+    {"name": "Dominique", "canFly": true},
+    {"name": "Bertrand", "canFly": false},
+    {"name": "Max", "canFly": true},
+    {"name": "Alexander", "canFly": false},
+    {"name": "Karl", "canFly": true},
+    {"name": "Maria", "canFly": false},
+    {"name": "Nils", "canFly": true}
+  ]
+
+// animations, technology service
+import { Injectable } from '@angular/core';
+
+export class Technology {
+
+  constructor(public name: string, public state = 'inactive') { }
+
+  toggleState() {
+    this.state = this.state === 'active' ? 'inactive' : 'active';
+  }
+
+}
+
+const ALL_TECHNOLOGIES = [
+      'Angular CLI 8.2',
+      'Angular 8.2',
+      'Angular Material 8.2',
+      'Bootstrap 4',
+      'TypeScript 3.6.7',
+      'JavaScript',
+      'EcmaScript 2015',
+      'EcmaScript 2016',
+      'EcmaScript 2017',
+      'EcmaScript 2018',
+      'Windows',
+      'Linux',
+      'MacOs',
+      'Firebase',
+      'Azure',
+      'Google Cloud Platform'
+].map(name => new Technology(name));
+
+@Injectable({
+  providedIn: 'root'
+})
+export class TechnologyService {
+
+  technologies: Technology[] = [];
+
+  canAdd() {
+    return this.technologies.length < ALL_TECHNOLOGIES.length;
+  }
+
+  canRemove() {
+    return this.technologies.length > 0;
+  }
+
+  addActive(active = true) {
+    const technology = ALL_TECHNOLOGIES[this.technologies.length];
+    technology.state = active ? 'active' : 'inactive';
+    this.technologies.push(technology);
+  }
+
+  addInactive() {
+    this.addActive(false);
+  }
+
+  remove() {
+    this.technologies.length -= 1;
+  }
+}
+
+// animations module
+import { NgModule } from '@angular/core';
+  import { CommonModule } from '@angular/common';
+
+  import { TechnologyTeamComponent } from './technology-team/technology-team.component';
+  import { TechnologyListBasicComponent }
+  from './technology-list-basic/technology-list-basic.component';
+  import { TechnologyListEnterLeaveComponent }
+  from './technology-list-enter-leave/technology-list-enter-leave.component';
+  import { TechnologyListEnterLeaveStatesComponent }
+  from './technology-list-enter-leave-states/technology-list-enter-leave-states.component';
+  import { TechnologyListAutoComponent }
+  from './technology-list-auto/technology-list-auto.component';
+  import { TechnologyListTimingsComponent }
+  from './technology-list-timings/technology-list-timings.component';
+  import { TechnologyListMultistepComponent }
+  from './technology-list-multistep/technology-list-multistep.component';
+  import { TechnologyListGroupsComponent }
+  from './technology-list-groups/technology-list-groups.component';
+  import { TechnologyListInlineStylesComponent }
+  from './technology-list-inline-styles/technology-list-inline-styles.component';
+  import { TechnologyListCombinedTransitionsComponent }
+  from './technology-list-combined-transitions/technology-list-combined-transitions.component';
+  import { TechnologyListTwowayComponent }
+  from './technology-list-twoway/technology-list-twoway.component';
+
+  @NgModule({
+    imports: [
+      CommonModule
+    ],
+    declarations: [TechnologyTeamComponent,
+                   TechnologyListBasicComponent,
+                   TechnologyListEnterLeaveComponent,
+                   TechnologyListEnterLeaveStatesComponent,
+                   TechnologyListAutoComponent,
+                   TechnologyListTimingsComponent,
+                   TechnologyListMultistepComponent,
+                   TechnologyListGroupsComponent,
+                   TechnologyListInlineStylesComponent,
+                   TechnologyListCombinedTransitionsComponent,
+                   TechnologyListTwowayComponent],
+    exports: [ TechnologyTeamComponent ]
+  })
+  export class AnimationsModule { }
+
+// global css
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  display: block;
+  width: 190px;
+  line-height: 50px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  background-color: #f8bbd0;
+  color: #fff;
+  border-radius: 5px;
+  margin: 10px;
+  cursor: pointer;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.active {
+  background-color: #ec407a;
+  color: #fff;
+  transform: scale(1.3);
+}
+
+.inactive {
+  background-color: #f8bbd0;
+  color: #fff;
+  transform: scale(1);
+}
+
+
+// technology team component
+import { Component } from '@angular/core';
+
+import { TechnologyService, Technology } from '../technology.service';
+
+@Component({
+  selector: 'app-technology-team',
+  template: \`
+              <div class="buttons">
+              <button [disabled]="!technologyService.canAdd()"
+                      (click)="technologyService.addInactive()">
+                      Add inactive technology
+              </button>
+              <button [disabled]="!technologyService.canAdd()"
+                      (click)="technologyService.addActive()">
+                      Add active technology
+              </button>
+              <button [disabled]="!technologyService.canRemove()"
+                      (click)="technologyService.remove()">
+                      Remove technology
+              </button>
+              </div>
+              <div class="columns">
+                  <div class="column">
+                      <h4>Basic State</h4>
+                        <app-technology-list-basic [technologies]="technologies">
+                        </app-technology-list-basic>
+                  </div>
+                  <div class="column">
+                      <h4>Enter & Leave</h4>
+                        <app-technology-list-enter-leave [technologies]="technologies">
+                        </app-technology-list-enter-leave>
+                  </div>
+                  <div class="column">
+                        <h4>Styles In Transitions</h4>
+                        <app-technology-list-inline-styles [technologies]="technologies">
+                        </app-technology-list-inline-styles>
+                  </div>
+          <div class="column">
+              <h4>Combined Transitions</h4>
+                <app-technology-list-combined-transitions [technologies]="technologies">
+                </app-technology-list-combined-transitions>
+          </div>
+                  <div class="column">
+                       <h4>Two-Way Transitions</h4>
+                        <app-technology-list-twoway [technologies]="technologies">
+                        </app-technology-list-twoway>
+                 </div>
+              </div>
+        <div class="columns">
+            <div class="column">
+                <h4>Enter & Leave & States</h4>
+                  <app-technology-list-enter-leave-states [technologies]="technologies">
+                  </app-technology-list-enter-leave-states>
+            </div>
+                  <div class="column">
+                      <h4>Auto Style Calc</h4>
+                      <app-technology-list-auto [technologies]="technologies">
+                      </app-technology-list-auto>
+                  </div>
+                  <div class="column">
+                      <h4>Different Timings</h4>
+                      <app-technology-list-timings [technologies]="technologies">
+                      </app-technology-list-timings>
+                  </div>
+                  <div class="column">
+                      <h4>Multiple Keyframes</h4>
+                      <app-technology-list-multistep [technologies]="technologies">
+                      </app-technology-list-multistep>
+                  </div>
+                  <div class="column">
+                      <h4>Parallel Groups</h4>
+                      <app-technology-list-groups [technologies]="technologies">
+                      </app-technology-list-groups>
+                  </div>
+          </div>
+  \`,
+  styles: [\`
+  .buttons {
+    text-align: center;
+  }
+  button {
+    padding: 1.5em 3em;
+  }
+  .columns {
+    display: flex;
+    flex-direction: row;
+  }
+  .column {
+    flex: 1;
+    padding: 10px;
+  }
+  .column p {
+    min-height: 6em;
+  }
+  \`],
+})
+export class TechnologyTeamComponent {
+  technologies: Technology[];
+
+  constructor(public technologyService: TechnologyService) {
+    this.technologies = technologyService.technologies;
+  }
+}
+
+// basic state component
+import { Component, Input } from '@angular/core';
+  import { trigger, state, style, animate, transition } from '@angular/animations';
+
+  import { Technology } from '../technology.service';
+
+  @Component({
+    selector: 'app-technology-list-basic',
+    template: \`
+            <ul>
+                  <li *ngFor="let technology of technologies"
+                        [@technologyState]="technology.state"
+                        (click)="technology.toggleState()">
+                        {{ technology.name }}
+                  </li>
+            </ul>
+    \`,
+    styleUrls: ['../technology-list.css'],
+    animations: [
+      trigger('technologyState', [
+        state('inactive', style({
+          backgroundColor: '#f8bbd0',
+          color: '#fff',
+          transform: 'scale(1)'
+        })),
+        state('active', style({
+          backgroundColor: '#ec407a',
+          color: '#fff',
+          transform: 'scale(1.3)'
+        })),
+        transition('inactive => active', animate('1000ms ease-in')),
+        transition('active => inactive', animate('1000ms ease-out'))
+      ])
+    ]
+  })
+  export class TechnologyListBasicComponent {
+
+    @Input() technologies: Technology[];
+
+  }
+
+// enter leave component
+import { Component, Input } from '@angular/core';
+  import { trigger, state, style, animate, transition } from '@angular/animations';
+
+  import { Technology } from '../technology.service';
+
+  @Component({
+    selector: 'app-technology-list-enter-leave',
+    template: \`
+                <ul>
+                      <li *ngFor="let technology of technologies"
+                      [@flyInOut]="'in'">
+                      {{ technology.name }}
+                      </li>
+                </ul>
+    \`,
+    styleUrls: ['../technology-list.css'],
+    animations: [
+      trigger('flyInOut', [
+        state('in', style({transform: 'translateX(0)'})),
+        transition('void => *', [
+          style({transform: 'translateX(-100%)'}),
+          animate(1000)
+        ]),
+        transition('* => void', [
+          animate(1000, style({transform: 'translateX(100%)'}))
+        ])
+      ])
+    ]
+  })
+  export class TechnologyListEnterLeaveComponent {
+        @Input() technologies: Technology[];
+  }
+
+// styles transition component
+import { Component, Input } from '@angular/core';
+  import { trigger, style, animate, transition } from '@angular/animations';
+
+  import { Technology } from '../technology.service';
+
+  @Component({
+    selector: 'app-technology-list-inline-styles',
+    template: \`
+              <ul>
+                  <li *ngFor="let technology of technologies"
+                       [@technologyState]="technology.state"
+                       (click)="technology.toggleState()">
+                  {{ technology.name }}
+                  </li>
+              </ul>
+    \`,
+    styleUrls: ['../technology-list.css'],
+    animations: [
+      trigger('technologyState', [
+        transition('inactive => active', [
+          style({
+            backgroundColor: '#ffab91',
+            transform: 'scale(1.3)'
+          }),
+          animate('3s ease-in', style({
+            backgroundColor: '#ff3d00',
+            transform: 'scale(1)'
+          }))
+        ])
+      ])
+    ]
+  })
+  export class TechnologyListInlineStylesComponent {
+      @Input() technologies: Technology[];
+
+  }
+
+// combined transitions component
+import { Component, Input } from '@angular/core';
+  import { trigger, style, state, animate, transition } from '@angular/animations';
+
+  import { Technology } from '../technology.service';
+
+  @Component({
+    selector: 'app-technology-list-combined-transitions',
+    template: \`
+    <ul>
+        <li *ngFor="let technology of technologies"
+             [@technologyState]="technology.state"
+             (click)="technology.toggleState()">
+        {{ technology.name }}
+        </li>
+    </ul>
+  \`,
+    styleUrls: ['../technology-list.css'],
+    animations: [
+      trigger('technologyState', [
+      state('inactive', style({
+        backgroundColor: '#ffe082',
+        transform: 'scale(1)'
+      })),
+      state('active', style({
+        backgroundColor: '#ff6f00',
+        transform: 'scale(1.5)'
+      })),
+      transition('inactive => active, active => inactive',
+      animate('3s ease-out'))
+      ])
+    ]
+  })
+  export class TechnologyListCombinedTransitionsComponent {
+    @Input() technologies: Technology[];
+  }
+
+// two way transitions component
+import { Component, Input } from '@angular/core';
+  import { trigger, style, state, animate, transition } from '@angular/animations';
+
+  import { Technology } from '../technology.service';
+
+  @Component({
+    selector: 'app-technology-list-twoway',
+    template: \`
+    <ul>
+        <li *ngFor="let technology of technologies"
+             [@technologyState]="technology.state"
+             (click)="technology.toggleState()">
+        {{ technology.name }}
+        </li>
+    </ul>
+  \`,
+    styleUrls: ['../technology-list.css'],
+    animations: [
+      trigger('technologyState', [
+      state('inactive', style({
+        backgroundColor: '#66bb6a',
+        transform: 'scale(1)'
+      })),
+      state('active', style({
+        backgroundColor: '#2e7d32',
+        transform: 'scale(1.7)'
+      })),
+      transition('inactive <=> active',
+      animate('2s ease-out'))
+      ])
+    ]
+  })
+  export class TechnologyListTwowayComponent {
+    @Input() technologies: Technology[];
+
+  }
+
+// enter leave states component
+import { Component, Input } from '@angular/core';
+  import { trigger, state, style, animate, transition } from '@angular/animations';
+
+  import { Technology } from './../technology.service';
+
+  @Component({
+    selector: 'app-technology-list-enter-leave-states',
+    template: \`
+            <ul>
+                <li *ngFor="let technology of technologies"
+                     (click)="technology.toggleState()"
+                     [@technologyState]="technology.state">
+                     {{ technology.name }}
+                </li>
+            </ul>
+    \`,
+    styleUrls: ['../technology-list.css'],
+    animations: [
+      trigger('technologyState', [
+        state('inactive', style({transform: 'translateX(0) scale(1)'})),
+        state('active', style({transform: 'translateX(0) scale(1.3)'})),
+        transition('inactive => active', animate('1000ms ease-in')),
+        transition('active => inactive', animate('1000ms ease-out')),
+        transition('void => inactive', [
+          style({transform: 'translateX(-100%) scale(1)'}),
+          animate(1000)
+        ]),
+        transition('inactive => void', [
+          style({transform: 'translateX(100%) scale(1)'}),
+          animate(1000)
+        ]),
+        transition('void => inactive', [
+          style({transform: 'translateX(0) scale(0)'}),
+          animate(2000)
+        ]),
+        transition('active => void', [
+          style({transform: 'translateX(0) scale(0)'}),
+          animate(2000)
+        ])
+      ])
+    ]
+  })
+  export class TechnologyListEnterLeaveStatesComponent {
+    @Input() technologies: Technology[];
+
+  }
+
+// auto style calc component
+import { Component, Input } from '@angular/core';
+  import { trigger, state, style, animate, transition } from '@angular/animations';
+
+  import { Technology } from '../technology.service';
+
+  @Component({
+    selector: 'app-technology-list-auto',
+    template: \`
+          <ul>
+              <li *ngFor="let technology of technologies"
+                   [@shrinkOut]="'in'">
+                    {{ technology.name }}
+              </li>
+          </ul>
+    \`,
+    styleUrls: ['../technology-list.css'],
+    animations: [
+      trigger('shrinkOut', [
+        state('in', style({height: '*'})),
+        transition('* => void', [
+          style({ height: '*' }),
+          animate(2500, style({ height: 0}))
+        ])
+      ])
+    ]
+  })
+  export class TechnologyListAutoComponent {
+      @Input() technologies: Technology[];
+
+  }
+
+// different timings component
+import { Component, Input } from '@angular/core';
+  import { trigger, state, style, animate, transition } from '@angular/animations';
+
+  import { Technology } from '../technology.service';
+
+  @Component({
+    selector: 'app-technology-list-timings',
+    template: \`
+                <ul>
+                    <li *ngFor="let technology of technologies"
+                          [@flyInOut]="'in'" (click)="technology.toggleState()">
+                          {{ technology.name }}
+                    </li>
+                </ul>
+    \`,
+    styleUrls: ['../technology-list.css'],
+    animations: [
+      trigger('flyInOut', [
+        state('in', style({ opacity: 1, transform: 'translateX(0)'})),
+        transition('void => *', [
+          style({
+            opacity: 0,
+            transform: 'translateX(-100%)'
+          }),
+          animate('0.9s ease-in')
+        ]),
+        transition('* => void', [
+          animate('0.8s 0.6s ease-out', style({
+            opacity: 0,
+            transform: 'translateX(100%)'
+          }))
+        ])
+      ])
+    ]
+  })
+  export class TechnologyListTimingsComponent {
+          @Input() technologies: Technology[];
+
+  }
+
+// multiple keyframes component
+import { Component, Input } from '@angular/core';
+import { trigger,
+         state,
+         animate,
+         style,
+         transition,
+         keyframes,
+         AnimationEvent } from '@angular/animations';
+
+import { Technology } from '../technology.service';
+
+@Component({
+  selector: 'app-technology-list-multistep',
+  template: \`
+          <ul>
+              <li *ngFor="let technology of technologies"
+                   (@flyInOut.start)="animationStarted($event)"
+                   (@flyInOut.done)="animationDone($event)"
+                   [@flyInOut]="'in'">
+              {{ technology.name }}
+              </li>
+          </ul>
+  \`,
+  styleUrls: ['../technology-list.css'],
+  animations: [
+    trigger('flyInOut', [
+      state('in', style({ transform: 'translateX(0)'})),
+      transition('void => *', [
+        animate(800, keyframes([
+          style({ opacity: 0, transform: 'translateX(-100%)', offset: 0}),
+          style({ opacity: 1, transform: 'translateX(15px)', offset: 0.3}),
+          style({ opacity: 1, transform: 'translateX(0)', offset: 1.0})
+        ]))
+      ]),
+      transition('* => void', [
+        animate(800, keyframes([
+          style({ opacity: 1, transform: 'translateX(0)', offset: 0}),
+          style({ opacity: 1, transform: 'translateX(-15px)', offset: 0.7}),
+          style({ opacity: 0, transform: 'translateX(100%)', offset: 1.0})
+        ]))
+      ])
+    ])
+  ]
+})
+export class TechnologyListMultistepComponent {
+  @Input() technologies: Technology[];
+
+  animationStarted(event: AnimationEvent): void {
+    console.warn('Animation started: ', event);
+  }
+
+  animationDone(event: AnimationEvent): void {
+    console.warn('Animation done: ', event);
+  }
+
+}
+
+// parallel groups component
+import { Component, Input } from '@angular/core';
+  import { trigger,
+           state,
+           style,
+           animate,
+           transition,
+           group } from '@angular/animations';
+
+  import { Technology } from '../technology.service';
+
+  @Component({
+    selector: 'app-technology-list-groups',
+    template: \`
+              <ul>
+                  <li *ngFor="let technology of technologies"
+                       [@flyInOut]="'in'">
+                  {{ technology.name }}
+                  </li>
+              </ul>
+    \`,
+    styles: [\`
+      li {
+        padding: 0 !important;
+        text-align: center;
+      }
+    \`],
+    styleUrls: ['../technology-list.css'],
+    animations: [
+      trigger('flyInOut', [
+        state('in', style({ width: 190, transform: 'translateX(0)', opacity: 1 })),
+        transition('void => *', [
+          style({ width: 10, transform: 'translateX(50px)', opacity: 0 }),
+          group([
+            animate('0.9s 0.7s ease', style({
+              transform: 'translateX(0)',
+              width: 190
+            })),
+            animate('0.9s ease', style({
+              opacity: 1
+            }))
+          ])
+        ]),
+        transition('* => void', [
+          group([
+            animate('0.9s 0.7s ease', style({
+              transform: 'translateX(50px)',
+              width: 190
+            })),
+            animate('0.9s 0.6s ease', style({
+              opacity: 0
+            }))
+          ])
+        ])
+      ])
+    ]
+  })
+  export class TechnologyListGroupsComponent {
+    @Input() technologies: Technology[];
+  }
+
+// angular forms user input
+// binding user input events
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-click-me',
+  template: \`
+            <button (click)="onClickMe()">Click me!</button>
+            {{ clickMessage }}
+  \`,
+  styleUrls: ['./click-me.component.css']
+})
+export class ClickMeComponent {
+  clickMessage = '';
+
+  onClickMe() {
+    this.clickMessage = 'You are my hero!';
+  }
+
+}
+
+/******************************************************/
+
+import { Component } from '@angular/core';
+
+@Component({
+selector: 'app-click-me2',
+template: \`
+    <button (click)="onClickMe2($event)">No! .. Click me!</button>
+    {{ clickMessage }}
+\`,
+})
+export class ClickMe2Component {
+  clickMessage = '';
+  clicks = 1;
+
+  onClickMe2(event: any) {
+    const eventMessage = event ? 'Event target is ' + event.target.tagName : '';
+    this.clickMessage = (\`Click #\${this.clicks++}. \${eventMessage}\`);
+  }
+
+}
+
+// user input $event object
+import { Component } from '@angular/core';
+
+  @Component({
+    selector: 'app-key-up1',
+    template: \`
+            <input (keyup)="onKey($event)">
+            <p>{{ values }}</p>
+    \`
+  })
+  export class KeyUpComponent_v1 {
+    values = '';
+
+    // onKey(event: any) { // without type info
+    //   this.values += event.target.value + ' | ';
+    // }
+
+    onKey(event: KeyboardEvent) { // with type info
+          this.values += (<HTMLInputElement>event.target).value + ' | ';
+
+    }
+
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+
+  @Component({
+    selector: 'app-key-up2',
+    template: \`
+            <input #box (keyup)="onKey(box.value)">
+            <p>{{ values }}</p>
+    \`
+  })
+  export class KeyUpComponent_v2 {
+    values = '';
+
+    onKey(value: string) {
+      this.values += value + ' | ';
+    }
+
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+
+  @Component({
+    selector: 'app-key-up3',
+    template: \`
+            <input #box (keyup.enter)="onEnter(box.value)">
+            <p>{{ value }}</p>
+    \`
+  })
+  export class KeyUpComponent_v3 {
+    value = '';
+
+    onEnter(value: string) {
+      this.value = value;
+    }
+
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+
+  @Component({
+    selector: 'app-key-up4',
+    template: \`
+            <input #box (keyup.enter)="update(box.value)"
+                        (blur)="update(box.value)">
+            <p>{{ value }}</p>
+    \`
+  })
+  export class KeyUpComponent_v4 {
+    value = '';
+
+    update(value: string) {
+      this.value = value;
+    }
+
+  }
+
+// user input template reference variable
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-loop-back',
+  template: \`
+      <input #box (keyup)="0">
+      <p>{{ box.value }}
+  \`
+})
+export class LoopBackComponent { }
+
+// little tour technologies
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-little-tour',
+  template: \`
+        <input #newTechnology
+              (keyup.enter)="add(newTechnology.value)"
+              (blur)="add(newTechnology.value); newTechnology.value = '';">
+        <button (click)="add(newTechnology.value)">Add</button>
+        <ul>
+            <li *ngFor="let technology of technologies">
+                  {{ technology }}
+            </li>
+        </ul>
+
+  \`
+})
+export class LittleTourComponent {
+    technologies = ['Angular CLI 9', 'Angular 9',
+                    'Angular Material 9', 'JavaScript', 'C#', 'Java'];
+
+    add(newTechnology: string): void {
+      if (newTechnology) {
+      this.technologies.push(newTechnology);
+      }
+    }
+
+}
+
+// template driven forms, hero form component
+import { Component } from '@angular/core';
+
+  import { Hero } from '../hero';
+
+  @Component({
+    selector: 'app-hero-form',
+    templateUrl: './hero-form.component.html',
+    styleUrls: ['./hero-form.component.css']
+  })
+  export class HeroFormComponent {
+
+    powers = ['Really Smart', 'Super Flexible',
+              'Super Hot', 'Weather Changer'];
+
+    model = new Hero(18, 'Dr IQ', this.powers[0], 'Chuck Overstreet');
+
+    submitted = false;
+
+    onSubmit() {
+      this.submitted = true;
+    }
+
+    newHero() {
+      this.model = new Hero(42, '', '');
+    }
+
+    // TODO: remove this when we are done
+    get diagnostic() { return JSON.stringify(this.model); }
+  }
+
+// hero form template
+<div class="container">
+  <h1>Hero Form</h1>
+  <div [hidden]="submitted">
+  <form #heroForm="ngForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="name">Name</label>
+          <input type="text"
+                 class="form-control"
+                 id="name"
+                 [(ngModel)]="model.name"
+                 name="name"
+                 #name="ngModel"
+                 required>
+          <div [hidden]="name.valid || name.pristine" class="alert alert-danger">
+                Name is required
+          </div>
+      </div>
+
+      <div class="form-group">
+          <label for="alterEgo">Alter Ego</label>
+          <input type="text"
+                 class="form-control"
+                 [(ngModel)]="model.alterEgo"
+                 name="alterEgo"
+                 id="alterEgo">
+      </div>
+
+      <div class="form-group">
+          <label for="power">Hero Power</label>
+          <select class="form-control"
+                  id="power"
+                  [(ngModel)]="model.power"
+                  name="power"
+                  required>
+            <option *ngFor="let pow of powers" [value]="pow">
+                  {{ pow }}
+            </option>
+          </select>
+      </div>
+
+      <button type="submit" class="btn btn-success" [disabled]="!heroForm.form.valid">
+        Submit
+      </button>
+      <button type="button" class="btn btn-default"
+              (click)="newHero(); heroForm.reset();">
+        New Hero
+      </button>
+  </form>
+</div>
+<div [hidden]="!submitted">
+  <h2>You submitted the following:</h2>
+  <div class="row">
+    <div class="col-xs-3">Name</div>
+    <div class="col-xs-9 pull-left">{{ model.name }}</div>
+  </div>
+  <div class="row">
+      <div class="col-xs-3">Alter Ego</div>
+      <div class="col-xs-9 pull-left">{{ model.alterEgo }}</div>
+  </div>
+  <div class="row">
+      <div class="col-xs-3">Power</div>
+      <div class="col-xs-9 pull-left">{{ model.power }}</div>
+  </div>
+  <br>
+  <button class="btn btn-primary" (click)="submitted=false;">Edit</button>
+</div>
+
+<hr>
+<input type="text" class="form-control" id="name" required
+        [(ngModel)]="model.name" name="name">
+        {{ model.name }}
+
+<hr>
+<input type="text" class="form-control" id="name"
+       required
+       [ngModel]="model.name"
+       name="name"
+       (ngModelChange)="model.name = $event">
+       {{ model.name }}
+<hr>
+<input type="text" class="form-control" id="name"
+       required
+       [(ngModel)]="model.name"
+       name="name"
+       #spy>
+       <br>{{ spy.className }}
+
+</div>
+
+// hero form css
+.ng-valid[required], .ng-valid.required {
+  border-left: 5px solid #42A948;
+}
+
+.ng-invalid:not(form) {
+  border-left: 5px solid #a94442;
+}
+
+// reactive forms, initial reactive form module
+import { NgModule } from '@angular/core';
+  import { CommonModule } from '@angular/common';
+  import { ReactiveFormsModule } from '@angular/forms';
+
+  import { HeroDetail1Component } from './hero-detail1/hero-detail1.component';
+  import { HeroDetail2Component } from './hero-detail2/hero-detail2.component';
+  import { HeroDetail3Component } from './hero-detail3/hero-detail3.component';
+  import { HeroDetail4Component } from './hero-detail4/hero-detail4.component';
+  import { HeroDetail5Component } from './hero-detail5/hero-detail5.component';
+  import { HeroDetail6Component } from './hero-detail6/hero-detail6.component';
+  import { HeroDetail7Component } from './hero-detail7/hero-detail7.component';
+  import { HeroDetail8Component } from './hero-detail8/hero-detail8.component';
+  import { HeroDetail9Component } from './hero-detail9/hero-detail9.component';
+
+  @NgModule({
+    imports: [
+      CommonModule,
+      ReactiveFormsModule
+    ],
+    declarations: [
+                    HeroDetail1Component,
+                    HeroDetail2Component,
+                    HeroDetail3Component,
+                    HeroDetail4Component,
+                    HeroDetail5Component,
+                    HeroDetail6Component,
+                    HeroDetail7Component,
+                    HeroDetail8Component,
+                    HeroDetail9Component
+                  ],
+    exports: [
+               HeroDetail1Component,
+               HeroDetail2Component,
+               HeroDetail3Component,
+               HeroDetail4Component,
+               HeroDetail5Component,
+               HeroDetail6Component,
+               HeroDetail7Component,
+               HeroDetail8Component,
+               HeroDetail9Component
+            ]
+  })
+  export class ReactiveModule { }
+
+// data model
+export class Hero {
+  id = 0;
+  name = '';
+  addresses: Address[];
+}
+
+export class Address {
+  street = '';
+  city = '';
+  state = '';
+  zip = '';
+}
+
+export const heroes: Hero[] = [
+
+    {
+      id: 1,
+      name: 'Thor',
+      addresses: [
+        { street: '123 Kurfürstendamm', city: 'Berlin', state: 'BE', zip: '13001'},
+        { street: '123 Maximilian Straße', city: 'München', state: 'BA', zip: '88181'}
+      ]
+    },
+    {
+      id: 2,
+      name: 'Tyr',
+      addresses: [
+        { street: '123 Elbchaussee', city: 'Hamburg', state: 'HH', zip: '61636'}
+      ]
+    },
+    {
+      id: 3,
+      name: 'Freyja',
+      addresses: []
+    }
+];
+
+export const states = ['BE', 'BA', 'HH', 'BW'];
+
+// just a form control
+import { Component } from '@angular/core';
+  import { FormControl } from '@angular/forms';
+
+  @Component({
+    selector: 'app-hero-detail1',
+    template: \`
+            <h2>Hero Detail</h2>
+            <h3>
+                  <i>
+                      Just a FormControl
+                  </i>
+            </h3>
+            <label class="center-block">Name:
+                  <input class="form-control" [formControl]="name">
+            </label>
+    \`
+  })
+  export class HeroDetail1Component {
+    name = new FormControl();
+
+  }
+
+ // form group
+ import { Component } from '@angular/core';
+ import { FormControl, FormGroup } from '@angular/forms';
+
+
+ @Component({
+   selector: 'app-hero-detail2',
+   template: \`
+             <h2>Hero Detail</h2>
+               <h3>
+                   <i>
+                       FormControl in a FormGroup
+                   </i>
+               </h3>
+             <form [formGroup]="heroForm" novalidate>
+               <div class="form-group">
+                   <label class="center-block">Name:
+                       <input class="form-control" formControlName="name">
+                   </label>
+               </div>
+             </form>
+       <p>
+           Form value: {{ heroForm.value | json }}
+       </p>
+       <p>
+           Form status: {{ heroForm.status | json }}
+       </p>
+   \`
+ })
+ export class HeroDetail2Component  {
+       heroForm = new FormGroup({
+         name: new FormControl()
+       });
+
+ }
+
+// form builder single control
+import { Component } from '@angular/core';
+  import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+
+  @Component({
+    selector: 'app-hero-detail3',
+    template: \`
+            <h2>Hero Detail</h2>
+              <h3>
+                  <i>
+                      FormGroup with a single FormControl using FormBuilder
+                  </i>
+              </h3>
+            <form [formGroup]="heroForm" novalidate>
+                  <div class="form-group">
+                      <label class="center-block">Name:
+                        <input class="form-control" formControlName="name">
+                      </label>
+                  </div>
+            </form>
+                <p>
+                    Form value: {{ heroForm.value | json }}
+                </p>
+                  <p>
+                    Form status: {{ heroForm.status | json }}
+                  </p>
+
+    \`
+  })
+  export class HeroDetail3Component  {
+          heroForm: FormGroup;
+
+          constructor(private formBuilder: FormBuilder) {
+            this.createForm();
+          }
+
+          createForm() {
+            this.heroForm = this.formBuilder.group({
+              name: ['', Validators.required ]
+            });
+          }
+
+  }
+
+// form group with multiple controls
+import { Component } from '@angular/core';
+  import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+
+  import { states } from '../data-model';
+
+  @Component({
+    selector: 'app-hero-detail4',
+    template: \`
+                    <h2>Hero Detail</h2>
+                    <h3>
+                        <i>
+                            A FormGroup with multiple FormControls
+                        </i>
+                    </h3>
+
+                    <form [formGroup]="heroForm" novalidate>
+                          <div class="form-group">
+                            <label class="center-block">Name:
+                                <input class="form-control" formControlName="name">
+                            </label>
+                          </div>
+                          <div class="form-group">
+                            <label class="center-block">Street:
+                                <input class="form-control" formControlName="street">
+                            </label>
+                          </div>
+                          <div class="form-group">
+                            <label class="center-block">City:
+                                <input class="form-control" formControlName="city">
+                            </label>
+                          </div>
+                          <div class="form-group">
+                            <label class="center-block">State:
+                                <select class="form-control" formControlName="state">
+                                      <option *ngFor="let state of states"
+                                               [value]="state">
+                                            {{ state }}
+                                      </option>
+                                </select>
+                            </label>
+                          </div>
+                          <div class="form-group">
+                            <label class="center-block">Zip Code:
+                                <input class="form-control" formControlName="zip">
+                            </label>
+                          </div>
+                          <div class="form-group radio">
+                              <h4>Super Power:</h4>
+                              <label class="center-block">
+                                  <input type="radio"
+                                  formControlName="power"
+                                  value="flight">
+                                  Flight
+                              </label>
+                              <label class="center-block">
+                                  <input type="radio"
+                                  formControlName="power"
+                                  value="x-ray vision">
+                                  X-Ray Vision
+                              </label>
+                              <label class="center-block">
+                                  <input type="radio"
+                                   formControlName="power"
+                                    value="strength">
+                                  Strength
+                              </label>
+                          </div>
+                          <div class="checkbox">
+                                  <label class="center-block">
+                                        <input type="checkbox" formControlName="sidekick">
+                                        I have a sidekick.
+                                  </label>
+                          </div>
+                    </form>
+
+                    <p>Form value: {{ heroForm.value | json }}</p>
+    \`
+  })
+  export class HeroDetail4Component {
+        heroForm: FormGroup;
+        states = states;
+
+        constructor(private formBuilder: FormBuilder) {
+          this.createForm();
+        }
+
+        createForm() {
+          this.heroForm = this.formBuilder.group({
+            name: ['', Validators.required],
+            street: '',
+            city: '',
+            state: '',
+            zip: '',
+            power: '',
+            sidekick: ''
+          });
+
+        }
+
+  }
+
+// form builder group
+import { Component } from '@angular/core';
+  import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+
+  import { states } from '../data-model';
+
+
+  @Component({
+    selector: 'app-hero-detail5',
+    template: \`
+    <form [formGroup]="heroForm" novalidate>
+          <div class="form-group">
+            <label class="center-block">Name:
+                <input class="form-control" formControlName="name">
+            </label>
+          </div>
+        <div formGroupName="address" class="well well-lg">
+          <h4>Secret Lair</h4>
+          <div class="form-group">
+            <label class="center-block">Street:
+                <input class="form-control" formControlName="street">
+            </label>
+          </div>
+          <div class="form-group">
+            <label class="center-block">City:
+                <input class="form-control" formControlName="city">
+            </label>
+          </div>
+          <div class="form-group">
+            <label class="center-block">State:
+                <select class="form-control" formControlName="state">
+                      <option *ngFor="let state of states"
+                               [value]="state">
+                            {{ state }}
+                      </option>
+                </select>
+            </label>
+          </div>
+            <div class="form-group">
+              <label class="center-block">Zip Code:
+                <input class="form-control" formControlName="zip">
+              </label>
+            </div>
+        </div>
+          <div class="form-group radio">
+              <h4>Super Power:</h4>
+              <label class="center-block">
+                  <input type="radio" formControlName="power" value="flight">
+                  Flight
+              </label>
+              <label class="center-block">
+                  <input type="radio" formControlName="power" value="x-ray vision">
+                  X-Ray Vision
+              </label>
+              <label class="center-block">
+                  <input type="radio" formControlName="power" value="strength">
+                  Strength
+              </label>
+          </div>
+          <div class="checkbox">
+                  <label class="center-block">
+                        <input type="checkbox" formControlName="sidekick">
+                        I have a sidekick.
+                  </label>
+          </div>
+    </form>
+
+        <p>Form value: {{ heroForm.value | json }}</p>
+        <h4>Extra info for the curious:</h4>
+        <p>Name value: {{ heroForm.get('name').value }}</p>
+        <p>Street value: {{ heroForm.get('address.street').value }}</p>
+    \`
+  })
+  export class HeroDetail5Component  {
+    heroForm: FormGroup;
+    states = states;
+
+
+    constructor(private formBuilder: FormBuilder) {
+      this.createForm();
+    }
+
+    createForm() {
+        this.heroForm = this.formBuilder.group({
+          name: ['', Validators.required],
+          address: this.formBuilder.group({
+            street: '',
+            city: '',
+            state: '',
+            zip: ''
+          }),
+          power: '',
+          sidekick: ''
+        });
+    }
+
+  }
+
+// hero service
+import { Injectable } from '@angular/core';
+
+  import { Hero, heroes } from './data-model';
+
+  import { Observable } from 'rxjs/Observable';
+  import { of } from 'rxjs/observable/of';
+  import 'rxjs/add/operator/delay';
+
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class HeroService {
+    delayMs = 1000;
+
+    getHeroes(): Observable<Hero[]> {
+      return of(heroes).delay(this.delayMs);
+    }
+
+    updateHero(hero: Hero): Observable<Hero> {
+      const oldHero = heroes.find(h => h.id === hero.id);
+      const newHero = Object.assign(oldHero, hero);
+      return of(newHero).delay(this.delayMs);
+    }
+
+  }
+
+// patch value
+import { Component, Input, OnChanges } from '@angular/core';
+  import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+
+  import { Hero, states } from '../data-model';
+
+  @Component({
+    selector: 'app-hero-detail6',
+    template: \`
+    <h2>Hero Detail</h2>
+    <h3>
+          <i>
+              PatchValue to initialize a value
+          </i>
+    </h3>
+    <form [formGroup]="heroForm" novalidate>
+    <div class="form-group">
+      <label class="center-block">Name:
+          <input class="form-control" formControlName="name">
+      </label>
+    </div>
+    <div formGroupName="address" class="well well-lg">
+      <h4>Secret Lair</h4>
+    <div class="form-group">
+      <label class="center-block">Street:
+          <input class="form-control" formControlName="street">
+      </label>
+    </div>
+    <div class="form-group">
+      <label class="center-block">City:
+          <input class="form-control" formControlName="city">
+      </label>
+    </div>
+    <div class="form-group">
+      <label class="center-block">State:
+          <select class="form-control" formControlName="state">
+                <option *ngFor="let state of states"
+                         [value]="state">
+                      {{ state }}
+                </option>
+          </select>
+      </label>
+    </div>
+      <div class="form-group">
+        <label class="center-block">Zip Code:
+          <input class="form-control" formControlName="zip">
+        </label>
+      </div>
+    </div>
+    <div class="form-group radio">
+        <h4>Super Power:</h4>
+        <label class="center-block">
+            <input type="radio" formControlName="power" value="flight">
+            Flight
+        </label>
+        <label class="center-block">
+            <input type="radio" formControlName="power" value="x-ray vision">
+            X-Ray Vision
+        </label>
+        <label class="center-block">
+            <input type="radio" formControlName="power" value="strength">
+            Strength
+        </label>
+    </div>
+    <div class="checkbox">
+            <label class="center-block">
+                  <input type="checkbox" formControlName="sidekick">
+                  I have a sidekick.
+            </label>
+    </div>
+  </form>
+  <p>Form value: {{ heroForm.value | json }}</p>
+  \`
+  })
+  export class HeroDetail6Component implements OnChanges {
+    @Input() hero: Hero;
+
+    heroForm: FormGroup;
+    states = states;
+
+
+    constructor(private formBuilder: FormBuilder) {
+      this.createForm();
+    }
+
+    createForm() {
+      this.heroForm = this.formBuilder.group({
+        name: ['', Validators.required ],
+        address: this.formBuilder.group({
+          street: '',
+          city: '',
+          state: '',
+          zip: ''
+        }),
+        power: '',
+        sidekick: ''
+      });
+    }
+
+    ngOnChanges() {
+      this.heroForm.reset();
+      this.heroForm.patchValue({
+        name: this.hero.name
+      });
+    }
+
+  }
+
+// app component host
+import { Component, OnInit } from '@angular/core';
+
+  import { HeroService } from './reactive/hero.service';
+  import { Hero } from './reactive/data-model';
+
+  import { Observable } from 'rxjs/Observable';
+
+  @Component({
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.css']
+  })
+  export class AppComponent implements OnInit {
+
+    heroes: Observable<Hero[]>;
+    selectedHero: Hero;
+
+    constructor(private heroService: HeroService) { }
+
+    getHeroes() {
+      this.heroes = this.heroService.getHeroes();
+      this.selectedHero = undefined;
+    }
+
+    select(hero: Hero) {
+      this.selectedHero = hero;
+    }
+
+    ngOnInit() {
+      this.getHeroes();
+    }
+
+  }
+
+// app component template
+<div class="container">
+<h1>Reactive Forms</h1>
+<!-- <app-hero-detail1></app-hero-detail1>
+<app-hero-detail2></app-hero-detail2>
+<app-hero-detail3></app-hero-detail3>
+<app-hero-detail4></app-hero-detail4>
+<app-hero-detail5></app-hero-detail5> -->
+
+<hr>
+<nav>
+  <button (click)="getHeroes()" class="btn btn-primary">
+  Refresh
+  </button>
+  <a *ngFor="let hero of heroes | async" (click)="select(hero)">
+            {{ hero.name }}
+  </a>
+</nav>
+<div *ngIf="selectedHero">
+<hr>
+<h2>Hero Detail</h2>
+<h3>Editing: {{ selectedHero.name }}</h3>
+<app-hero-detail6 [hero]="selectedHero"></app-hero-detail6>
+<!-- <app-hero-detail7 [hero]="selectedHero"></app-hero-detail7>
+    <app-hero-detail8 [hero]="selectedHero"></app-hero-detail8> -->
+</div>
+
+</div>
+
+// set value
+
+
+  `,
+  blockQuote: `
+  Wir beabsichtigen zum Mond zu fliegen in diesem Jahrzehnt und andere Sachen zu tun, nicht weil sie einfach sind,
+  sondern weil sie schwer sind, weil das Ziel uns dienen wird zu organisieren und messen die Beste unserer Energien
+  und Kompetenzen, weil diese Herausforderung ist eine welche wir annehmen, eine die wir nicht vertagen wollen
+  und eine die wir vorhaben zu gewinnen.
+  `,
+  imageFooterUrl: 'assets/img/post7.jpg',
   footerQuote: 'Wir sind alle miteinander verbunden; zueinander biologisch. Zu der Erde, chemisch. Zum Rest des Universums, atomar.'
 },
   ];
@@ -3045,7 +5355,10 @@ import { Component } from '@angular/core';
     if (this.articleId === 'angular-superheroic-javascript-framework') {
       this.articleId = 6;
     }
-    if (!(+this.articleId) || +this.articleId > 6) {
+    if (this.articleId === 'angular-basics-1') {
+      this.articleId = 7;
+    }
+    if (!(+this.articleId) || +this.articleId > 7) {
       this.isNotFound = true;
       this.router.navigate(['page-not-found']);
     }
