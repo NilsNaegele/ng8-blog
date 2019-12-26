@@ -1183,7 +1183,9 @@ let point3D: Point3D = {{ '{' }}x: 10, y: 20, z: 30{{ '}' }};
         <div class="col-lg-8 col-md-10 mx-auto">
           <h2 class="section-heading">{{ posts[articleId]?.sectionHeading }}</h2>
             <pre>
-              <code>{{ posts[articleId]?.code }}</code>
+              <code>
+                {{ posts[articleId]?.code }}
+              </code>
             </pre>
           <blockquote class="blockquote">
             {{ posts[articleId]?.blockQuote}}
