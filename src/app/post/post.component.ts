@@ -7018,10 +7018,1428 @@ import { Component, Inject } from '@angular/core';
 
 // httpclient
 // inmemory data service
+import { InMemoryDbService } from 'angular-in-memory-web-api';
+
+export class InMemoryDataService implements InMemoryDbService {
+  createDb() {
+    const heroes = [
+      { id: 11, name: 'Odin' },
+      { id: 12, name: 'Thor' },
+      { id: 13, name: 'Tyr' },
+      { id: 14, name: 'Frigg' },
+      { id: 15, name: 'Freyja' },
+      { id: 16, name: 'Loki' },
+      { id: 17, name: 'Baldur' },
+      { id: 18, name: 'Mani' }
+    ];
+    return { heroes };
+  }
+
+}
 
 
+// heroes service
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpHeaders } from '@angular/common/http';
+
+import { Hero } from './hero';
+import { HttpErrorHandler, HandleError } from '../http-error-handler.service';
+
+import { Observable } from 'rxjs/Observable';
+import { of } from 'rxjs/observable/of';
+import { catchError } from 'rxjs/operators';
+
+const httpOptions = {
+  headers: new HttpHeaders({
+    'Content-Type': 'application/json',
+    'Authorization': 'applications/json'
+  })
+};
+
+@Injectable({
+  providedIn: 'root'
+})
+export class HeroesService {
+  heroesUrl = 'api/heroes';
+  private handleError: HandleError;
+
+  constructor(private http: HttpClient, httpErrorHandler: HttpErrorHandler) {
+    this.handleError = httpErrorHandler.createHandleError('HeroesService');
+  }
+
+  getHeroes(): Observable<Hero[]> {
+    return this.http.get<Hero[]>(this.heroesUrl)
+                    .pipe(catchError(this.handleError('getHeroes', [])));
+  }
+
+  searchHeroes(term: string): Observable<Hero[]> {
+    term = term.trim();
+
+    const options = term ? { params: new HttpParams().set('name', term) } : {};
+    return this.http.get<Hero[]>(this.heroesUrl, options)
+                    .pipe(catchError(this.handleError('searchHeroes', [])));
+  }
 
 
+  addHero(hero: Hero): Observable<Hero> {
+    return this.http.post<Hero>(this.heroesUrl, hero, httpOptions)
+                    .pipe(
+                      catchError(this.handleError('addHero', hero))
+                    );
+  }
+
+  deleteHero(id: number): Observable<{}> {
+    const url = \`\${this.heroesUrl}/\${id}\`;
+    return this.http.delete(url, httpOptions)
+                    .pipe(
+                      catchError(this.handleError('deleteHero'))
+                    );
+  }
+
+  updateHero(hero: Hero): Observable<Hero> {
+    httpOptions.headers = httpOptions.headers.set('Authorization', 'my-new-auth-token');
+    return this.http.put<Hero>(this.heroesUrl, hero, httpOptions)
+                    .pipe(catchError(this.handleError('updateHero', hero))
+          );
+  }
+
+}
+
+
+// heroes component
+import { Component, OnInit, OnDestroy } from '@angular/core';
+
+  import { Hero } from './hero';
+  import { HeroesService } from './heroes.service';
+
+  import { Subscription } from 'rxjs/Subscription';
+
+  @Component({
+    selector: 'app-heroes',
+    template: \`
+              <h3>Heroes</h3>
+              <div>
+                  <label>Hero name:
+                        <input #heroName>
+                  </label>
+                  <button (click)="add(heroName.value); heroName.value = '';">
+                    Add
+                  </button>
+                  <button (click)="search(heroName.value)">
+                    Search
+                  </button>
+              </div>
+
+              <ul class="heroes">
+                    <li *ngFor="let hero of heroes">
+                          <a (click)="edit(hero)">
+                              <span class="badge">{{ hero.id || -1}}</span>
+                              <span *ngIf="hero !== editHero">{{ hero.name }}</span>
+                              <input *ngIf="hero === editHero" [(ngModel)]="hero.name"
+                              (blur)="update()" (keyup.enter)="update()">
+                          </a>
+                      <button class="delete" title="delete hero" (click)="delete(hero)">
+                      x
+                      </button>
+                    </li>
+              </ul>
+    \`,
+    styleUrls: ['./heroes.component.css']
+  })
+  export class HeroesComponent implements OnInit, OnDestroy {
+      heroes: Hero[];
+      editHero: Hero;
+      heroesSubscription: Subscription;
+
+      constructor(private heroesService: HeroesService) { }
+
+      ngOnInit() {
+        this.getHeroes();
+      }
+
+      getHeroes(): void {
+        this.heroesSubscription = this.heroesService.getHeroes()
+                                  .subscribe(heroes => this.heroes = heroes);
+      }
+
+      add(name: string): void {
+        this.editHero = undefined;
+        name = name.trim();
+        if (!name) { return; }
+
+        const newHero: Hero = { name } as Hero;
+        this.heroesSubscription = this.heroesService.addHero(newHero)
+                                  .subscribe(hero => this.heroes.push(hero));
+      }
+
+      delete(hero: Hero): void {
+        this.heroes = this.heroes.filter(h => h !== hero);
+        this.heroesSubscription = this.heroesService.deleteHero(hero.id).subscribe();
+      }
+
+      edit(hero) {
+        this.editHero = hero;
+      }
+
+      search(searchTerm: string) {
+        this.editHero = undefined;
+        if (searchTerm) {
+          this.heroesSubscription = this.heroesService.searchHeroes(searchTerm)
+                            .subscribe(heroes => this.heroes = heroes);
+        }
+      }
+
+      update() {
+        if (this.editHero) {
+          this.heroesSubscription =
+          this.heroesService.updateHero(this.editHero).subscribe(hero => {
+                const ix = hero ? this.heroes.findIndex(h => h.id === hero.id) : -1;
+                if (ix > -1) { this.heroes[ix] = hero; }
+
+          });
+          this.editHero = undefined;
+        }
+      }
+
+      ngOnDestroy() {
+        this.heroesSubscription.unsubscribe();
+      }
+
+  }
+
+
+// heroes component css
+/* HeroesComponent's private CSS styles */
+
+.heroes {
+  margin: 0 0 2em 0;
+  list-style-type: none;
+  padding: 0;
+  width: 15em;
+}
+.heroes li {
+  position: relative;
+  cursor: pointer;
+  background-color: #EEE;
+  margin: .5em;
+  padding: .3em 0;
+  height: 1.6em;
+  border-radius: 4px;
+  width: 19em;
+}
+
+.heroes li:hover {
+  color: #607D8B;
+  background-color: #DDD;
+  left: .1em;
+}
+
+.heroes a {
+  color: #888;
+  text-decoration: none;
+  position: relative;
+  display: block;
+  width: 250px;
+}
+
+.heroes a:hover {
+  color:#607D8B;
+}
+
+.heroes .badge {
+  display: inline-block;
+  font-size: small;
+  color: white;
+  padding: 0.8em 0.7em 0 0.7em;
+  background-color: #607D8B;
+  line-height: 1em;
+  position: relative;
+  left: -1px;
+  top: -4px;
+  height: 1.8em;
+  min-width: 16px;
+  text-align: right;
+  margin-right: .8em;
+  border-radius: 4px 0 0 4px;
+}
+
+.button {
+  background-color: #eee;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  cursor: hand;
+  font-family: Arial;
+}
+
+button:hover {
+  background-color: #cfd8dc;
+}
+
+button.delete {
+  position: relative;
+  left: 24em;
+  top: -32px;
+  background-color: gray !important;
+  color: white;
+  display: inherit;
+  padding: 5px 8px;
+  width: 2em;
+}
+
+input {
+  font-size: 100%;
+  margin-bottom: 2px;
+  width: 11em;
+}
+
+.heroes input {
+  position: relative;
+  top: -3px;
+  width: 12em;
+}
+
+
+// message service
+import { Injectable } from '@angular/core';
+
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class MessageService {
+    messages: string[] = []; // empty
+
+    add(message: string) {
+      this.messages.push(message);
+    }
+
+    clear() {
+      this.messages = [];
+    }
+
+  }
+
+
+// message component
+import { Component } from '@angular/core';
+  import { MessageService } from '../message.service';
+
+  @Component({
+    selector: 'app-messages',
+    template: \`
+        <div *ngIf="messageService.messages.length">
+                <h3>Messages</h3>
+                <button class="clear" (click)="messageService.clear()">clear</button>
+                <br>
+                <ol>
+                  <li *ngFor="let message of messageService.messages">{{ message }}</li>
+                </ol>
+        </div>
+    \`
+  })
+  export class MessagesComponent {
+
+    constructor(public messageService: MessageService) { }
+
+  }
+
+
+// assets/config.json
+{
+  "heroesUrl": "api/heroes",
+  "textfile": "assets/textfile.txt"
+}
+
+
+// assets/textfile.txt
+<!doctype html>
+  <html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>ng5-http-client</title>
+    <base href="/">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+  </head>
+  <body>
+    <app-root></app-root>
+  </body>
+  </html>
+
+
+// config service
+import { Injectable } from '@angular/core';
+  import { HttpClient, HttpResponse, HttpErrorResponse } from '@angular/common/http';
+
+  import { Observable } from 'rxjs/Observable';
+  import { ErrorObservable } from 'rxjs/observable/ErrorObservable';
+  import { catchError, retry } from 'rxjs/operators';
+
+  export interface Config {
+    heroesUrl: string;
+    textfile: string;
+  }
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class ConfigService {
+    configUrl = 'assets/config.json';
+
+    constructor(private http: HttpClient) { }
+
+    getConfig() {
+      return this.http.get<Config>(this.configUrl)
+                      .pipe(
+                        retry(3),
+                        catchError(this.handleError)
+                      );
+    }
+
+    getConfig_1() {
+      return this.http.get(this.configUrl);
+    }
+
+    getConfig_2() {
+      return this.http.get<Config>(this.configUrl);
+    }
+
+    getConfig_3() {
+      return this.http.get<Config>(this.configUrl)
+                      .pipe(
+                        catchError(this.handleError)
+                      );
+    }
+
+    getConfigResponse(): Observable<HttpResponse<Config>> {
+      return this.http.get<Config>(
+              this.configUrl, { observe: 'response'}
+      );
+    }
+
+    private handleError(error: HttpErrorResponse) {
+      if (error.error instanceof ErrorEvent) {
+        console.error('An error occured:', error.error.message);
+      } else {
+        console.error(
+          \`Backend returned code \${error.status}, \` +
+          \`body was \${error.error}\`
+        );
+      }
+      return new ErrorObservable('Something bad happened; please try again later.');
+    }
+
+    makeIntentionalError() {
+      return this.http.get('not/a/real/url')
+                       .pipe(
+                         catchError(this.handleError)
+                       );
+    }
+
+  }
+
+// config component
+import { Component, OnDestroy } from '@angular/core';
+
+import { ConfigService, Config } from './config.service';
+import { MessageService } from '../message.service';
+
+import { Subscription } from 'rxjs/Subscription';
+
+@Component({
+  selector: 'app-config',
+  template: \`
+      <h3>Get configuration from JSON file</h3>
+      <div>
+              <button (click)="clear(); showConfig();">get</button>
+              <button (click)="clear(); showConfigResponse()">getResponse</button>
+              <button (click)="clear();">clear</button>
+              <button (click)="clear(); makeError();">error</button>
+            <span *ngIf="config">
+                      <p>Heroes API URL is "{{ config.heroesUrl }}"</p>
+                      <p>Textfile URL is "{{ config.textfile }}"</p>
+              <div *ngIf="headers">
+                  Response headers:
+                  <ul>
+                      <li *ngFor="let header of headers">{{ header }}</li>
+                  </ul>
+              </div>
+            </span>
+      </div>
+      <p *ngIf="error" class="error">{{ error | json }}</p>
+  \`,
+  styles: ['.error { color: red; }']
+})
+export class ConfigComponent implements OnDestroy {
+  error: any;
+  headers: string[];
+  config: Config;
+  configSubscription: Subscription;
+
+  constructor(private configService: ConfigService) { }
+
+  clear() {
+    this.config = undefined;
+    this.error = undefined;
+    this.headers = undefined;
+  }
+
+  showConfig() {
+    this.configSubscription = this.configService.getConfig().subscribe(
+                  data => this.config = { ...data },
+                  error => this.error = error
+    );
+  }
+
+
+  showConfig_v1() {
+    this.configSubscription = this.configService.getConfig_1()
+                              .subscribe(data => this.config = {
+            heroesUrl: data['heroesUrl'],
+            textfile: data['textfile']
+    });
+  }
+
+  showConfig_v2() {
+    this.configSubscription = this.configService.getConfig()
+                              .subscribe(data => this.config = { ...data });
+  }
+
+  showConfigResponse() {
+    this.configSubscription = this.configService.getConfigResponse()
+        .subscribe(response => {
+            const keys = response.headers.keys();
+            this.headers = keys.map(key => \`\${key}: \${response.headers.get(key)}\`);
+            this.config = { ...response.body };
+        });
+  }
+
+  makeError() {
+    this.configSubscription =
+    this.configService.makeIntentionalError().subscribe(null, error => this.error = error);
+  }
+
+  ngOnDestroy() {
+    this.configSubscription.unsubscribe();
+  }
+
+}
+
+
+// downloader service
+import { Injectable } from '@angular/core';
+  import { HttpClient } from '@angular/common/http';
+
+  import { MessageService } from '../message.service';
+
+  import { tap } from 'rxjs/operators';
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class DownloaderService {
+
+    constructor(private http: HttpClient,
+                private messageService: MessageService) { }
+
+    getTextFile(filename: string) {
+      return this.http.get(filename, { responseType: 'text'})
+                      .pipe(
+                        tap(
+                            data => this.log(filename, data),
+                            error => this.logError(filename, error)
+                        )
+                      );
+    }
+
+    private log(filename: string, data: string) {
+      const message = \`DownloaderService downloaded: \${filename} and got "\${data}".\`;
+      this.messageService.add(message);
+    }
+
+    private logError(filename: string, error: any) {
+      const message = \`DownloaderService failed to download: \${filename}; and got error
+      "\${error.message}".\`;
+      console.error(message);
+      this.messageService.add(message);
+    }
+
+  }
+
+
+// downloader component
+import { Component, OnDestroy } from '@angular/core';
+
+  import { DownloaderService } from './downloader.service';
+
+  import { Subscription } from 'rxjs/Subscription';
+
+  @Component({
+    selector: 'app-downloader',
+    template: \`
+          <h3>Download the texfile</h3>
+          <button (click)="download()">download</button>
+          <button (click)="clear()">clear</button>
+          <p *ngIf="contents">Contents: "{{ contents }}"</p>
+    \`
+  })
+  export class DownloaderComponent implements OnDestroy {
+    contents: string;
+    downloaderSubscription: Subscription;
+
+    constructor(private downloaderService: DownloaderService) { }
+
+    clear() {
+      this.contents = undefined;
+    }
+
+    download() {
+     this.downloaderSubscription = this.downloaderService.getTextFile('assets/textfile.txt')
+                            .subscribe(results => this.contents = results);
+    }
+
+    ngOnDestroy() {
+      this.downloaderSubscription.unsubscribe();
+    }
+
+  }
+
+
+// uploader service
+import { Injectable } from '@angular/core';
+  import { HttpClient, HttpEvent, HttpEventType, HttpProgressEvent,
+           HttpRequest, HttpResponse, HttpErrorResponse } from '@angular/common/http';
+
+  import { MessageService } from '../message.service';
+
+  import { of } from 'rxjs/observable/of';
+  import { catchError, last, map, tap } from 'rxjs/operators';
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class UploaderService {
+
+    constructor(private http: HttpClient,
+                private messageService: MessageService) { }
+
+    upload(file: File) {
+      if (!file) { return; }
+
+      const req = new HttpRequest('POST', '/upload/file', file, {
+            reportProgress: true
+      });
+
+      return this.http.request(req).pipe(
+        map(event => this.getEventMessage(event, file)),
+        tap(message => this.showProgress(message)),
+        last(),
+        catchError(this.handleError(file))
+      );
+    }
+
+    private getEventMessage(event: HttpEvent<any>, file: File) {
+        switch (event.type) {
+          case HttpEventType.Sent:
+            return \`Uploading file "\${file.name}" of size \${file.size}\`;
+          case HttpEventType.UploadProgress:
+          const percentDone = Math.round(100 * event.loaded / event.total);
+            return \`File "\${file.name}" is \${percentDone}% uploaded.\`;
+          case HttpEventType.Response:
+            return \`File "\${file.name}" was completely uploaded.\`;
+          default:
+            return \`File "\${file.name}" surprising upload event: \$\{event.type}\`;
+        }
+    }
+
+    private handleError(file: File) {
+      const userMessage = \`\${file.name} upload failed\`;
+      return (error: HttpErrorResponse) => {
+        console.error(error);
+        const message = (error.error instanceof Error) ?
+              error.error.message : \`server returned code \$\{error.status}
+              with body "\${error.error}"\`;
+        this.messageService.add(\`\${userMessage} \${message}\`);
+        return of(userMessage);
+      };
+    }
+
+    private showProgress(message: string) {
+      this.messageService.add(message);
+    }
+
+  }
+
+
+// uploader component
+import { Component, OnDestroy } from '@angular/core';
+
+  import { UploaderService } from './uploader.service';
+
+  import { Subscription } from 'rxjs/Subscription';
+
+  @Component({
+    selector: 'app-uploader',
+    template: \`
+        <h3>Upload File</h3>
+        <form enctype="multipart/form-data" method="post">
+        <div>
+        <label for="picked">Choose file to upload</label>
+          <div>
+              <input type="file"
+                   id="picked"
+                   #picked
+                   (click)="message=''"
+                   (change)="onPicked(picked)">
+          </div>
+        </div>
+        <p *ngIf="message">{{ message }}</p>
+        </form>
+    \`
+  })
+  export class UploaderComponent implements OnDestroy {
+    message: string;
+    uploaderSubscription: Subscription;
+
+    constructor(private uploaderService: UploaderService) { }
+
+    onPicked(input: HTMLInputElement) {
+      const file = input.files[0];
+      if (file) {
+        this.uploaderSubscription = this.uploaderService.upload(file).subscribe(
+          msg => {
+            input.value = null;
+            this.message = msg;
+          }
+        );
+      }
+    }
+
+    ngOnDestroy() {
+      this.uploaderSubscription.unsubscribe();
+    }
+
+  }
+
+
+// package search service
+import { Injectable } from '@angular/core';
+  import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+
+  import { HttpErrorHandler, HandleError } from '../http-error-handler.service';
+
+  import { Observable } from 'rxjs/Observable';
+  import { of } from 'rxjs/observable/of';
+  import { catchError, map } from 'rxjs/operators';
+
+  export interface NpmPackageInfo {
+    name: string;
+    version: string;
+    description: string;
+  }
+
+  export const searchUrl = 'https://npmsearch.com/query';
+
+  const httpOptions = {
+    headers: new HttpHeaders({
+      'x-refresh': 'true'
+    })
+  };
+
+  function createHttpOptions(packageName: string, refresh = false) {
+    const params = new HttpParams({ fromObject: { q: packageName} });
+    const headerMap = refresh ? {'x-refresh': 'true'} : {};
+    const headers = new HttpHeaders(headerMap);
+    return { headers, params };
+  }
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class PackageSearchService {
+    private handleError: HandleError;
+
+    constructor(private http: HttpClient, httpErrorHandler: HttpErrorHandler) {
+      this.handleError = httpErrorHandler.createHandleError('HeroesService');
+    }
+
+    search(packageName: string, refresh = false): Observable<NpmPackageInfo[]> {
+      if (!packageName.trim()) {
+        return of([]);
+      }
+
+      const options = createHttpOptions(packageName, refresh);
+
+      return this.http.get(searchUrl, options).pipe(
+        map((data: any) => {
+          return data.results.map(entry => ({
+            name: entry.name[0],
+            version: entry.version[0],
+            description: entry.description[0]
+          } as NpmPackageInfo));
+        }), catchError(this.handleError('search', []))
+      );
+    }
+
+  }
+
+
+// package search component
+import { Component, OnInit } from '@angular/core';
+
+  import { PackageSearchService, NpmPackageInfo } from './package-search.service';
+
+  import { Observable } from 'rxjs/Observable';
+  import { Subject } from 'rxjs/Subject';
+  import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+
+  @Component({
+    selector: 'app-package-search',
+    template: \`
+            <h3>Search Npm Package</h3>
+            <p><i>Searches when typing stops. Caches for 30 seconds.</i></p>
+            <input (keyup)="search($event.target.value)" id="name" placeholder="Search">
+            <input type="checkbox" id="refresh" [checked]="withRefresh"
+            (click)="toggleRefresh()">
+            <label for="refresh">with refresh</label>
+
+            <ul>
+                  <li *ngFor="let package of packages$ | async">
+                        <b>{{ package.name }} v.{{ package.version }}</b> -
+                        <i>{{ package.description }}</i>
+                  </li>
+            </ul>
+
+    \`
+  })
+  export class PackageSearchComponent implements OnInit {
+    withRefresh = false;
+    packages$: Observable<NpmPackageInfo[]>;
+    private searchText$ = new Subject<string>();
+
+    search(packageName: string) {
+      this.searchText$.next(packageName);
+    }
+
+    constructor(private packageSearchService: PackageSearchService) { }
+
+    ngOnInit() {
+      this.packages$ = this.searchText$.pipe(
+        debounceTime(500),
+        distinctUntilChanged(),
+        switchMap(packageName =>
+          this.packageSearchService.search(packageName, this.withRefresh))
+        );
+    }
+
+    toggleRefresh() {
+      this.withRefresh = !this.withRefresh;
+    }
+
+  }
+
+
+// authentication service
+import { Injectable } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AuthService {
+  getAuthorizationToken() {
+    return 'some-auth-token';
+  }
+
+}
+
+// http error handler service
+import { Injectable } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+
+import { MessageService } from './message.service';
+
+import { Observable } from 'rxjs/Observable';
+import { of } from 'rxjs/observable/of';
+
+export type HandleError =
+  <T> (operation?: string, result?: T) => (error: HttpErrorResponse) => Observable<T>;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class HttpErrorHandler {
+    constructor (private messageService: MessageService) { }
+
+    createHandleError = (serviceName = '') => <T>
+        (operation = 'operation', result = {} as T) =>
+                   this.handleError(serviceName, operation, result)
+
+   handleError<T> (serviceName = '', operation = 'operation', result = {} as T) {
+     return (error: HttpErrorResponse): Observable<T> => {
+       console.error(error);
+
+      const message = (error.error instanceof ErrorEvent) ? error.error.message :
+      \`server returned a code of \${error.status} with body "\${error.error}"\`;
+
+      this.messageService.add(\`\${serviceName}: \${operation} failed: \${message}\`);
+      return of (result);
+     };
+   }
+
+  }
+
+
+// request cache service
+import { Injectable } from '@angular/core';
+  import { HttpRequest, HttpResponse } from '@angular/common/http';
+
+  import { MessageService } from './message.service';
+
+  export interface RequestCacheEntry {
+    url: string;
+    response: HttpResponse<any>;
+    lastRead: number;
+  }
+
+  export abstract class RequestCache {
+    abstract get(request: HttpRequest<any>): HttpResponse<any> | undefined;
+    abstract put(request: HttpRequest<any>, response: HttpResponse<any>): void;
+  }
+
+  const maxAge = 20000;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class RequestCacheWithMap implements RequestCache {
+
+    cache = new Map<string, RequestCacheEntry>();
+
+    constructor(private messageService: MessageService) { }
+
+
+    get(request: HttpRequest<any>): HttpResponse<any> | undefined {
+      const url = request.urlWithParams;
+      const cached = this.cache.get(url);
+
+      if (!cached) {
+        return undefined;
+      }
+
+      const isExpired = cached.lastRead < (Date.now() - maxAge);
+      const expired = isExpired ? 'expired' : '';
+      this.messageService.add(\`Found \${expired}cached response for "\${url}".\`);
+      return isExpired ? undefined : cached.response;
+    }
+
+    put(request: HttpRequest<any>, response: HttpResponse<any>): void {
+      const url = request.urlWithParams;
+      this.messageService.add(\`Caching response from "\${url}".\`);
+
+      const entry = { url, response, lastRead: Date.now() };
+      this.cache.set(url, entry);
+
+      const expired = Date.now() - maxAge;
+      this.cache.forEach(item => {
+        if (item.lastRead < expired) {
+          this.cache.delete(item.url);
+        }
+      });
+
+      this.messageService.add(\`Request cache size: \${this.cache.size}.\`);
+
+    }
+
+
+  }
+
+
+// auth interceptor
+import { Injectable } from '@angular/core';
+  import { HttpRequest, HttpResponse } from '@angular/common/http';
+
+  import { MessageService } from './message.service';
+
+  export interface RequestCacheEntry {
+    url: string;
+    response: HttpResponse<any>;
+    lastRead: number;
+  }
+
+  export abstract class RequestCache {
+    abstract get(request: HttpRequest<any>): HttpResponse<any> | undefined;
+    abstract put(request: HttpRequest<any>, response: HttpResponse<any>): void;
+  }
+
+  const maxAge = 20000;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class RequestCacheWithMap implements RequestCache {
+
+    cache = new Map<string, RequestCacheEntry>();
+
+    constructor(private messageService: MessageService) { }
+
+
+    get(request: HttpRequest<any>): HttpResponse<any> | undefined {
+      const url = request.urlWithParams;
+      const cached = this.cache.get(url);
+
+      if (!cached) {
+        return undefined;
+      }
+
+      const isExpired = cached.lastRead < (Date.now() - maxAge);
+      const expired = isExpired ? 'expired' : '';
+      this.messageService.add(\`Found \${expired}cached response for "\${url}".\`);
+      return isExpired ? undefined : cached.response;
+    }
+
+    put(request: HttpRequest<any>, response: HttpResponse<any>): void {
+      const url = request.urlWithParams;
+      this.messageService.add(\`Caching response from "\${url}".\`);
+
+      const entry = { url, response, lastRead: Date.now() };
+      this.cache.set(url, entry);
+
+      const expired = Date.now() - maxAge;
+      this.cache.forEach(item => {
+        if (item.lastRead < expired) {
+          this.cache.delete(item.url);
+        }
+      });
+
+      this.messageService.add(\`Request cache size: \${this.cache.size}.\`);
+
+    }
+
+  }
+
+
+// caching interceptor
+import { Injectable } from '@angular/core';
+  import { HttpEvent, HttpHeaders, HttpRequest,
+           HttpResponse, HttpInterceptor, HttpHandler } from '@angular/common/http';
+
+  import { RequestCache } from '../request-cache.service';
+  import { searchUrl } from '../package-search/package-search.service';
+
+  import { Observable } from 'rxjs/Observable';
+  import { of } from 'rxjs/observable/of';
+  import { startWith, tap } from 'rxjs/operators';
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class CachingInterceptor implements HttpInterceptor {
+
+          constructor(private cache: RequestCache) {}
+
+          intercept(request: HttpRequest<any>, next: HttpHandler) {
+
+            if (!isCachable(request)) {
+              return next.handle(request);
+            }
+
+            const cachedResponse = this.cache.get(request);
+            if (request.headers.get('x-refresh')) {
+              const results$ = sendRequest(request, next, this.cache);
+              return cachedResponse ? results$.pipe(startWith(cachedResponse)) : results$;
+            }
+            return cachedResponse ? of(cachedResponse) :
+            sendRequest(request, next, this.cache);
+          }
+
+
+  }
+
+  function isCachable(request: HttpRequest<any>) {
+    return request.method === 'GET' &&
+           request.url.indexOf(searchUrl) > -1;
+  }
+
+  function sendRequest(request: HttpRequest<any>,
+                       next: HttpHandler,
+                       cache: RequestCache): Observable<HttpEvent<any>> {
+    const noHeadersRequest = request.clone({ headers: new HttpHeaders() });
+    return next.handle(noHeadersRequest).pipe(
+      tap(event => {
+        if (event instanceof HttpResponse) {
+          cache.put(request, event);
+        }
+      })
+    );
+
+  }
+
+
+// ensure https interceptor
+import { Injectable } from '@angular/core';
+  import { HttpEvent, HttpInterceptor, HttpHandler, HttpRequest } from '@angular/common/http';
+
+  import { Observable } from 'rxjs/Observable';
+
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class EnsureHttpsInterceptor implements HttpInterceptor {
+    intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+      const secureRequest = request.clone({
+        url: request.url.replace('http://', 'https://')
+      });
+      return next.handle(secureRequest);
+    }
+
+  }
+
+
+// logging interceptor
+import { Injectable } from '@angular/core';
+
+  import { HttpEvent, HttpInterceptor, HttpHandler,
+           HttpRequest, HttpResponse } from '@angular/common/http';
+
+  import { MessageService } from '../message.service';
+
+  import { Observable } from 'rxjs/Observable';
+  import { finalize, tap } from 'rxjs/operators';
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class LoggingInterceptor implements HttpInterceptor {
+
+    constructor(private messageService: MessageService) { }
+
+    intercept(request: HttpRequest<any>, next: HttpHandler) {
+      const started = Date.now();
+      let ok: string;
+
+      return next.handle(request)
+                 .pipe(
+                   tap(
+                     event => ok = event instanceof HttpResponse ? 'succeeded' : '',
+                     error => ok = 'failed'
+                   ),
+                   finalize(() => {
+                     const elapsed = Date.now() - started;
+                     const message = \`\${request.method} "\${request.urlWithParams}"
+                                      \${ok} in \${elapsed} ms.\`;
+                     this.messageService.add(message);
+                   })
+                 );
+    }
+
+  }
+
+
+// noop interceptor
+import { Injectable } from '@angular/core';
+import { HttpEvent, HttpInterceptor,
+         HttpHandler, HttpRequest } from '@angular/common/http';
+
+import { Observable } from 'rxjs/Observable';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class NoopInterceptor implements HttpInterceptor {
+
+  intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    return next.handle(request);
+  }
+
+}
+
+
+// trim name interceptor
+import { Injectable } from '@angular/core';
+import { HttpEvent, HttpInterceptor,
+         HttpHandler, HttpRequest } from '@angular/common/http';
+
+import { Observable } from 'rxjs/Observable';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class TrimNameInterceptor implements HttpInterceptor {
+
+  intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+        const body = request.body;
+        if (!body || !body.name) {
+          return next.handle(request);
+        }
+        const newBody = { ...body, name: body.name.trim() };
+        const newRequest = request.clone({ body: newBody });
+
+        return next.handle(newRequest);
+  }
+
+}
+
+
+// upload interceptor
+import { Injectable } from '@angular/core';
+  import { HttpEvent, HttpInterceptor, HttpHandler,
+           HttpResponse, HttpRequest, HttpEventType,
+           HttpProgressEvent } from '@angular/common/http';
+
+  import { Observable } from 'rxjs/Observable';
+  import { of } from 'rxjs/observable/of';
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class UploadInterceptor implements HttpInterceptor {
+
+    intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+      if (request.url.indexOf('/upload/file') === -1) {
+        return next.handle(request);
+      }
+        const delay = 300;
+        return createUploadEvents(delay);
+    }
+
+  }
+
+  function createUploadEvents(delay: number) {
+    const chunks = 5;
+    const total = 12345678;
+    const chunkSize = Math.ceil(total / chunks);
+
+    return new Observable<HttpEvent<any>>(observer => {
+      observer.next({ type: HttpEventType.Sent });
+      uploadLoop(0);
+
+      function uploadLoop(loaded: number) {
+        setTimeout(() => {
+          loaded += chunkSize;
+          if (loaded >= total) {
+            const doneResponse = new HttpResponse({
+              status: 201
+            });
+            observer.next(doneResponse);
+            observer.complete();
+            return;
+          }
+
+          const progressEvent: HttpProgressEvent = {
+            type: HttpEventType.UploadProgress,
+            loaded,
+            total
+          };
+          observer.next(progressEvent);
+          uploadLoop(loaded);
+        }, delay);
+      }
+    });
+
+  }
+
+
+// global css styles
+/* Master Styles */
+  h1 {
+    color: #369;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 250%;
+  }
+  h2, h3 {
+    color: #444;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: lighter;
+  }
+  body {
+    margin: 2em;
+  }
+  body, input[text], button {
+    color: #888;
+    font-family: Cambria, Georgia;
+  }
+  a {
+    cursor: pointer;
+    cursor: hand;
+  }
+  button {
+    font-family: Arial;
+    background-color: #eee;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    cursor: hand;
+  }
+  button:hover {
+    background-color: #cfd8dc;
+  }
+  button:disabled {
+    background-color: #eee;
+    color: #aaa;
+    cursor: auto;
+  }
+
+  /* Navigation link styles */
+  nav a {
+    padding: 5px 10px;
+    text-decoration: none;
+    margin-right: 10px;
+    margin-top: 10px;
+    display: inline-block;
+    background-color: #eee;
+    border-radius: 4px;
+  }
+  nav a:visited, a:link {
+    color: #607D8B;
+  }
+  nav a:hover {
+    color: #039be5;
+    background-color: #CFD8DC;
+  }
+  nav a.active {
+    color: #039be5;
+  }
+
+  /* everywhere else */
+  * {
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+
+// app module
+import { NgModule } from '@angular/core';
+  import { BrowserModule } from '@angular/platform-browser';
+  import { FormsModule } from '@angular/forms';
+  import { HttpClientModule } from '@angular/common/http';
+  import { HttpClientXsrfModule } from '@angular/common/http';
+
+  import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
+  import { InMemoryDataService } from './in-memory-data.service';
+
+  import { AppComponent } from './app.component';
+  import { HeroesComponent } from './heroes/heroes.component';
+  import { ConfigComponent } from './config/config.component';
+  import { MessagesComponent } from './messages/messages.component';
+  import { DownloaderComponent } from './downloader/downloader.component';
+  import { UploaderComponent } from './uploader/uploader.component';
+  import { PackageSearchComponent } from './package-search/package-search.component';
+
+  import { MessageService } from './message.service';
+  import { HttpErrorHandler } from './http-error-handler.service';
+  import { AuthService } from './auth.service';
+  import { RequestCache, RequestCacheWithMap } from './request-cache.service';
+
+  import { httpInterceptorProviders } from './http-interceptors';
+
+  @NgModule({
+    declarations: [
+      AppComponent,
+      HeroesComponent,
+      ConfigComponent,
+      MessagesComponent,
+      DownloaderComponent,
+      UploaderComponent,
+      PackageSearchComponent
+    ],
+    imports: [
+      BrowserModule,
+      FormsModule,
+      HttpClientModule,
+      HttpClientXsrfModule.withOptions({
+        cookieName: 'My-Xsrf-Cookie',
+        headerName: 'My-Xsrf-Header'
+      }),
+      HttpClientInMemoryWebApiModule.forRoot(
+          InMemoryDataService, {
+          dataEncapsulation: false,
+          passThruUnknownUrl: true,
+          put204: false
+        }
+      )
+    ],
+    providers: [
+          AuthService,
+          HttpErrorHandler,
+          MessageService,
+          { provide: RequestCache, useClass: RequestCacheWithMap },
+          httpInterceptorProviders
+        ],
+    bootstrap: [AppComponent]
+  })
+  export class AppModule { }
+
+
+// app component
+import { Component } from '@angular/core';
+
+  @Component({
+    selector: 'app-root',
+    template: \`
+          // tslint:disable-next-line: whitespace
+          <h1>HTTPClient Code</h1>
+          <div>
+            <input type="checkbox" id="heroes" [checked]="showHeroes"
+            (click)="toggleHeroes()">
+            <label for="heroes">Heroes</label>
+            <input type="checkbox" id="config" [checked]="showConfig"
+            (click)="toggleConfig()">
+            <label for="config">Config</label>
+            <input type="checkbox" id="downloader" [checked]="showDownloader"
+            (click)="toggleDownloader()">
+            <label for="downloader">Downloader</label>
+            <input type="checkbox" id="uploader" [checked]="showUploader"
+            (click)="toggleUploader()">
+            <label for="uploader">Uploader</label>
+            <input type="checkbox" id="search" [checked]="showSearch"
+            (click)="toggleSearch()">
+            <label for="search">Search</label>
+
+          </div>
+          <app-heroes *ngIf="showHeroes"></app-heroes>
+          <app-messages></app-messages>
+          <app-config *ngIf="showConfig"></app-config>
+          <app-downloader *ngIf="showDownloader"></app-downloader>
+          <app-uploader *ngIf="showUploader"></app-uploader>
+          <app-package-search *ngIf="showSearch"></app-package-search>
+    \`
+  })
+  export class AppComponent {
+          showHeroes = true;
+          showConfig = true;
+          showDownloader = true;
+          showUploader = true;
+          showSearch = true;
+
+          toggleHeroes() {
+            this.showHeroes = !this.showHeroes;
+          }
+
+          toggleConfig() {
+            this.showConfig = !this.showConfig;
+          }
+
+          toggleDownloader() {
+            this.showDownloader = !this.showDownloader;
+          }
+
+          toggleUploader() {
+            this.showUploader = !this.showUploader;
+          }
+
+          toggleSearch() {
+            this.showSearch = !this.showSearch;
+          }
+
+  }
+
+
+// routing
 
   `,
   blockQuote: `
