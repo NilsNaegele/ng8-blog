@@ -6289,6 +6289,750 @@ import { Component, OnInit } from '@angular/core';
   imageFooterUrl: 'assets/img/post7.jpg',
   footerQuote: 'Wir sind alle miteinander verbunden; zueinander biologisch. Zu der Erde, chemisch. Zum Rest des Universums, atomar.'
 },
+{
+  id: 8,
+  imageHeaderUrl: 'url(assets/img/post8-bg.jpg)',
+  heading: 'Angular 8/9, Basis- Teil 2',
+  subHeading: 'DI, HTTP, Routing, QR, Testing, TS, API',
+  metaPublishedDate: 'am 26 Dezember, 2019',
+  sectionHeading: 'Dependency Injection, Http Client, Routing, Quick Reference, Testing, Typescript, API + Template Syntax',
+  code: `
+// in memory collection
+import { Hero } from './hero';
+
+export const HEROES: Hero[] = [
+  { id: 11, isSecret: false, name: 'Odin' },
+  { id: 12, isSecret: false, name: 'Thor' },
+  { id: 13, isSecret: false, name: 'Frigg' },
+  { id: 14, isSecret: false, name: 'Freyja' },
+  { id: 15, isSecret: false, name: 'Heimdall' },
+  { id: 16, isSecret: false, name: 'Loki' },
+  { id: 17, isSecret: false, name: 'Baldur' },
+  { id: 18, isSecret: true, name: 'Tyr' },
+  { id: 19, isSecret: true, name: 'Mani' },
+  { id: 20, isSecret: true, name: 'Sol' }
+];
+
+
+// hero class
+
+export class Hero {
+  id: number;
+  name: string;
+  isSecret = false;
+}
+
+// logger service
+import { Injectable } from '@angular/core';
+
+
+@Injectable({
+  providedIn: 'root'
+})
+export class Logger {
+  logs: string[] = [];
+
+  log(message: string): void {
+    this.logs.push(message);
+    console.log(message);
+  }
+
+}
+
+// user service
+import { Injectable } from '@angular/core';
+
+export class User {
+  constructor(public name: string, public isAuthorized = false) {}
+}
+
+const flash = new User('Flash', true);
+const nils = new User('Nils-Holger', false);
+
+
+@Injectable({
+  providedIn: 'root'
+})
+export class UserService {
+  user = nils;
+
+  getNewUser() {
+    this.user = this.user === nils ? flash : nils;
+  }
+
+}
+
+// hero service
+import { Injectable } from '@angular/core';
+import { HEROES } from './mock-heroes';
+import { Logger } from '../logger.service';
+
+
+@Injectable({
+  providedIn: 'root'
+})
+export class HeroService {
+
+  constructor(private logger: Logger, private isAuthorized: boolean) { }
+
+
+  getHeroes() {
+    const auth = this.isAuthorized ? 'authorized' : 'unauthorized';
+    this.logger.log(\`Getting heroes for \${auth} user.\`);
+    return HEROES.filter(hero => this.isAuthorized || !hero.isSecret);
+  }
+
+}
+
+// hero service provider
+/* tslint:disable:one-line */
+import { HeroService } from './hero.service';
+import { Logger } from '../logger.service';
+import { UserService } from '../user.service';
+
+const heroServiceFactory = (logger: Logger, userService: UserService) => {
+      return new HeroService(logger, userService.user.isAuthorized);
+};
+
+export const heroServiceProvider =
+        {
+          provide: HeroService,
+          useFactory: heroServiceFactory,
+          deps: [ Logger, UserService ]
+        };
+
+
+// hero list component
+/* tslint:disable:one-line */
+  import { Component } from '@angular/core';
+
+  import { Hero } from './hero';
+  import { HeroService } from './hero.service';
+
+  @Component({
+    selector: 'app-hero-list',
+    template:  \`
+          <div *ngFor="let hero of heroes">
+                {{ hero.id }} - {{ hero.name }}
+                ({{ hero.isSecret ? 'secret' : 'public' }})
+          </div>
+    \`
+  })
+  export class HeroListComponent {
+    heroes: Hero[];
+
+    constructor(heroService: HeroService)
+    {
+        this.heroes = heroService.getHeroes();
+    }
+
+  }
+
+// heroes component
+import { Component } from '@angular/core';
+  import { heroServiceProvider } from './hero.service.provider';
+
+  @Component({
+    selector: 'app-heroes',
+    template: \`
+              <h2>Heroes</h2>
+              <app-hero-list></app-hero-list>
+    \`
+  })
+  export class HeroesComponent { }
+
+
+// car service
+import { Injectable } from '@angular/core';
+
+  export class Engine {
+    public cylinders = 4;
+  }
+
+  export class Tires {
+    public make = 'Flinstone';
+    public model = 'Square';
+  }
+
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class Car {
+    public description = 'DI';
+
+    constructor(public engine: Engine, public tires: Tires) { }
+
+    drive() {
+      return \`\${this.description} car with \` +
+            \`\${this.engine.cylinders} cylinders and \${this.tires.make} tires.\`;
+    }
+
+  }
+
+// car no dependency injection
+import { Engine, Tires } from './car';
+
+export class Car {
+  public engine: Engine;
+  public tires: Tires;
+  public description = 'No DI';
+
+  constructor() {
+    this.engine = new Engine();
+    this.tires = new Tires();
+  }
+
+
+  drive() {
+    return \`\${this.description} car with \` +
+    \`\${this.engine.cylinders} cylinders and \${this.tires.make} tires.\`;
+  }
+
+}
+
+
+// car injector
+import { ReflectiveInjector } from '@angular/core';
+
+import { Car, Engine, Tires } from './car';
+import { Logger } from '../logger.service';
+
+export function useInjector() {
+  let injector: ReflectiveInjector;
+
+  injector = ReflectiveInjector.resolveAndCreate([Car, Engine, Tires]);
+  const car = injector.get(Car);
+  car.description = 'Injector';
+
+  injector = ReflectiveInjector.resolveAndCreate([Logger]);
+  const logger = injector.get(Logger);
+  logger.log('Injector car.drive() said: ' + car.drive());
+  return car;
+}
+
+// car factory
+import { Engine, Tires, Car } from './car';
+
+  // BAD PATTERN
+  export class CarFactory {
+
+    createCar() {
+      const car = new Car(this.createEngine(), this.createTires());
+      car.description = 'Factory';
+      return car;
+    }
+
+    createEngine() {
+      return new Engine();
+    }
+
+    createTires() {
+      return new Tires();
+    }
+
+  }
+
+// car creations
+// example with car and engine variations
+
+import { Car, Engine, Tires } from './car';
+
+// example 1
+export function simpleCar() {
+  const car = new Car(new Engine(), new Tires());
+  car.description = 'Simple';
+  return car;
+}
+
+// example 2
+class Engine2 {
+  constructor(public cylinders: number) { }
+}
+
+export function superCar() {
+  const bigCylinders = 12;
+  const car = new Car(new Engine2(bigCylinders), new Tires());
+  car.description = 'Super';
+  return car;
+}
+
+// example 3
+class MockEngine extends Engine {
+  cylinders = 8;
+}
+class MockTires extends Tires {
+  make = 'YokoGoodStone';
+}
+
+export function testCar() {
+  const car = new Car(new MockEngine(), new MockTires());
+  car.description = 'Test';
+  return car;
+}
+
+
+// injector component
+import { Component, Injector, OnInit } from '@angular/core';
+
+  import { Car, Engine, Tires } from '../car/car';
+  import { Hero } from '../heroes/hero';
+  import { HeroService } from '../heroes/hero.service';
+  import { heroServiceProvider } from '../heroes/hero.service.provider';
+  import { Logger } from '../logger.service';
+
+  @Component({
+    selector: 'app-injectors',
+    template: \`
+          <h2>Other Injections</h2>
+          <div id="car">{{ car.drive() }}</div>
+          <div id="hero">{{ hero.name }}</div>
+          <div id="rodent">{{ rodent }}</div>
+  \`
+  })
+  export class InjectorComponent implements OnInit {
+    car: Car;
+
+    heroService: HeroService;
+    hero: Hero;
+
+    constructor(private injector: Injector) { }
+
+    ngOnInit() {
+      this.car = this.injector.get(Car);
+      this.heroService = this.injector.get(HeroService);
+      this.hero = this.heroService.getHeroes()[0];
+    }
+
+    get rodent() {
+      const rousDontExist = \`R.O.U.S.'s? I don't think they exist\`;
+      return this.injector.get(ROUS, rousDontExist);
+    }
+
+  }
+
+  class ROUS {}
+
+
+// test component
+import { Component } from '@angular/core';
+
+import { Hero } from '../heroes/hero';
+import { HeroService } from '../heroes/hero.service';
+import { HeroListComponent } from '../heroes/hero-list.component';
+
+@Component({
+  selector: 'app-tests',
+  template: \`
+        <h2>Tests</h2>
+        <p id="tests">Tests {{ results.pass }}: {{ results.message }}</p>
+  \`
+})
+export class TestComponent {
+  results = runTests();
+
+}
+
+function runTests() {
+  const expectedHeroes = [ { name: 'Carmen' }, { name: 'Nils' } ];
+  const mockService = <HeroService> { getHeroes: () => expectedHeroes };
+
+  it('should have heroes when HeroListComponent created', () => {
+    const component = new HeroListComponent(mockService);
+    expect(component.heroes.length).toEqual(expectedHeroes.length);
+  });
+  return testResults;
+}
+
+let testName = '';
+let testResults = { pass : '', message : ''};
+
+function expect(actual: any) {
+  return {
+    toEqual: function(expected: any) {
+      testResults = actual === expected ?
+          { pass: 'passed', message: testName } :
+          { pass: 'failed',
+          message: \`\${testName}; expected \${actual} to equal \${expected}.\`};
+    }
+  };
+}
+
+function it(label: string, test: () => void) {
+  testName = label;
+  test();
+}
+
+
+// providers component
+import { Component, Inject, Injectable, OnInit } from '@angular/core';
+
+  import { AppConfig, APP_CONFIG, HERO_DI_CONFIG } from '../app.config';
+
+  import { HeroService } from '../heroes/hero.service';
+  import { heroServiceProvider } from '../heroes/hero.service.provider';
+
+  import { Logger } from '../logger.service';
+  import { UserService } from '../user.service';
+
+  const template = \`{{ log }}\`;
+
+  @Component({
+    selector: 'app-provider-1',
+    template: template,
+    providers: [ Logger ]
+  })
+  export class Provider1Component {
+    log: string;
+    constructor(logger: Logger) {
+      logger.log('hi from logger provided with logger class');
+      this.log = logger.logs[0];
+    }
+  }
+
+  ////////////////////////////////////////////////////////////
+
+  @Component({
+    selector: 'app-provider-3',
+    template: template,
+    providers: [ { provide: Logger, useClass: Logger } ]
+  })
+  export class Provider3Component {
+    log: string;
+    constructor(logger: Logger) {
+      logger.log('hi from logger provided with useClass: Logger');
+      this.log = logger.logs[0];
+    }
+  }
+
+  ////////////////////////////////////////////////////////////
+  export class BetterLogger extends Logger { }
+
+  @Component({
+    selector: 'app-provider-4',
+    template: template,
+    providers: [ { provide: Logger, useClass: BetterLogger } ]
+  })
+  export class Provider4Component {
+    log: string;
+    constructor(logger: Logger) {
+      logger.log('hi from logger provided with useClass: BetterLogger');
+      this.log = logger.logs[0];
+    }
+  }
+
+  ////////////////////////////////////////////////////////////
+
+  @Injectable()
+  export class EvenBetterLogger extends Logger {
+    constructor(private userService: UserService) { super(); }
+
+    log(message: string): void {
+      const name = this.userService.user.name;
+      super.log(\`Message to \${name}: \${message}\`);
+    }
+
+  }
+
+  @Component({
+    selector: 'app-provider-5',
+    template: template,
+    providers: [ UserService, { provide: Logger, useClass: EvenBetterLogger } ]
+  })
+  export class Provider5Component {
+    log: string;
+    constructor(logger: Logger) {
+      logger.log('hi from EvenBetter logger');
+      this.log = logger.logs[0];
+    }
+  }
+
+  ////////////////////////////////////////////////////////////
+
+  export class NewLogger extends Logger { }
+
+  export class OldLogger {
+    logs: string[] = [];
+    log(message: string): void {
+      throw new Error('Should not call the old logger!');
+    }
+  }
+
+  @Component({
+    selector: 'app-provider-6a',
+    template: template,
+    providers: [ NewLogger, { provide: OldLogger, useClass: NewLogger } ]
+  })
+  export class Provider6aComponent {
+    log: string;
+    constructor(newLogger: NewLogger, oldLogger: OldLogger) {
+      if (newLogger === oldLogger) {
+        throw new Error('expected the two loggers to be different instances.');
+      }
+      oldLogger.log('hi oldlogger (but we want newlogger)');
+      this.log = newLogger.logs[0] || oldLogger.logs[0];
+    }
+  }
+
+  ////////////////////////////////////////////////////////////
+
+  @Component({
+    selector: 'app-provider-6b',
+    template: template,
+    providers: [ NewLogger, { provide: OldLogger, useExisting: NewLogger } ]
+  })
+  export class Provider6bComponent {
+    log: string;
+    constructor(newLogger: NewLogger, oldLogger: OldLogger) {
+      if (newLogger !== oldLogger) {
+        throw new Error('expected the tow loggers to be the same instance');
+      }
+      oldLogger.log('hi from newlogger (via aliased oldlogger)');
+      this.log = newLogger.logs[0];
+    }
+  }
+
+  ////////////////////////////////////////////////////////////
+
+  export function SilentLoggerFn() { }
+
+  const silentLogger = {
+    logs: ['Silent logger says "shhhhhh!", provided with "usevalue"'],
+    log: SilentLoggerFn
+  };
+
+  @Component({
+    selector: 'app-provider-7',
+    template: template,
+    providers: [ { provide: Logger, useValue: silentLogger } ]
+  })
+  export class Provider7Component {
+    log: string;
+    constructor(logger: Logger) {
+      logger.log('hi from logger provided with usevalue');
+      this.log = logger.logs[0];
+    }
+  }
+
+  ////////////////////////////////////////////////////////////
+
+  @Component({
+    selector: 'app-provider-8',
+    template: template,
+    providers: [ heroServiceProvider, Logger, UserService ]
+  })
+  export class Provider8Component {
+    log = 'hero service injected successfully via heroserviceprovider';
+    constructor(heroService: HeroService) { }
+  }
+
+  ////////////////////////////////////////////////////////////
+
+  @Component({
+    selector: 'app-provider-9',
+    template: template,
+    providers: [ { provide: APP_CONFIG, useValue: HERO_DI_CONFIG } ]
+  })
+  export class Provider9Component implements OnInit {
+    log: string;
+    constructor(@Inject(APP_CONFIG) private config: AppConfig ) { }
+
+    ngOnInit() {
+      this.log = 'app-config application title is ' + this.config.title;
+    }
+  }
+
+  ////////////////////////////////////////////////////////////
+
+  import { Optional } from '@angular/core';
+
+  const some_message = 'hi from injected logger';
+
+  @Component({
+    selector: 'app-provider-10',
+    template: template,
+    providers: [ { provide: Logger, useValue: null } ]
+  })
+  export class Provider10Component implements OnInit {
+    log: string;
+    constructor( @Optional() private logger: Logger) {
+      if (this.logger) {
+        this.logger.log(some_message);
+      }
+    }
+
+    ngOnInit() {
+      this.log = this.logger ? this.logger.logs[0] : 'Optional logger was not available';
+    }
+
+
+  }
+
+  ////////////////////////////////////////////////////////////
+
+  @Component({
+    selector: 'app-providers',
+    template: \`
+      <h2>Provider Variations</h2>
+      <div id="p1"><app-provider-1></app-provider-1></div>
+      <div id="p3"><app-provider-3></app-provider-3></div>
+      <div id="p4"><app-provider-4></app-provider-4></div>
+      <div id="p5"><app-provider-5></app-provider-5></div>
+      <div id="p6a"><app-provider-6a></app-provider-6a></div>
+      <div id="p6b"><app-provider-6b></app-provider-6b></div>
+      <div id="p7"><app-provider-7></app-provider-7></div>
+      <div id="p8"><app-provider-8></app-provider-8></div>
+      <div id="p9"><app-provider-9></app-provider-9></div>
+      <div id="p10"><app-provider-10></app-provider-10></div>
+    \`
+  })
+  export class ProvidersComponent { }
+
+
+// providers module
+import { NgModule } from '@angular/core';
+
+  import {
+    Provider1Component,
+    Provider3Component,
+    Provider4Component,
+    Provider5Component,
+    Provider6aComponent,
+    Provider6bComponent,
+    Provider7Component,
+    Provider8Component,
+    Provider9Component,
+    Provider10Component,
+    ProvidersComponent
+  } from './providers.component';
+
+  @NgModule({
+    declarations: [
+          Provider1Component,
+          Provider3Component,
+          Provider4Component,
+          Provider5Component,
+          Provider6aComponent,
+          Provider6bComponent,
+          Provider7Component,
+          Provider8Component,
+          Provider9Component,
+          Provider10Component,
+          ProvidersComponent
+    ],
+    exports: [ ProvidersComponent ]
+  })
+  export class ProvidersModule { }
+
+
+// app module
+import { NgModule } from '@angular/core';
+  import { BrowserModule } from '@angular/platform-browser';
+
+  import { ProvidersModule } from './providers/providers.module';
+
+  import { AppComponent } from './app.component';
+  import { APP_CONFIG, HERO_DI_CONFIG } from './app.config';
+  import { HeroListComponent } from './heroes/hero-list.component';
+  import { HeroesComponent } from './heroes/heroes.component';
+  import { CarComponent } from './car/car.component';
+  import { InjectorComponent } from './injector/injector.component';
+  import { TestComponent } from './test/test.component';
+
+  import { Logger } from './logger.service';
+  import { UserService } from './user.service';
+
+
+
+  @NgModule({
+    declarations: [
+      AppComponent,
+      HeroListComponent,
+      HeroesComponent,
+      CarComponent,
+      InjectorComponent,
+      TestComponent
+    ],
+    imports: [
+      BrowserModule,
+      ProvidersModule
+    ],
+    providers: [ Logger, UserService, { provide: APP_CONFIG, useValue: HERO_DI_CONFIG} ],
+    bootstrap: [ AppComponent ]
+  })
+  export class AppModule { }
+
+
+// app component
+import { Component, Inject } from '@angular/core';
+
+  import { AppConfig } from './app-config';
+  import { APP_CONFIG } from './app.config';
+  import { UserService } from './user.service';
+
+  @Component({
+    selector: 'app-root',
+    template: \`
+            <h1>{{ title }}</h1>
+            <app-car></app-car>
+            <app-injectors><app-injectors>
+            <app-tests><app-tests>
+            <h2>User</h2>
+            <p id="user">
+            {{ userInfo }}
+              <button (click)="nextUser()">Next User</button>
+            </p>
+
+            <app-heroes id="authorized" *ngIf="isAuthorized"></app-heroes>
+            <app-heroes id="unauthorized" *ngIf="!isAuthorized"></app-heroes>
+            <app-providers></app-providers>
+
+    \`
+  })
+  export class AppComponent {
+   title: string;
+
+    constructor(@Inject(APP_CONFIG) config: AppConfig, private userService: UserService) {
+            this.title = config.title;
+    }
+
+    get isAuthorized() {
+      return this.user.isAuthorized;
+    }
+
+    nextUser() {
+      this.userService.getNewUser();
+    }
+
+    get user() {
+      return this.userService.user;
+    }
+
+    get userInfo() {
+      return \`Current user, \${this.user.name}, is \` +
+      \`\${this.isAuthorized ? '' : 'not'} authorized.\`;
+    }
+
+}
+
+
+// httpclient
+// inmemory data service
+
+
+
+
+
+  `,
+  blockQuote: `
+  Wir beabsichtigen zum Mond zu fliegen in diesem Jahrzehnt und andere Sachen zu tun, nicht weil sie einfach sind,
+  sondern weil sie schwer sind, weil das Ziel uns dienen wird zu organisieren und messen die Beste unserer Energien
+  und Kompetenzen, weil diese Herausforderung ist eine welche wir annehmen, eine die wir nicht vertagen wollen
+  und eine die wir vorhaben zu gewinnen.
+  `,
+  imageFooterUrl: 'assets/img/post8.jpg',
+  footerQuote: 'Wir sind alle miteinander verbunden; zueinander biologisch. Zu der Erde, chemisch. Zum Rest des Universums, atomar.'
+}
   ];
 
   constructor( private route: ActivatedRoute, private router: Router,
@@ -6321,7 +7065,10 @@ import { Component, OnInit } from '@angular/core';
     if (this.articleId === 'angular-basics-1') {
       this.articleId = 7;
     }
-    if (!(+this.articleId) || +this.articleId > 7) {
+    if (this.articleId === 'angular-basics-2') {
+      this.articleId = 8;
+    }
+    if (!(+this.articleId) || +this.articleId > 8) {
       this.isNotFound = true;
       this.router.navigate(['page-not-found']);
     }
