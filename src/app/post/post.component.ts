@@ -10035,7 +10035,986 @@ class CanLoadGuard implements CanLoad {
 
 
 // testing
+// banner inline component
+import { Component } from '@angular/core';
 
+@Component({
+  selector: 'app-banner-inline',
+  template: \`
+    <h1>{{ title }}</h1>
+  \`
+})
+export class BannerInlineComponent {
+    title = 'Test Tour of Heroes';
+
+}
+
+
+// banner inline component tests
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { DebugElement } from '@angular/core';
+
+import { BannerInlineComponent } from './banner-inline.component';
+
+describe('BannerInlineComponent (inline template)', () => {
+  let component: BannerInlineComponent;
+  let fixture: ComponentFixture<BannerInlineComponent>;
+  let de: DebugElement;
+  let el: HTMLElement;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      declarations: [ BannerInlineComponent ] // declare test component
+    })
+    .compileComponents();
+  });
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(BannerInlineComponent);
+    component = fixture.componentInstance; // component test instance
+    // query for title h1 by css element selector
+    de = fixture.debugElement.query(By.css('h1'));
+    el = de.nativeElement;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('should display original title', () => {
+    expect(el.textContent).toContain(component.title);
+  });
+
+  it('should display a different test title', () => {
+    component.title = 'Hi baby';
+    fixture.detectChanges();
+    expect(el.textContent).toContain('Hi baby');
+  });
+
+});
+
+
+// banner component autochangedetect tests
+import { async } from '@angular/core/testing';
+  import { ComponentFixtureAutoDetect } from '@angular/core/testing';
+  import { ComponentFixture, TestBed } from '@angular/core/testing';
+  import { By } from '@angular/platform-browser';
+  import { DebugElement } from '@angular/core';
+
+  import { BannerComponent } from './banner.component';
+
+  describe('Banner Component (AutoChangeDetect)', () => {
+      let comp: BannerComponent;
+      let fixture: ComponentFixture<BannerComponent>;
+      let de: DebugElement;
+      let el: HTMLElement;
+
+      beforeEach(async(() => {
+        TestBed.configureTestingModule({
+          declarations: [ BannerComponent ],
+          providers: [
+            { provide: ComponentFixtureAutoDetect, useValue: true }
+          ]
+        })
+        .compileComponents();
+      }));
+
+      beforeEach(() => {
+        fixture = TestBed.createComponent(BannerComponent);
+        comp = fixture.componentInstance;
+        de = fixture.debugElement.query(By.css('h1'));
+        el = de.nativeElement;
+      });
+
+      it('should display original title', () => {
+        expect(el.textContent).toContain(comp.title);
+      });
+
+      it('should still see original title after comp.title change', () => {
+        const oldTitle = comp.title;
+        comp.title = 'Hi Carmen';
+        expect(el.textContent).toContain(oldTitle);
+      });
+
+      it('should display updated title after detectChanges', () => {
+        comp.title = 'Hi Carmen';
+        fixture.detectChanges();
+        expect(el.textContent).toContain(comp.title);
+      });
+
+  });
+
+
+// banner component templateurl tests
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { DebugElement } from '@angular/core';
+
+import { BannerComponent } from './banner.component';
+
+describe('BannerComponent (TemplateURL)', () => {
+  let comp: BannerComponent;
+  let fixture: ComponentFixture<BannerComponent>;
+  let de: DebugElement;
+  let el: HTMLElement;
+
+  // async beforeeach
+  beforeEach(async(() => {
+    TestBed.configureTestingModule({
+      declarations: [ BannerComponent ] // declare test component
+    })
+    .compileComponents(); // compile template and css
+  }));
+
+  // synchronous beforeeach
+  beforeEach(() => {
+    fixture = TestBed.createComponent(BannerComponent);
+    comp = fixture.componentInstance; // banner component test instance
+    // query for title h1 by css element selector
+    de = fixture.debugElement.query(By.css('h1'));
+    el = de.nativeElement;
+    // fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(comp).toBeTruthy();
+  });
+
+  it('no title in DOM until manually call \`detectChanges\`', () => {
+    expect(el.textContent).toEqual('');
+  });
+
+  it('should display original title', () => {
+    fixture.detectChanges();
+    expect(el.textContent).toContain(comp.title);
+  });
+
+  it('should display a different test title', () => {
+    comp.title = 'Hi Baby!';
+    fixture.detectChanges();
+    expect(el.textContent).toContain('Hi Baby!');
+  });
+
+});
+
+
+// dashboardhero component
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+
+  import { Hero } from '../model/hero';
+
+  @Component({
+    selector: 'app-dashboard-hero',
+    template: \`
+      <div (click)="click()" class="hero">
+            {{ hero.name | uppercase }}
+      </div>
+    \`,
+    styleUrls: ['./dashboard-hero.component.css']
+  })
+  export class DashboardHeroComponent  {
+    @Input() hero: Hero;
+    @Output() selected = new EventEmitter<Hero>();
+
+    click() {
+      this.selected.emit(this.hero);
+    }
+
+  }
+
+
+// dasboardhero component tests
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { DebugElement } from '@angular/core';
+
+import { addMatchers, click } from '../../testing';
+
+import { DashboardHeroComponent } from './dashboard-hero.component';
+import { Hero } from '../model/hero';
+
+describe('DasboardHeroComponent', () => {
+  let component: DashboardHeroComponent;
+  let expectedHero: Hero;
+  let fixture: ComponentFixture<DashboardHeroComponent>;
+  let heroEl: DebugElement;
+
+  // async beforeeach
+  beforeEach(async(() => {
+    TestBed.configureTestingModule({
+      declarations: [ DashboardHeroComponent ]
+    })
+    .compileComponents(); // compile template and css
+  }));
+
+  // synchronous beforeeach
+  beforeEach(() => {
+    fixture = TestBed.createComponent(DashboardHeroComponent);
+    component = fixture.componentInstance;
+    heroEl = fixture.debugElement.query(By.css('.hero')); // find hero element
+
+    // pretend wired to something that supplied a hero
+    expectedHero = new Hero(42, 'Nils-Holger');
+    component.hero = expectedHero;
+    fixture.detectChanges(); // trigger initial data binding
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('should display hero name', () => {
+    const expectedPipedName = expectedHero.name.toUpperCase();
+    expect(heroEl.nativeElement.textContent).toContain(expectedPipedName);
+  });
+
+  it('should raised selected event when clicked', () => {
+    let selectedHero: Hero;
+    component.selected.subscribe((hero: Hero) => selectedHero = hero);
+
+    heroEl.triggerEventHandler('click', null);
+    expect(selectedHero).toBe(expectedHero);
+  });
+
+  it('should raised selected event when clicked', () => {
+    let selectedHero: Hero;
+    component.selected.subscribe((hero: Hero) => selectedHero = hero);
+
+    click(heroEl); // triggereventhandler helper
+    expect(selectedHero).toBe(expectedHero);
+  });
+});
+
+describe('DashboardHeroComponent when inside a test host', () => {
+    let testHost: TestHostComponent;
+    let fixture: ComponentFixture<TestHostComponent>;
+    let heroEl: DebugElement;
+
+    beforeEach(async() => {
+      TestBed.configureTestingModule({
+        declarations: [ DashboardHeroComponent, TestHostComponent ] // declare both
+      }).compileComponents();
+    });
+
+    beforeEach(() => {
+      // create testhostcomponent instead of dashboardherocomponent
+      fixture = TestBed.createComponent(TestHostComponent);
+      testHost = fixture.componentInstance;
+      heroEl = fixture.debugElement.query(By.css('.hero')); // find hero
+      fixture.detectChanges(); // trigger initial data binding
+    });
+
+    it('should display hero name', () => {
+      const expectedPipedName = testHost.hero.name.toUpperCase();
+      expect(heroEl.nativeElement.textContent).toContain(expectedPipedName);
+    });
+
+    it('should raise selected event when clicked', () => {
+      click(heroEl);
+      expect(testHost.selectedHero).toBe(testHost.hero);
+    });
+
+});
+
+//// test host component ////
+import { Component } from '@angular/core';
+
+@Component({
+  template: \`
+          <app-dashboard-hero [hero]="hero"
+          (selected)="onSelected($event)">
+          </app-dashboard-hero>
+  \`
+})
+class TestHostComponent {
+  hero = new Hero(42, 'Nils-Holger');
+  selectedHero: Hero;
+  onSelected(hero: Hero) {
+    this.selectedHero = hero;
+  }
+}
+
+
+// dashboard component
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+
+import { Hero } from '../model/hero';
+import { HeroService } from '../model/hero.service';
+
+@Component({
+  selector: 'app-dashboard',
+  template: \`
+      <h2 highlight>{{ title }}</h2>
+
+      <div class="grid grid-pad">
+        <app-dashboard-hero *ngFor="let hero of heroes" class="col-1-4"
+                            [hero]="hero" (selected)="gotoDetail($event)">
+        </app-dashboard-hero>
+      </div>
+  \`,
+  styleUrls: ['./dashboard.component.css']
+})
+export class DashboardComponent implements OnInit {
+
+  heroes: Hero[] = [];
+
+  constructor(private router: Router,
+              private heroService: HeroService) { }
+
+  ngOnInit() {
+    this.heroService.getHeroes()
+                    .then(heroes => this.heroes = heroes.slice(1, 5));
+  }
+
+  gotoDetail(hero: Hero) {
+    const url = \`/heroes/\${hero.id}\`;
+    this.router.navigateByUrl(url);
+  }
+
+  get title() {
+    const count = this.heroes.length;
+    return count === 0 ? 'No Heroes' : count === 1 ? 'Top Hero' : \`Top \${count} Heroes\`;
+  }
+
+}
+
+
+// dasboard component tests
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { async, inject, ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { Router } from '@angular/router';
+
+import { addMatchers, click } from '../../testing';
+import { HeroService } from '../model';
+import { FakeHeroService } from '../model/testing';
+
+import { DashboardComponent } from './dashboard.component';
+import { DashboardModule } from './dashboard.module';
+
+class RouterStub {
+  navigateByUrl(url: string) {
+    return url;
+  }
+}
+
+beforeEach( addMatchers );
+
+let component: DashboardComponent;
+let fixture: ComponentFixture<DashboardComponent>;
+
+//// deep ////
+describe('DashboardComponent (deep)', () => {
+  beforeEach(() => {
+        TestBed.configureTestingModule({
+          imports: [ DashboardModule ]
+        });
+  });
+
+  const clickForDeep = () => {
+    const heroEl = fixture.debugElement.query(By.css('.hero'));
+    click(heroEl);
+  };
+
+  compileAndCreate();
+  tests(clickForDeep);
+
+});
+
+
+
+//// shallow ////
+describe('DasboardComponent (shallow)', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [ DashboardModule ],
+      schemas: [ NO_ERRORS_SCHEMA ]
+    });
+});
+
+const clickForShallow = () => {
+const heroEl = fixture.debugElement.query(By.css('app-dashboard-hero'));
+heroEl.triggerEventHandler('selected', component.heroes[0]);
+};
+
+compileAndCreate();
+tests(clickForShallow);
+
+});
+
+function compileAndCreate() {
+  beforeEach(async(() => {
+        TestBed.configureTestingModule({
+          providers: [
+            { provide: HeroService, useClass: FakeHeroService },
+            { provide: Router, useClass: RouterStub }
+          ]
+        })
+        .compileComponents().then(() => {
+              fixture = TestBed.createComponent(DashboardComponent);
+              component = fixture.componentInstance;
+        });
+  }));
+}
+
+function tests(heroClick: Function) {
+
+    it('should not have heroes before ngoninit', () => {
+        expect(component.heroes.length).toBe(0,
+        'should not have heroes before ngoninit');
+    });
+
+    it('should not have heroes immediately after ngoninit', () => {
+        fixture.detectChanges(); // runs initial lifecycle hooks
+        expect(component.heroes.length).toBe(0,
+        'should not have heroes until service promise resolves');
+    });
+
+    describe('after get dashboard heroes', () => {
+      // trigger component so it gets heroes and binds to them
+      beforeEach(async(() => {
+        fixture.detectChanges(); // runs ngoninit getheroes
+        fixture.whenStable() // no need for lastpromise hack
+        .then(() => fixture.detectChanges()); // bind to heroes
+      }));
+
+      it('should have heroes', () => {
+        expect(component.heroes.length).toBeGreaterThan(0,
+        'should have heroes after service promise resolves');
+      });
+
+      it('should display 4 heroes', () => {
+          // find and examine heroes
+          // look for them in the dom by css class
+          const heroes = fixture.debugElement.queryAll(By.css('app-dashboard-hero'));
+          expect(heroes.length).toBe(4, 'should display 4 heroes');
+      });
+
+      it('should tell router to navigate when hero clicked',
+          inject([Router], (router: Router) => {
+            const spy = spyOn(router, 'navigateByUrl');
+
+            heroClick(); // trigger click onf first inner <div class="hero">
+
+            // args passed to router.navigateByUrl()
+            const navArgs = spy.calls.first().args[0];
+
+            // expecting to navigate to id of the component's first hero
+            const id = component.heroes[0].id;
+            console.log(navArgs);
+            console.log('/heroes/' + id);
+            expect(navArgs).toBe('/heroes/' + id, 'should nav to herodetail for first hero');
+          }));
+
+    });
+
+}
+
+
+// twain service
+import { Injectable } from '@angular/core';
+
+  const quotes = [
+    \`Always do the right thing. This will gratify some people and astonish the rest.\`,
+    \`I have never let my schooling interfere with my education.\`,
+    \`Don't go around saying the world owes you a living. The world owes you nothing.
+    It was here first.\`,
+    \`Whenever you find yourself on the side of majority, it is time to pause and reflect.\`,
+    \`If you tell the truth, you don't have to remember anything.\`,
+    \`Clothes make the man. Naked people have little or no influence on society.\`,
+    \`It's not the size of the dog in the fight, it's the size of the fight in the dog.\`,
+    \`Truth is stranger than fiction, but it is because fiction is obliged to stick to
+    possibilities; Truth isn't.\`,
+    \`The man who does not read a good book has no advantage over the man who cannot
+    read them.\`,
+    \`Get your facts first, and then you can distort them as much as you please.\`
+  ];
+
+  @Injectable()
+  export class TwainService {
+    private next = 0;
+
+    getQuote(): Promise<string> {
+      return new Promise(resolve => {
+        setTimeout(() => resolve(this.nextQuote()), 500);
+      });
+    }
+
+    private nextQuote() {
+      if (this.next === quotes.length) {
+        this.next = 0;
+      }
+      return quotes[ this.next++ ];
+    }
+
+  }
+
+
+// highlight directive
+import { Directive, ElementRef, Input, OnChanges } from '@angular/core';
+
+@Directive({
+  selector: '[highlight]'
+})
+export class HighlightDirective implements OnChanges {
+  @Input('highlight') bgColor: string;
+
+  defaultColor = 'rgb(211, 211, 211)';
+
+  constructor(private el: ElementRef) {
+    el.nativeElement.style.customProperty = true;
+   }
+
+  ngOnChanges() {
+    this.el.nativeElement.style.backgroundColor = this.bgColor || this.defaultColor;
+  }
+
+}
+
+
+// title case pipe
+import { Pipe, PipeTransform } from '@angular/core';
+
+@Pipe({
+  name: 'titleCase', pure: false
+})
+export class TitleCasePipe implements PipeTransform {
+
+  transform(input: string): string {
+    return input.length === 0 ? '' :
+           input.replace(/wS*/g,
+            (txt => txt[0].toUpperCase() + txt.substr(1).toLowerCase() ));
+  }
+
+}
+
+
+// shared module
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+
+import { HighlightDirective } from './highlight.directive';
+import { TitleCasePipe } from './title-case.pipe';
+import { TwainComponent } from './twain.component';
+
+@NgModule({
+  imports: [
+    CommonModule
+  ],
+  exports: [
+    CommonModule,
+    FormsModule,
+    HighlightDirective,
+    TitleCasePipe,
+    TwainComponent
+  ],
+  declarations: [HighlightDirective, TitleCasePipe, TwainComponent]
+})
+export class SharedModule { }
+
+
+// twain component
+import { Component, OnInit } from '@angular/core';
+
+import { TwainService } from './twain.service';
+
+@Component({
+  selector: 'app-twain-quote',
+  template: \`
+        <p class="twain"><i>{{ quote }}</i></p>
+  \`
+})
+export class TwainComponent implements OnInit {
+  intervalId: number;
+  quote = '...';
+
+  constructor(private twainService: TwainService) { }
+
+  ngOnInit() {
+    this.twainService.getQuote().then(quote => this.quote = quote);
+  }
+
+}
+
+
+// twain component tests
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { fakeAsync, tick } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { DebugElement } from '@angular/core';
+
+import { TwainComponent } from './twain.component';
+import { TwainService } from './twain.service';
+
+
+describe('TwainComponent', () => {
+  let component: TwainComponent;
+  let fixture: ComponentFixture<TwainComponent>;
+
+  let spy: jasmine.Spy;
+  let de: DebugElement;
+  let el: HTMLElement;
+  let twainService: TwainService; // actually injected service
+
+  const testQuote = 'The will to win is nothing without the will to prepare.';
+
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      declarations: [ TwainComponent ],
+      providers: [ TwainService ]
+    })
+    .compileComponents();
+
+    fixture = TestBed.createComponent(TwainComponent);
+    component = fixture.componentInstance;
+
+    // twainservice actually injected into component
+    twainService = fixture.debugElement.injector.get(TwainService);
+
+    // setup spy on \`getquote\` method
+    spy = spyOn(twainService, 'getQuote').and.returnValue(Promise.resolve(testQuote));
+
+    // get twain quote element by css selector (e.g. by class name)
+    de = fixture.debugElement.query(By.css('.twain'));
+    el = de.nativeElement;
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('should not show quote before OnInit', () => {
+    expect(el.textContent).toBe('', 'nothing displayed');
+    expect(spy.calls.any()).toBe(false, 'getQuote not yet called');
+  });
+
+  it('should still not show quote after component initialized', () => {
+    fixture.detectChanges();
+    // getquote service is async => still has not returned with quote
+    expect(el.textContent).toBe('...', 'no quote yet');
+    expect(spy.calls.any()).toBe(true, 'getQuote called');
+  });
+
+  it('should show quote after getQuote promise (async)', async(() => {
+    fixture.detectChanges();
+
+    fixture.whenStable().then(() => { // wait for async getquote
+        fixture.detectChanges();      // update view with quote
+        expect(el.textContent).toBe(testQuote);
+    });
+  }));
+
+  it('should show quote after getQuote promise (fakeAsync)', fakeAsync(() => {
+      fixture.detectChanges();
+      tick(); // wait for async getquote
+      fixture.detectChanges();
+      expect(el.textContent).toBe(testQuote);
+  }));
+
+  it('should show quote after getQuote promise (done)', (done: any) => {
+    fixture.detectChanges();
+
+    // get spy promise and wait for it to resolve
+    spy.calls.mostRecent().returnValue.then(() => {
+        fixture.detectChanges(); // update view with quote
+        expect(el.textContent).toBe(testQuote);
+        done();
+    });
+  });
+
+});
+
+
+// welcome component
+import { Component, OnInit } from '@angular/core';
+
+  import { UserService } from './model/user.service';
+
+  @Component({
+    selector: 'app-welcome',
+    template: \`
+          <h3 class="welcome"><i>{{ welcome }}</i></h3>
+    \`
+  })
+  export class WelcomeComponent implements OnInit {
+    welcome = '--- not initialized yet ---';
+
+    constructor(private userService: UserService) { }
+
+    ngOnInit() {
+      this.welcome = this.userService.isLoggedIn ?
+      'Welcome, ' + this.userService.user.name : 'Please log in.';
+    }
+
+  }
+
+
+// welcome component tests
+import { async, inject, ComponentFixture, TestBed } from '@angular/core/testing';
+  import { By } from '@angular/platform-browser';
+  import { DebugElement } from '@angular/core';
+
+  import { WelcomeComponent } from './welcome.component';
+  import { UserService } from './model';
+
+  describe('WelcomeComponent', () => {
+    let component: WelcomeComponent;
+    let fixture: ComponentFixture<WelcomeComponent>;
+    let componentUserService: UserService; // actually injected service
+    let userService: UserService; // testbed injected service
+    let de: DebugElement; // debugelement with welcome message
+    let el: HTMLElement; // dom element with welcome message
+
+    let userServiceStub: {
+      isLoggedIn: boolean;
+      user: { name: string }
+    };
+
+    beforeEach(async(() => {
+      // stub userservice for test purposes
+      userServiceStub = {
+        isLoggedIn: true,
+        user: { name: 'Carmen Labelle' }
+      };
+
+      TestBed.configureTestingModule({
+        declarations: [ WelcomeComponent ],
+        providers: [ {provide: UserService, useValue: userServiceStub } ]
+      })
+      .compileComponents();
+    }));
+
+    beforeEach(() => {
+      fixture = TestBed.createComponent(WelcomeComponent);
+      component = fixture.componentInstance;
+      // userservice actually injected into component
+      userService = fixture.debugElement.injector.get(UserService);
+      componentUserService = userService;
+      // userservice from root injector
+      userService = TestBed.get(UserService);
+
+      // get welcome element by css selector (e.g. by class name)
+      de = fixture.debugElement.query(By.css('.welcome'));
+      el = de.nativeElement;
+
+      // fixture.detectChanges();
+    });
+
+    it('should create', () => {
+      expect(component).toBeTruthy();
+    });
+
+    it('should welcome the user', () => {
+      fixture.detectChanges();
+      const content = el.textContent;
+      expect(content).toContain('Welcome', '"Welcome ..."');
+      expect(content).toContain('Carmen Labelle', 'expected name');
+    });
+
+    it('should welcome "Nils-Holger"', () => {
+      userService.user.name = 'Nils-Holger'; // welcome message hasn't been shown yet
+      fixture.detectChanges();
+      expect(el.textContent).toContain('Nils-Holger');
+    });
+
+    it('should request login if not logged in', () => {
+      userService.isLoggedIn = false; // welcome message hasn't been shown yet
+      fixture.detectChanges();
+      const content = el.textContent;
+      expect(content).not.toContain('Welcome', 'not welcomed');
+      expect(content).toMatch(/log in/i, '"log in"');
+    });
+
+    it(\`should inject the component's UserService instance\`, () => {
+      inject([UserService], (service: UserService) => {
+        expect(service).toBe(componentUserService);
+      });
+    });
+
+    it('TestBed and Component UserService should be the same', () => {
+      expect(userService === componentUserService).toBe(true);
+    });
+
+    it('stub object and injected UserService should not be the same', () => {
+      expect(userServiceStub === userService).toBe(false);
+      // changing stub object has no effect on injected service
+      userServiceStub.isLoggedIn = false;
+      expect(userService.isLoggedIn).toBe(true);
+    });
+
+  });
+
+
+// testing utilities: global jasmine
+import jasmineRequire from 'jasmine-core/lib/jasmine-core/jasmine.js';
+
+window['jasmineRequire'] = jasmineRequire;
+
+
+// testing utilities: jasmine matchers definition
+declare namespace jasmine {
+  interface Matchers<T> {
+    toHaveText(actual: any, expectationFailOutput?: any): jasmine.CustomMatcher;
+  }
+}
+
+
+// testing utilities: jasmine matchers implementation
+/// <reference path="./jasmine-matchers.d.ts" />
+
+
+  //// Jasmine Custom Matchers ////
+  // be sure to extend jasmine-matchers.d.ts when adding matchers
+
+  export function addMatchers(): void {
+    jasmine.addMatchers({
+      toHaveText: toHaveText
+    });
+  }
+
+  function toHaveText(): jasmine.CustomMatcher {
+
+    return {
+      compare: function(actual: any,
+                        expectedText: string,
+                        expectationFailOutput?: any): jasmine.CustomMatcherResult {
+              const actualText = elementText(actual);
+              const pass = actualText.indexOf(expectedText) > -1;
+              const message = pass ? '' : composeMessage();
+              return { pass, message };
+
+              function composeMessage() {
+                const a = (actualText.length < 100 ? actualText :
+                  actualText.substr(0, 100) + '...');
+                const efo = expectationFailOutput ? \` '\${expectationFailOutput}'\` : '';
+                return \`Expected element to have text content '\${expectedText}'
+                        instead of '\${a}'\${efo}\`;
+              }
+      }
+    };
+  }
+
+  function elementText(n: any): string {
+    if (n instanceof Array) {
+      return n.map(elementText).join('');
+    }
+    if (n.nodeType === Node.COMMENT_NODE) {
+      return '';
+    }
+    if (n.nodeType === Node.ELEMENT_NODE && n.hasChildNodes()) {
+      return elementText(Array.prototype.slice.call(n.childNodes));
+    }
+    if (n.nativeElement) {
+      n = n.nativeElement;
+    }
+    return n.textContent;
+  }
+
+
+// testing utilities: router stubs
+export { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/router';
+
+import { Component, Directive, Injectable, Input } from '@angular/core';
+import { NavigationExtras } from '@angular/router';
+
+
+@Directive({
+  selector: '[routerLink]',
+  host: {
+    '(click)': 'onClick()'
+  }
+})
+export class RouterLinkStubDirective {
+  @Input('routerLink') linkParams: any;
+  navigatedTo: any = null;
+
+  onClick() {
+    this.navigatedTo = this.linkParams;
+  }
+}
+
+@Component({ selector: 'router-outlet', template: ''})
+export class RouterOutletStubComponent { }
+
+@Injectable()
+export class RouterStub {
+  navigate(commands: any[], extras?: NavigationExtras) { }
+}
+
+// only implements params and part of snapshot.parammap
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { convertToParamMap, ParamMap } from '@angular/router';
+
+@Injectable()
+export class ActivatedRouteStub {
+
+  // activatedroute.parammap is observable
+  private subject = new BehaviorSubject(convertToParamMap(this.testParamMap));
+  paramMap = this.subject.asObservable();
+
+  // test parameters
+  private _testParamMap: ParamMap;
+  get testParamMap() {
+    return this._testParamMap;
+  }
+  set testParamMap(params: {}) {
+    this._testParamMap = convertToParamMap(params);
+    this.subject.next(this._testParamMap);
+  }
+
+  // activatedroute.snapshot.parammap
+  get snapshot() {
+    return { paramMap: this.testParamMap };
+  }
+
+}
+
+
+// testing utilirties: barrel + more utilities
+import { DebugElement } from '@angular/core';
+import { tick, ComponentFixture } from '@angular/core/testing';
+
+export * from './jasmine-matchers';
+export * from './router-stubs';
+
+
+//// short utilities ////
+
+/* wait a tick, then detect changes */
+export function advance(f: ComponentFixture<any>): void {
+  tick();
+  f.detectChanges();
+}
+
+//// create a custom dom event the old fashioned way ////
+export function newEvent(eventName: string, bubbles = false, cancelable = false) {
+  const evt = document.createEvent('CustomEvent');
+  evt.initCustomEvent(eventName, bubbles, cancelable, null);
+  return evt;
+}
+
+export const ButtonClickEvents = {
+  left: { button: 0 },
+  right: { button: 2 }
+};
+
+// simulate element click. defaults to mouse left-button click event
+export function click(el: DebugElement | HTMLElement,
+                      eventObj: any = ButtonClickEvents.left): void {
+    if (el instanceof HTMLElement) {
+        el.click();
+    } else {
+        el.triggerEventHandler('click', eventObj);
+    }
+}
+
+
+// basic intro to typescript
 
 
   `,
