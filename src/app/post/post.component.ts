@@ -6293,9 +6293,9 @@ import { Component, OnInit } from '@angular/core';
   id: 8,
   imageHeaderUrl: 'url(assets/img/post8-bg.jpg)',
   heading: 'Angular 8/9, Basis- Teil 2',
-  subHeading: 'DI, HTTP, Routing, QR, Testing, TS, API',
+  subHeading: 'DI, HTTP, Routing, QR, Testing, TS',
   metaPublishedDate: 'am 26 Dezember, 2019',
-  sectionHeading: 'Dependency Injection, Http Client, Routing, Quick Reference, Testing, Typescript, API + Template Syntax',
+  sectionHeading: 'Dependency Injection, Http Client, Routing, Quick Reference, Testing, Typescript',
   code: `
 // in memory collection
 import { Hero } from './hero';
@@ -11015,7 +11015,1190 @@ export function click(el: DebugElement | HTMLElement,
 
 
 // basic intro to typescript
+// constant named properties
+const Foo = 'Foo';
+const Bar = 'Bar';
 
+let x = {
+  [Foo]: 100,
+  [Bar]: 'hello world'
+};
+
+let a = x[Foo]; // type number
+let b = x[Bar]; // type string
+
+
+// strict class initialization
+export class TypescriptComponent {
+
+  foo: number;
+  bar = 'hello world';
+  baz: boolean;
+
+  constructor() {
+    this.foo = 42;
+  }
+
+}
+
+
+// fixed length tuples
+interface NumberStringTuple extends Array<number | string> {
+  0: number;
+  1: string;
+  length: 2;
+}
+
+
+// optional catch clause variables
+let input = '...';
+try {
+  JSON.parse(input);
+}
+catch {
+  console.log('invalid JSON ' + input);
+}
+
+
+// string enums
+enum Colors {
+  Red = 'RED',
+  Blue = 'BLUE',
+  Green = 'GREEN'
+}
+
+
+// improved inference for generics
+function arrayMap<T, U>(f: (x: T) => U): (a: T[]) => U[] {
+  return a => a.map(f);
+}
+
+const lengths: (a: string[]) => number[] = arrayMap(s => s.length);
+
+
+// weak detection type
+interface Options {
+  data?: string;
+  timeout?: number;
+  maxRetries?: number;
+}
+
+
+// support for mixin classes
+class Point {
+  constructor(public x: number, public y: number) { }
+}
+
+class Person {
+  constructor(public name: string) { }
+}
+
+type Constructor<T> = new(...args: any[]) => T;
+
+function Tagged<T extends Constructor<{}>>(Base: T) {
+  return class extends Base {
+    _tag: string;
+    constructor(...args: any[]) {
+      super(...args);
+      this._tag = '';
+    }
+  };
+}
+
+const TaggedPoint = Tagged(Point);
+
+let point = new TaggedPoint(100, 200);
+point._tag = 'hello world';
+
+class Customer extends Tagged(Person) {
+  accountBalance: number;
+}
+
+let customer = new Customer('John');
+customer._tag = 'test';
+customer.accountBalance = 1000000;
+
+
+
+// object type
+declare function create(obj: object | null): void;
+
+create({ property: 100 });
+create(null);
+
+
+// keyof
+interface Person {
+  name: string;
+  age: number;
+  location: string;
+}
+
+type Key1 = keyof Person;
+type Key2 = keyof Person[];
+type Key3 = keyof { [x: string]: Person };
+
+
+// mapped types
+interface Person {
+  name: string;
+  age: number;
+  location: string;
+}
+
+interface PartialPerson {
+  name?: string;
+  age?: number;
+  location?: string;
+}
+
+type Partial<T> = {
+      [P in keyof T]?: T[P];
+};
+
+type PP = Partial<Person>;
+
+
+// tagged union types
+interface Square {
+  kind: 'square';
+  size: number;
+}
+
+interface Rectangle {
+  kind: 'rectangle';
+  width: number;
+  height: number;
+}
+
+interface Circle {
+  kind: 'circle';
+  radius: number;
+}
+
+type Shape = Square | Rectangle | Circle;
+
+function area(shape: Shape) {
+  switch (shape.kind) {
+    case 'square':
+        return shape.size * shape.size;
+    case 'rectangle':
+        return shape.height * shape.width;
+    case 'circle':
+        return Math.PI * shape.radius * shape.radius;
+  }
+}
+
+function test1(shape: Shape) {
+  if (shape.kind === 'square') {
+    shape;
+  } else {
+    shape;
+  }
+}
+
+function test2(shape: Shape) {
+  if (shape.kind === 'rectangle' || shape.kind === 'circle') {
+    return;
+  }
+  shape;
+}
+
+
+// type parameters as constraints
+function assign<T extends U, U>(target: T, source: U): T {
+  for (let id in source) {
+    target[id] = source[id];
+  }
+  return target;
+}
+
+
+// async await support
+async function logDelayed(elements: string[]) {
+  for (const element of elements) {
+    await delay(200);
+    console.log(element);
+  }
+}
+
+async function delay(ms: number) {
+  return new Promise<void>(resolve => {
+          setTimeout(resolve, ms);
+  });
+}
+
+logDelayed(['Hi', 'Baby', 'Beautiful', 'Asynchronous', 'Planet']).then(() => {
+  console.log();
+  console.log('Logged every element');
+});
+
+
+// this typing
+class BasicCalculator {
+
+  public constructor(protected value: number = 0) { }
+
+  public currentValue(): number {
+    return this.value;
+  }
+
+  public add(operand: number) {
+    this.value += operand;
+    return this;
+  }
+
+  public subtract(operand: number) {
+    this.value -= operand;
+    return this;
+  }
+
+  public multiply(operand: number) {
+    this.value *= operand;
+    return this;
+  }
+
+  public divide(operand: number) {
+    this.value /= operand;
+    return this;
+  }
+
+}
+
+class ScientificCalculator extends BasicCalculator {
+
+  public constructor(value = 0) {
+    super(value);
+  }
+
+  public square() {
+    this.value = this.value ** 2;
+    return this;
+  }
+
+  public sin() {
+    this.value = Math.sin(this.value);
+    return this;
+  }
+
+  public cos() {
+    this.value = Math.cos(this.value);
+    return this;
+  }
+
+}
+
+let value = new BasicCalculator(10).add(100).subtract(20).multiply(5)
+                                   .divide(9).currentValue();
+let value1 = new ScientificCalculator(100).add(1000).sin().currentValue();
+
+
+// abstract classes/methods support
+abstract class Base {
+  abstract getLaid(): string;
+  getAGirlFriend() { return 'you sexy string ...'; }
+
+}
+
+class Derived extends Base {
+  getLaid() {
+    return 'super sex ... () => get married.';
+  }
+
+}
+
+  const x: Base = new Derived();
+  console.log(x.getLaid());
+  console.log(x.getAGirlFriend());
+
+
+// generic type aliases
+type Lazy<T> = T | (() => T);
+
+let s: Lazy<string>;
+s = 'eager';
+s = () => 'lazy';
+
+interface Tuple<A, B> {
+    a: A;
+    b: B;
+
+}
+
+type Pair<T> = Tuple<T, T>;
+
+
+// support for es6 generators
+function *g(): Iterable<string> {
+  for (let i = 1; i < 4; i++) {
+    yield 'hi baby ' + i;
+  }
+}
+
+
+// decorators
+class C {
+  @readonly
+  @enumerable(false)
+  method() { }
+}
+
+function readonly(target, key, descriptor) {
+  descriptor.writable = false;
+}
+
+function enumerable(value) {
+  return function(target, key, descriptor) {
+    descriptor.enumerable = value;
+  };
+}
+
+
+// union types
+interface RunOptions {
+  program: string;
+  terminal: string[] | string | (() => string);
+}
+
+private options: RunOptions;
+
+this.options.terminal = 'hello world';
+this.options.terminal = ['hello', 'world'];
+this.options.terminal = () => 'hello world';
+
+
+function formatTerminal(c: string | string[]) {
+  if (typeof c === 'string') {
+    return c.trim();
+  } else {
+    return c.join(',');
+  }
+}
+
+class Dog {
+  woof() {}
+}
+
+class Cat {
+  meow() {}
+}
+
+let pet: Dog | Cat;
+
+if (pet instanceof Dog) {
+  pet.woof();
+} else {
+  pet.meow();
+}
+
+type PrimitiveArray = Array<string | number | boolean>;
+type MyNumber = number;
+type callback = () => void;
+
+
+// protected, tuple types
+class Female {
+  protected protectHer() { }
+}
+
+class MyWife extends Female {
+  public takeHerToTheMovies() {
+    this.protectHer();
+  }
+}
+
+let x: [string, number];
+x = ['hello', 100];
+
+const t = new MyWife();
+t.takeHerToTheMovies();
+
+
+// basic types
+let isDone: boolean = false;
+  let decimal: number = 42;
+  let hex: number = 0xf00d;
+  let binary: number = 0b1010;
+  let octal: number = 0o744;
+
+  let color: string = 'red';
+
+  let fullName: string = 'Nils-Holger Nägele';
+  let age: number = 46;
+  let sentence: string = \`Hello, my name is \${ fullName }.
+  I'll be \${ age + 1 } years in 7 months.
+  \`;
+
+  let list: number[] = [1, 2, 3, 4, 5, 6, 7, 8];
+
+  let list1: Array<number> = [9, 10, 11, 12, 13, 14, 15, 16];
+
+  let y: [string, number];
+  y = ['hi', 42];
+  console.log(y[0].substr(1));
+
+  enum Color { Red, Green, Blue }
+  let c: Color = Color.Red;
+  let colorName: string = Color[0];
+  console.log(colorName);
+
+  let notSure: any = 6;
+  notSure = 'she takes any and wants many ...';
+  notSure = false;
+
+  let list3: any[] = [1, true, 'free'];
+
+  let someValue: any = 'this is a string';
+  let strLength: number = (<string>someValue).length;
+  let strLength1: number = (someValue as string).length;
+
+  function greetUser(): void {
+    console.log('welcome in the pleasure dome ...');
+  }
+
+  function error(message: string): never {
+    throw new Error(message);
+  }
+
+  function infiniteLoop(): never {
+    while (true) {
+
+    }
+  }
+
+
+// variable declarations
+let hello = 'Hello';
+console.log(theCityThatNeverSleepsAndProducesWorldsBestSoftware());
+
+for (let i = 1; i <= 1024; i++) {
+  setTimeout(() =>  console.log(i), 100 * i);
+}
+
+const eternalLife = 1000;
+
+const input = [1, 2, 3, 4, 5];
+const [first, second, third, fourth, fifth] = input;
+console.log(third);
+console.log(fourth);
+f([100, 200]);
+
+let [firstEntry, ...rest] = [1, 2, 3, 4, 5];
+console.log(firstEntry);
+console.log(rest);
+
+const o = {
+    a: 'foo',
+    b: 42,
+    c: 'bar'
+};
+const { a, b } = o;
+
+const winner = [1, 2];
+const firstLooser = [3, 4];
+
+const bothPlus = [0, ...winner, ...firstLooser, 5];
+
+const theCityThatNeverSleepsAndProducesWorldsBestSoftware = () => {
+  let getCity;
+  if (true) {
+    let city = 'Berlin';
+    getCity = () =>  city;
+  }
+  return getCity();
+};
+
+const f = ([first, second]: [ number, number]) => {
+  console.log(first);
+  console.log(second);
+};
+
+const keepWholeObject = (wholeObject: { a: string, b?: number }) => {
+  const { a, b = 1001 } = wholeObject;
+};
+
+
+// interfaces
+class Control {
+  private state: any;
+}
+
+interface SelectableControl extends Control {
+  select(): void;
+}
+
+class Button extends Control implements SelectableControl {
+  select() { }
+}
+
+class Textbox extends Control {
+  select() { }
+}
+
+class Location { }
+
+interface Counter {
+  (start: number): string;
+  interval: number;
+  reset(): void;
+}
+
+function getCounter(): Counter {
+  let counter = <Counter>function (start: number) { };
+  counter.interval = 123;
+  counter.reset = () => { };
+  return counter;
+}
+
+let c = getCounter();
+c(10);
+c.reset();
+c.interval = 10.0;
+
+interface Shape {
+  color: string;
+}
+
+interface PenStroke {
+  penWidth: number;
+}
+
+interface Square extends Shape, PenStroke {
+  sideLength: number;
+}
+
+let square = <Square>{};
+square.color = 'red';
+square.sideLength = 10;
+square.penWidth = 6.0;
+
+interface ClockConstructor {
+  new (hour: number, minute: number, second: number): ClockInterface;
+}
+
+interface ClockInterface {
+  tick();
+}
+
+const createClock = (ctor: ClockConstructor,
+                     hour: number,
+                     minute: number,
+                     second: number): ClockInterface => {
+  return new ctor(hour, minute, second);
+};
+
+class DigitalClock implements ClockInterface {
+  constructor(h: number, m: number, s: number) { }
+  tick() {
+    console.log('beep beep');
+  }
+}
+
+class AnalogClock implements ClockInterface {
+  constructor(h: number, m: number, s: number) { }
+  tick() {
+    console.log('tick tock');
+  }
+}
+
+let digital = createClock(DigitalClock, 7, 15, 0);
+let analog = createClock(AnalogClock, 12, 55, 59);
+
+interface SearchFunc {
+  search?: string;
+  (source: string, subString: string): boolean;
+}
+
+const mySearch: SearchFunc = (src: string, sub: string) => {
+                let result = src.search(sub);
+                return result > -1;
+};
+
+
+interface SquareConfig {
+  color?: string;
+  width?: number;
+}
+
+const createSquare = (config: SquareConfig): { color: string, area: number } => {
+  let color = config.color ? config.color : 'red';
+  let area = config.width ? Math.pow(config.width, 2) : 100;
+  return { color, area };
+};
+
+let mySquare = createSquare({ color: 'green', width: 10 });
+
+
+interface Point {
+  readonly x: number;
+  readonly y: number;
+}
+
+let p1: Point = { x: 8, y: 16 };
+
+
+// classes
+class Point {
+  a: number;
+  b: number;
+
+}
+
+interface Point3D extends Point {
+  c: number;
+}
+
+let point3D: Point3D = { a: 1, b: 2, c: 3 };
+
+class Greeter {
+  greeting: string;
+  constructor(message: string) {
+    this.greeting = message;
+  }
+  greet() {
+    return 'Hello ' + this.greeting;
+  }
+}
+
+let greeter: Greeter;
+greeter = new Greeter('World');
+console.log(greeter.greet());
+
+abstract class Department {
+  constructor(public name: string) { }
+
+  printName(): void {
+    console.log('Department name is: ' + this.name);
+  }
+
+  abstract printMeeting(): void;
+
+}
+
+class EngineeringDepartment extends Department {
+
+  constructor() {
+    super('Software Engineering');
+   }
+
+   printMeeting() {
+   console.log('The Engineering Department meets each Morning at 4:00 AM');
+   }
+
+   generateCharts(): void {
+     console.log('Generating Velocity and Burndown charts ...');
+   }
+}
+
+let department: Department;
+department = new EngineeringDepartment();
+department.printName();
+department.printMeeting();
+
+class Grid {
+
+  static origin = { x: 0, y: 0 };
+
+  constructor(public scale: number) {
+
+  }
+
+  calculateDistanceFromOrigin(point: { x: number; y: number; }) {
+    let xDist = (point.x - Grid.origin.x);
+    let yDist = (point.y - Grid.origin.y);
+    return Math.sqrt(xDist * xDist + yDist * yDist) / this.scale;
+  }
+
+}
+
+let grid1 = new Grid(1.0);
+let grid2 = new Grid(5.0);
+console.log(grid1.calculateDistanceFromOrigin({x: 10, y: 10}));
+console.log(grid2.calculateDistanceFromOrigin({x: 10, y: 10}));
+
+const passcode = 'secret_passcode';
+
+class Employee {
+  private _fullName: string;
+
+  get fullName(): string {
+    return this._fullName;
+  }
+
+  set fullName(newName: string) {
+    if (passcode && passcode === 'secret_passcode') {
+      this._fullName = newName;
+    } else {
+      console.log('Error: Unauthorized update of employee!');
+    }
+  }
+
+}
+
+let employee = new Employee();
+employee.fullName = 'John Blow';
+if (employee.fullName) {
+  console.log(employee.fullName);
+}
+
+
+class Animal {
+  name: string;
+  constructor(theName: string) {
+    this.name = theName;
+  }
+  move(distanceInMeters: number = 0) {
+    console.log(\`\${this.name} moved \${distanceInMeters}m.\`);
+  }
+}
+
+class Snake extends Animal {
+  constructor(name: string) {
+    super(name);
+  }
+  move(distanceInMeters = 10) {
+    console.log('Slithering ...');
+    super.move(distanceInMeters);
+  }
+}
+
+class WorkStallion extends Animal {
+  constructor(name: string) {
+    super(name);
+  }
+  move(distanceInMeters = 150) {
+    console.log('Galloping ...');
+    super.move(distanceInMeters);
+  }
+
+}
+
+let nils = new Snake('Nils the Cobra');
+let wally = new WorkStallion('Wally the Racer');
+
+nils.move();
+wally.move(200);
+
+
+// functions
+function add(x: number, y: number): number {
+  return x + y;
+}
+
+let myAdd = (x: number, y: number): number => x + y;
+
+let z = 100;
+
+function addToZ(x, y) {
+  return x + y + z;
+}
+
+function buildName(firstName: string, lastName: string): string {
+  return firstName + ' ' + lastName;
+}
+
+let result1 = buildName('Mary', 'Fox');
+
+const buildName1 = (firstName: string, lastName?: string): string =>  {
+            return lastName ? firstName + ' ' + lastName : firstName;
+};
+
+const buildName2 = (firstName: string, lastName = 'Blow'): string => firstName + lastName;
+
+const buildName3 = (firstName = 'Will', lastName: string): string => firstName + lastName;
+
+function buildName4(firstName: string, ...restOfNames: string[]) {
+  return firstName + ' ' + restOfNames.join(' ');
+}
+
+let employeeNames = buildName4('Joseph', 'Samuel', 'Lucas', 'Alice');
+
+let buildNameFun: (fname: string, ...rest: string[]) => string = buildName4;
+
+let deck = {
+        suits: ['hearts', 'spades', 'clubs', 'diamonds'],
+        cards: Array(52),
+        createCardPicker: function() {
+          return () => {
+            let pickedCard = Math.floor(Math.random() * 52);
+            let pickedSuit = Math.floor(pickedCard / 13);
+            return { suit: this.suits[pickedSuit], card: pickedCard % 13 };
+          };
+        }
+};
+
+let cardPicker = deck.createCardPicker();
+let pickedCard = cardPicker();
+console.log('card: ' + pickedCard.card + ' of ' + pickedCard.suit);
+
+interface Card {
+  suit: string;
+  card: number;
+}
+
+interface Deck {
+  suits: string[];
+  cards: number[];
+  createCardSelector(this: Deck): () => Card;
+}
+
+const decker: Deck = {
+          suits: ['hearts', 'spades', 'clubs', 'diamonds'],
+          cards: Array(52),
+          createCardSelector: function(this: Deck) {
+            return () => {
+              let selectedCard = Math.floor(Math.random() * 52);
+              let selectedSuit = Math.floor(selectedCard / 13);
+
+              return { suit: this.suits[selectedSuit], card: selectedCard % 13 };
+            };
+          }
+};
+
+let cardSelector = decker.createCardSelector();
+let selectedCard = cardSelector();
+
+console.log('card: ' + selectedCard.card + ' of ' + selectedCard.suit);
+
+
+// generics
+class BeeKeeper {
+  hasMask: boolean;
+}
+
+class ZooKeeper {
+  nameTag: string;
+}
+
+class Animal {
+  numberLegs: number;
+}
+
+class Bee extends Animal {
+  keeper: BeeKeeper;
+}
+
+class Giraffe extends Animal {
+  keeper: ZooKeeper;
+}
+
+const createInstance = <A extends Animal>(c: new () => A): A => new c();
+
+createInstance(Giraffe).keeper.nameTag;
+createInstance(Bee).keeper.hasMask;
+
+const getProperty = <T, K extends keyof T>(obj: T, key: K) => obj[key];
+
+
+let x = { a: 10, b: 20, c: 30, d: 40 };
+
+console.log(getProperty(x, 'c'));
+
+interface LengthWise {
+  length: number;
+}
+
+function loggingIdentity<T extends LengthWise>(arg: T): T {
+  console.log(arg.length);
+  return arg;
+}
+
+console.log(loggingIdentity({length: 10, value: 3}));
+
+class GenericNumber<T> {
+    zeroValue: T;
+    add: (x: T, y: T) => T;
+}
+
+
+let myGenericNumber = new GenericNumber<number>();
+myGenericNumber.zeroValue = 0;
+myGenericNumber.add = (a, b) => a + b;
+
+console.log(myGenericNumber.add(myGenericNumber.zeroValue, 42));
+
+interface GenericIdentityFn<T> {
+  search?: T;
+  (arg: T): T;
+}
+
+const identity = <T>(arg: T): T => arg;
+
+let myIdentity: GenericIdentityFn<number> = identity;
+
+console.log(identity<string>('herString'));
+console.log(identity<number>(42));
+console.log(identity<boolean>(true));
+console.log(identity<any>('she wants many ...'));
+
+
+// enums
+const enum Directions { North, South, East, West }
+
+let directions = [ Directions.North, Directions.South, Directions.East, Directions.West ];
+
+enum E {
+  X, Y, Z
+}
+
+const f = (obj: { X: number }) => obj.X;
+
+console.log(f(E));
+
+enum ShapeKind {
+  Circle,
+  Square
+}
+
+interface Circle {
+  kind: ShapeKind.Circle;
+  radius: number;
+}
+
+interface Square {
+  kind: ShapeKind.Square;
+  sideLength: number;
+}
+
+let c: Circle = {
+  kind: ShapeKind.Circle,
+  radius: 15
+};
+
+enum FileAccess {
+  None,
+  Read = 1 << 1,
+  Write = 1 << 2,
+  ReadWrite = Read | Write,
+  G = 'ABC'.length
+}
+
+console.log(FileAccess.Write + '' + FileAccess.Read);
+
+enum Direction {
+  Up = 'UP',
+  Down = 'DOWN',
+  Left = 'LEFT',
+  Right = 'RIGHT'
+}
+
+console.log(Direction.Right);
+
+
+// iterators and generators
+let someArray = [1, 'string', true];
+
+for (let entry of someArray) {
+  console.log(entry);
+}
+
+for (let entry in someArray) {
+  if (someArray.hasOwnProperty(entry)) {
+  console.log(entry);
+  }
+}
+
+let pets = new Set(['Dog', 'Cat', 'Rabbit']);
+pets['species'] = 'mammals';
+
+for (let pet in pets) {
+  if (pets.hasOwnProperty(pet)) {
+  console.log(pet);
+  }
+}
+
+let numbers = [1, 13, 33, 71, 100];
+for (let num of numbers) {
+  console.log(num);
+}
+
+
+// decorators
+import 'reflect-metadata';
+
+function c() {
+  console.log('c(): evaluated');
+  return function(target, propertyKey: string, descriptor: PropertyDescriptor) {
+    console.log('c(): called');
+  };
+}
+
+function p() {
+  console.log('p(): evaluated');
+  return function(target, propertyKey: string, descriptor: PropertyDescriptor) {
+    console.log('p(): called');
+  };
+}
+
+class C {
+    @c()
+    @p()
+    method() { }
+}
+
+
+@sealed
+class Greeter {
+  greeting: string;
+  constructor(message: string) {
+    this.greeting = message;
+  }
+  @enumerable(false)
+  greet() {
+    return 'Hey, ' + this.greeting;
+  }
+}
+
+function enumerable(value: boolean) {
+  return function(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+    descriptor.enumerable = value;
+  };
+}
+
+function sealed(constructor: Function) {
+  Object.seal(constructor);
+  Object.seal(constructor.prototype);
+}
+
+console.log(new Greeter('Marie').greet());
+
+function classDecorator<T extends { new(...args: any[]): {}}>(constructor: T) {
+  return class extends constructor {
+    newProperty = 'new property';
+    hello = 'override';
+  };
+}
+
+@classDecorator
+class Greeter1 {
+  property = 'property';
+  hello: string;
+  constructor(msg: string) {
+    this.hello = msg;
+  }
+}
+
+console.log(new Greeter1('world'));
+
+
+class Point {
+      private _x: number;
+      private _y: number;
+
+      constructor(x: number, y: number) {
+        this._x = x;
+        this._y = y;
+      }
+
+      @configurable(false)
+      get x() { return this._x; }
+
+      @configurable(false)
+      get y() { return this._y; }
+}
+
+function configurable(value: boolean) {
+  return function(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+    descriptor.configurable = value;
+  };
+}
+
+console.log(new Point(1, 10).x);
+
+class Greeter2 {
+  @format('Hello, %s')
+  greeting: string;
+
+  constructor(message: string) {
+    this.greeting = message;
+  }
+
+  greet() {
+    let formatString = getFormat(this, 'greeting');
+    return formatString.replace('%s', this.greeting);
+  }
+}
+
+const formatMetadataKey = Symbol('format');
+
+function format(formatString: string) {
+  return Reflect.metadata(formatMetadataKey, formatString);
+}
+function getFormat(target: any, propertyKey: string) {
+  return Reflect.getMetadata(formatMetadataKey, target, propertyKey);
+}
+
+class Greeter3 {
+  greeting: string;
+  constructor(message: string) {
+    this.greeting = message;
+  }
+  @validate
+  greet(@required name: string) {
+    return 'Hey, ' + name + ', ' + this.greeting;
+  }
+}
+
+const requireMetadataKey = Symbol('required');
+
+function required(target: Object, propertyKey: string | symbol, parameterIndex: number) {
+  let existingRequiredParameters: number[] = Reflect.getOwnMetadata(requireMetadataKey,
+  target, propertyKey) || [];
+  existingRequiredParameters.push(parameterIndex);
+  Reflect.defineMetadata(requireMetadataKey, existingRequiredParameters,
+    target, propertyKey);
+}
+
+function validate(target: any, propertyName: string,
+                  descriptor: TypedPropertyDescriptor<Function>) {
+                    let method = descriptor.value;
+                    descriptor.value = function() {
+                      let requiredParameters: number[] =
+                                              Reflect.getOwnMetadata(requireMetadataKey,
+                      target, propertyName);
+                      if (requiredParameters) {
+                          for (let parameterIndex of requiredParameters) {
+                            if (parameterIndex >= arguments.length ||
+                              arguments[parameterIndex] === undefined) {
+                                throw new Error('Missing required argument.');
+                              }
+                          }
+                      }
+                      return method.apply(this, arguments);
+                    };
+                  }
+console.log(new Greeter3('what's up?').greet('Nils-Holger'));
+
+class Point1 {
+  x: number;
+  y: number;
+}
+
+class Line {
+  private _p0: Point;
+  private _p1: Point;
+
+  @validate1
+  set p0(value: Point) { this._p0 = value; }
+  get p0() { return this._p0; }
+
+  @validate1
+  set p1(value: Point) { this._p1 = value; }
+  get p1() { return this._p1; }
+
+}
+
+function validate1<T>(target: any, propertyKey: string,
+  descriptor: TypedPropertyDescriptor<T>) {
+  let set = descriptor.set;
+  descriptor.set = function(value: T) {
+    let type = Reflect.getMetadata('design:type', target, propertyKey);
+    if (!(value instanceof type)) {
+      throw new TypeError('Invalid type.');
+    }
+    set(value);
+  };
+}
 
   `,
   blockQuote: `
