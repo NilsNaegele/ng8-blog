@@ -9664,10 +9664,377 @@ nav a.active {
 
 // angular quick reference
 
+// bootstrapping
+import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+
+// bootstraps the app, using the root component from the specified ngmodule
+platformBrowserDynamic().bootstrapModule(AppModule);
 
 
+// ngmodules
+import { NgModule } from '@angular/core;
+
+// defines a module that contains components, directives, pipes and providers
+@NgModule({
+  declarations: ...,
+  imports: ...,
+  exports: ...,
+  providers: ...,
+  bootstrap: ...
+})
+class MyModule { }
+
+// list of components, directives, and pipes that belong to this module
+declarations: [ MyRedComponent, MyBlueComponent, MyDatePipe ]
+
+// list of modules to import into this module. everything from the imported
+// modules is available to declarations of this module
+imports: [ BrowserModule, SomeOtherModule ]
+
+// list of components, directives, and pipes visible to modules that
+// import this module
+exports: [ MyRedComponent, MyDatePipe ]
+
+// list of dependency injection providers visible both to the contents of this
+// module and to importers of this module
+providers: [ MyService, { provide: ... } ]
+
+// list of components to bootstrap when this module is bootstrapped
+bootstrap: [ MyAppComponent ]
 
 
+// template syntax
+// binds property value to the result of expression firstName
+<input [value]="firstName">
+
+// binds attribute role to the result of expression myAriaRole
+<input [attr.role]="myAriaRole">
+
+// binds the presence of the css class extra-sparkle on the element
+// to the truthiness of the expression isDelightful
+<div [class.extra-sparkle]="isDelightful"></div>
+
+// binds style property width to the result of expression mySize in pixels.
+// units are optional
+<div [style.width.px]="mySize"></div>
+
+// calls method readRainbow when a click event is triggered on this button
+// element (or its children) and passes in the event object
+<button (click)="readRainbow($event)"></button>
+
+// binds a property to an interpolated string, for example, "Hi Baby"
+// Equivalent to: <div [title]="'Hi ' + girlyName">
+<div title="Hi {{ girlyName }}"></div>
+
+// binds text content to an interpolated string, for example, "Hi Baby"
+<p>Hi {{ girlyName }}</p>
+
+// sets up two-way binding. equivalent to: <my-cmp [title]="name"
+// (titleChange)="name=$event">
+<my-cmp [(title)]="name"></my-cmp>
+
+// creates a local variable movieplayer that provides access to the video element
+// instance in data-binding and event-binding expressions in the current template.
+<video #movieplayer ...>
+<button (click)="movieplayer.play()">Play</button>
+</video>
+
+// the * symbol turns the current element into an embedded template. equivalent to:
+// <ng-template [myUnless]="myExpression"><p>...</p></ng-template>
+<p *myUnless="myExpression"></p>
+
+// transforms the current value of expression cardNumber via the pipe called
+// myCardNumberFormatter
+<p>Card No.: {{ cardNumber | myCardNumberFormatter }}</p>
+
+// the safe navigation operator (?) means the employer field is optional and if
+// undefined, the rest of the expression should be ignored. formerly known as
+// the elvis operator
+<p>Employer: {{ employer?.companyName }}</p>
+
+// an svg snippet template needs an svg: prefix on its root element to disambiguate
+// the svg element from an html component
+<svg:rect x="0" y="0" width="100" height="100"/>
+
+// an <svg> root element is detected as an svg element automatically,
+// without the prefix
+<svg>
+<rect x="0" y="0" width="100" height="100"/>
+</svg>
+
+
+// built-in directives
+import { CommonModule } from '@angular/common';
+
+// removes or recreates a portion of the dom tree based on the
+// showSection expression
+<section *ngIf="showSection">
+
+// turns the li element and its contents into a template, and uses
+// that to instantiate a view for each item in the list
+<ul>
+    <li *ngFor="let item of list">
+          {{ item }}
+    </li>
+</ul>
+
+// conditionally swaps the contents of the div by selecting one of the
+// embedded templates based on the current value of conditionExpression
+<div [ngSwitch]="conditionExpression">
+  <ng-template [ngSwitchCase]="case1Exp">...</ng-template>
+  <ng-template ngSwitchCase="case2LiteralString">...</ng-template>
+  <ng-template ngSwitchDefault>...</ng-template>
+</div>
+
+// binds the presence of css classes on the element to the truthiness of
+// the associated map values. the right-hand expression should return
+// {class-name: true/false} map
+<div [ngClass]="{'active': isActive, 'disabled': isDisabled}"></div>
+
+
+// forms
+import { FormsModule } from '@angular/forms';
+
+// provides two-way data-binding, parsing, and validation for form controls
+<input [(ngModel)]="userName">
+
+
+// class decorators
+import { Directive, ... } from '@angular/core';
+
+// declares that a class is a component and provides metadata about the component
+@Component({
+  ...
+})
+class MyComponent { }
+
+// declares that a class is a directive and provides metadata about the directive
+@Directive({
+  ...
+})
+class MyDirective { }
+
+// declares that a class is a pipe and provides metadata about the pipe
+@Pipe({
+  ...
+})
+class MyPipe { }
+
+// declares that a class has dependencies that should be injected
+// into the constructor when the dependency injector is creating
+// an instance of this class
+@Injectable({
+  providedIn: 'root'
+})
+class MyService { }
+
+
+// directive configuration
+@Directive({
+  property1: value1,
+  ...
+})
+
+// specifies a css selector that identifies the directive within a template.
+// supported selectors include element, [attribute], .class, and :not()
+// does not support parent-child relationship selectors
+selector: '.cool-button:not(a)'
+
+// list of dependency injection providers for this directive and its children
+providers: [ MyService, { provide: ... }]
+
+
+// component configuration
+@Component extends @Directive, so the @Directive configuration applies
+to components as well
+
+// if set, the templateurl and styleurl are resolved to the component
+moduleId: module.id
+
+// list of dependency injection providers scoped to the component's view
+viewProviders: [ MyService, { provide: ... } ]
+
+// inline template or external template url of the component's view
+template: 'Hello {{ wifeName }}'
+templateUrl: 'my-component.html'
+
+// list of inline css styles or external stylesheet urls for styling
+// the component's view
+styles: ['.primary { color: red; }']
+styleUrls: ['my-component.css']
+
+
+// class field decorators for directives && components
+import { Input, ... } from '@angular/core';
+
+// declares an input property that you can update via property binding
+// (example: <my-cmp [myProperty]="someExpression"></my-cmp>)
+@Input() myProperty;
+
+// declares an output property that fires events you can subscribe to
+// with an event binding (example: <my-cmp (myEvent)="letsGetMarried()">
+// </my-cmp>)
+@Output() myEvent = new EventEmitter();
+
+// binds a host element property (here, the css class valid) to a
+// directive/component property (isValid)
+@HostBinding('class.valid') isValid;
+
+// subscribes to a host element event (click) with a directive/component
+// method (onClick), optionally passing an argument ($event)
+@HostListener('click', [$event]) onClick(e) { ... }
+
+// binds the first result of the component content query (myPredicate)
+// to a property (myChildComponent) of the class.
+@ContentChild(myPredicate) myChildComponent;
+
+// binds the results of the component content query (myPredicate) to a property
+// (myChildComponents) of the class
+@ContentChildren(myPredicate) myChildComponents;
+
+// binds the first result of the component view query (myPredicate) to a property
+// (myChildComponent) of the class. not available for directives.
+@ViewChild(myPredicate, { static: false }) myChildComponent;
+
+// binds the results of the component view query (myPredicate) to a property
+// (myChildComponents) of the class. not available for directives.
+@ViewChildren(myPredicate, { static: true }) myChildComponents;
+
+
+// directive/component change detection and lifecycle hooks
+// called before anyother lifecycle hook. use it to inject dependencies,
+// but avoid any serious work here
+constructor(myService: MyService, ...) { ... }
+
+// called after every change to input properties and before processing
+// content or child views
+ngOnChanges(changeRecord) { ... }
+
+// called after the constructor, initializing input properties, and the first
+// call to ngOnChanges
+ngOnInit() { ... }
+
+// called every time that the input properties of a component or a directive
+// are checked. use it to extend change detection by performing a custom check
+ngDoCheck() { ... }
+
+// called after ngOnInit when the component's or directive's content has been
+// initialized
+ngAfterContentInit() { ... }
+
+// called after every check of the component's or directive's content.
+ngAfterContentChecked() { ... }
+
+// called after ngAfterContentInit when the component's view has been initialized.
+// applies to component's only
+ngAfterViewInit() { ... }
+
+// called after every check of the component's view. applies to component's only
+ngAfterViewChecked() { ... }
+
+// called once, before the instance is destroyed
+ngOnDestroy() { ... }
+
+
+// dependency injection configuration
+// sets or overrides the provider for myservice to the mymockservice class
+{ provide: MyService, useClass: MyMockService }
+
+// sets or overrides the provider for myservice to the myfactory factory function
+{ provide: MyService, useFactory: myFactory }
+
+// sets or overrides the provider for myvalue to the value 42
+{ provide: MyValue, useValue: 42 }
+
+
+// routing && navigation
+import { Routes, RouterModule, ... } from '@angular/router';
+
+// configure routes for the application. supports static, parameterized,
+// redirect, and wildcard routes. also supports custom route data and resolve
+const routes: Routes = [
+  { path: '', component: HomeComponent },
+  { path: 'path/:routeParam', component: MyComponent },
+  { path: 'staticPath', component: ... },
+  { path: '**', component: ... },
+  { path: 'oldPath', redirectTo: '/staticPath' },
+  { path: ..., component: ..., data: { message: 'Custom' } }
+];
+const routing = RouterModule.forRoot(routes);
+
+// marks the location to load the component of the active route
+<router-outlet></router-outlet>
+<router-outlet name="aux"></router-outlet>
+
+// creates a link to a different view based on a route instruction consisting
+// of a route path, required and optional parameters, query parameters, and a
+// fragment. to navigate to a root route, use the / prefix: for a child route,
+// use the ./ prefix; for a sibling or parent, use the ../prefix
+<a routerLink="/path"></a>
+<a [routerLink]="['/path', routeParam]"></a>
+<a [routerLink]="['/path', { matrixParam: 'value' }]"></a>
+<a [routerLink]="['/path']" [queryParams]="{ page: 1 }"></a>
+<a [routerLink]="['/path']" fragment="anchor"></a>
+
+// the provided classes are added to the element when the routerlink
+// becomes the current active route
+<a [routerLink]="[ '/path' ]" routerLinkActive="active"></a>
+
+// an interface for defining a class that the router should call first to
+// determine if it should activate this component. should return a boolean
+// or an observable/promise that resolves to a boolean
+class CanActivateGuard implements CanActivate {
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):
+              Observable<boolean> | Promise<boolean> | boolean { ... }
+
+}
+
+{ path: ..., canActivate: [ CanActivateGuard ]}
+
+// an interface for defining a class that the router should call first to
+// determine if it should deactivate this component after navigation.
+// should return a boolean or an observable/promise that resolves to a
+// boolean
+class CanDeactivateGuard implements CanDeactivate<T> {
+  canDeactivate(component: T, route: ActivatedRouteSnapshot,
+                state: RouterStateSnapshot): Observable<boolean>
+                | Promise<boolean> | boolean { ... }
+}
+
+{ path: ..., canDeactivate: [ CanDeactivateGuard ]}
+
+// an interface for defining a class that the router should call first to
+// determine if it should activate the child route. should return a boolean
+// or an observable/promise that resolves to a boolean
+class CanActivateChildGuard implements CanActivateChild {
+  canActivateChild(route: ActivatedRouteSnapshot,
+                state: RouterStateSnapshot): Observable<boolean>
+                | Promise<boolean> | boolean { ... }
+}
+
+{ path: ..., canActivateChild: [ CanActivateGuard ], children: ... }
+
+// an interface for defining a class that the router should call first to
+// resolve route data before rendering the route.
+// should return a value or an observable/promise that resolves to a value
+class ResolveGuard implements Resolve<T> {
+  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):
+         Observable<any> | Promise<any> | any { ... }
+}
+
+{ path: ..., resolve: [ ResolveGuard ]}
+
+// an interface for defining a class that the router should call first to
+// check if the lazy loaded module should be loaded. should return a boolean
+// or an observable/promise that resolves to a boolean
+class CanLoadGuard implements CanLoad {
+  canLoad(route: Route): Observable<boolean> | Promise<boolean> | boolean { ... }
+}
+
+{ path: ..., canLoad: [ CanLoadGuard ], loadChildren: ... }
+
+
+// testing
 
 
 
