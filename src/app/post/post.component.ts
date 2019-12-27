@@ -12209,6 +12209,24 @@ function validate1<T>(target: any, propertyKey: string,
   `,
   imageFooterUrl: 'assets/img/post8.jpg',
   footerQuote: 'Wir sind alle miteinander verbunden; zueinander biologisch. Zu der Erde, chemisch. Zum Rest des Universums, atomar.'
+},
+{
+  id: 9,
+  imageHeaderUrl: 'url(assets/img/post9-bg.jpg)',
+  heading: 'Du kannst nicht Javascript- Teil 1',
+  subHeading: 'Javascript Goodness',
+  metaPublishedDate: 'am 29 Dezember, 2019',
+  sectionHeading: 'Mehr Javascript Techniken',
+  code: `
+  `,
+  blockQuote: `
+  Wir beabsichtigen zum Mond zu fliegen in diesem Jahrzehnt und andere Sachen zu tun, nicht weil sie einfach sind,
+  sondern weil sie schwer sind, weil das Ziel uns dienen wird zu organisieren und messen die Beste unserer Energien
+  und Kompetenzen, weil diese Herausforderung ist eine welche wir annehmen, eine die wir nicht vertagen wollen
+  und eine die wir vorhaben zu gewinnen.
+  `,
+  imageFooterUrl: 'assets/img/post9.jpg',
+  footerQuote: 'Wir sind alle miteinander verbunden; zueinander biologisch. Zu der Erde, chemisch. Zum Rest des Universums, atomar.'
 }
   ];
 
@@ -12245,7 +12263,10 @@ function validate1<T>(target: any, propertyKey: string,
     if (this.articleId === 'angular-basics-2') {
       this.articleId = 8;
     }
-    if (!(+this.articleId) || +this.articleId > 8) {
+    if (this.articleId === 'you-do-not-know-javascript') {
+      this.articleId = 9;
+    }
+    if (!(+this.articleId) || +this.articleId > 9) {
       this.isNotFound = true;
       this.router.navigate(['page-not-found']);
     }
@@ -12255,6 +12276,61 @@ function validate1<T>(target: any, propertyKey: string,
     this.location.back();
   }
 }
+
+
+// values
+// value embedded using literal
+console.log('My name is Nils-Holger.');
+const firstName = 'Nils-Holger';
+// delimit string literal with back-tick
+console.log(`My name is ${firstName}`);
+// primitive literal values such as boolean and numbers
+// while (false) {
+//   console.log(3.141592);
+// }
+const names = ['Joe', 'Nils-Holger', 'Mark'];
+// access array element in second postion like this
+console.log(`My name is ${names[1]}`);
+// better use undefined as as single empty value
+const value = null;
+// while (value !== undefined) {
+//   console.log('Still got something');
+// }
+const hitchhikersGuide = [];
+// primitive symbol is a hidden unguessable value, unique identifier
+const result = hitchhikersGuide[Symbol('meaning of life')];
+// 42
+
+// arrays and objects
+// arrays special type of object comprised of an ordered and numerically
+// indexed list of data
+const names1 = ['Peter', 'Nils', 'Tim', 'Ernst'];
+const len = names1.length; // 4
+const first = names1[0]; // Peter
+const second = names1[1]; // Nils
+
+// objects, unordered keyed collection of any various values
+const name = {
+  first: 'Nils-Holger',
+  last: 'Nägele',
+  age: 48,
+  specialties: ['JS', 'HTML']
+};
+console.log(`My name is ${name.first}`);
+
+// value type determination
+console.log(typeof 42); // number
+const str = typeof 'abc'; // string
+const bool = typeof true; // boolean
+const undef = typeof undefined; // undefined
+const nul = typeof null; // 'object' --oops, JS bug
+const obj = typeof { a: 1 }; // 'object'
+const obj1 = typeof [1, 2, 3]; // 'object'
+const func = typeof function hello() {}; // 'function'
+
+// decalaring and using variables
+
+
 
 
 
