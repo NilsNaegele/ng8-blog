@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { DomSanitizer } from '@angular/platform-browser';
+import { identity } from 'rxjs';
 
 // symbol type
 
@@ -12837,6 +12838,169 @@ mathHomework.study();
 // Please study Mathematics
 
 
+// Any sufficiently advanced technology is indistinguishable from magic. -- Arthur C. Clarke
+
+// practice, practice, practice
+
+// objects and classes
+
+// this or that
+function identify() {
+  return this.name.toUpperCase();
+}
+function speak() {
+  const greeting = 'Hello, I\'m ' + identify.call(this);
+  console.log(greeting);
+}
+const me = {
+  name: 'Nils-Holger'
+};
+const you = {
+  name: 'Reader'
+};
+identify.call(me); // NILS-HOLGER
+identify.call(you); // READER
+speak.call(me); // Hello, I'm Nils-Holger
+speak.call(you); // Hello I'm Reader
+
+// instead of relying on this, could have passed in a context object to identify() and speak()
+function identify1(context) {
+  return context.name.toUpperCase();
+}
+
+function speak1(context) {
+  const greeting = 'Hello, I\'m ' + identify1(context);
+  console.log(greeting);
+}
+
+identify1(you); // READER
+speak1(me); // Hello, I'm Nils-Holger
+
+
+// track how many times a function was called
+function foo(num) {
+    console.log( 'foo: ' + num );
+    // keep track of how many times foo is called
+    this.count++;
+}
+
+foo.count = 0;
+
+let i;
+
+for (i = 0; i < 10; i++) {
+    if (i > 5) {
+       foo( i );
+    }
+}
+// foo: 6
+// foo: 7
+// foo: 8
+// foo: 9
+
+// how many times was foo called?
+console.log( foo.count ); // 0
+
+// fix hack, create object to hold count property
+function foo1(num) {
+  console.log( 'foo1: ' + num );
+  // keep track of how many times foo1 is called
+  data1.count++;
+}
+
+const data1 = {
+  count: 0
+};
+
+let j: number;
+
+for (j = 0; j < 10; i++) {
+    if (j > 5) {
+      foo1(j);
+   }
+}
+// foo1: 6
+// foo1: 7
+// foo1: 8
+// foo1: 9
+
+// how many times was foo1 called?
+console.log( data1.count ); // 4
+
+function foo2() {
+  foo2.count = 4; // foo2 refers to itself
+}
+
+setTimeout(() => {}, 10);
+
+
+// solution use foo3 identifier as a function object reference in each place
+const foo3 = (num) => {
+  console.log( 'foo3: ' + num );
+  // keep track of how many times foo3 is called
+  foo3.count++;
+};
+
+foo3.count = 0;
+
+let k;
+
+for (k = 0; k < 10; k++) {
+  if (k > 5) {
+    foo3( i );
+   }
+}
+// foo3: 6
+// foo3: 7
+// foo3: 8
+// foo3: 9
+
+// how many times was foo3 called?
+console.log( foo3.count ); // 4
+
+
+// another approach, force this to point to actual foo4 function object
+function foo4(num) {
+  console.log( 'foo4: ' + num );
+
+ // keep track of how many times foo4 is called
+ // Note: this IS actually foo4 now, based on
+ // how foo4 is called (see below)
+  this.count4++;
+}
+
+foo4.count4 = 0;
+
+let l;
+
+for (l = 0; l < 10; l++) {
+    if (l > 5) {
+     // using call(..), we ensure the this
+     // points at the function object (foo) itself
+      foo4.call( foo4, l );
+    }
+}
+// foo4: 6
+// foo4: 7
+// foo4: 8
+// foo4: 9
+
+// how many times was foo called?
+console.log( foo4.count4 ); // 4
+
+// code that fails, attempts to cross over boundary and use this implicitly refer
+// to a functions lexcial scope
+const foo5 = () => {
+  const a = 2;
+  this.bar();
+}
+
+const bar5 = () => console.log(this.a);
+
+foo5(); // undefined
+
+
+
 
   `,
   blockQuote: `
@@ -12896,11 +13060,6 @@ mathHomework.study();
     this.location.back();
   }
 }
-
-// practice, practice, prcatice
-
-
-
 
 
 
