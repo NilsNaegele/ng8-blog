@@ -12665,8 +12665,176 @@ forAgainstLet2.print();
 // https://davidwalsh.name/for-and-against-let
 
 // let us dive deeper into the JavaScript rabbit hole... ;-)
+// consuming iterators with for of loop
+const it = /* ... */;
+// loop over results one at a time
+for (let val of it) {
+  console.log(\`Iterator value: \${val}\`);
+}
+
+// Iterator value: ...
+// Iterator value: ...
+
+// spread iterator into an array
+const vals = [...it];
+
+// function call spread
+doSomethingUseful(...it);
 
 
+// iterables
+const arr = [10, 20, 30];
+for (let val of arr) {
+  console.log(\`Array value: \${val}\`);
+}
+
+// Array value: 10
+// Array value: 20
+// Array value: 30
+
+// shallow copy array
+const arrCopy = [...arr];
+
+// iterate characters in string, one at a time
+const greeting = 'hello world';
+const chars = [...greeting];
+chars;
+// ['h', 'e', 'l', ...]
+
+// map, given 2 DOM elements, btn1 and btn2
+const buttonNames = new Map();
+buttonNames.set(btn1, 'Button 1');
+buttonNames.set(btn2, 'Button 2');
+
+for (let [btn, btnName] of buttonNames) {
+  btn.addEventListener('click', (onClick) => {
+    console.log(\`Clicked \${btnName}\`);
+  });
+}
+
+// consume values of buttonNames
+for (let btnName of buttonNames.values()) {
+  console.log(btnName);
+}
+// Button 1
+// Button 2
+
+// get index andd value in array iteration with entries() method
+const arr1 = [10, 20, 30];
+for (let [idx, val] of arr1.entries()) {
+  console.log(\`[\${idx}]: \${val}\`);
+}
+
+// [0]: 10
+// [1]: 20
+// [2]; 30
+
+
+// closure, function remembers and continues to access varaiables defined outside its scope
+// even wehen function is executed in different scope
+function greeting1(msg) {
+  return function who1(name) {
+    console.log(\`\${msg}, \${name}!\`);
+  };
+}
+
+const hello = greeting1('Hello');
+const hi = greeting1('Hi');
+
+hello('Nils-Holger'); // Hello, Nils-Holger!
+hello('Jennifer'); // Hello, Jennifer!
+hi('Mark'); // Hi, Mark!
+
+// closure can observe and make updates to variables over time
+function counter(step = 1) {
+  let count = 0;
+  return function increaseCount() {
+    count = count + step;
+    return count;
+  };
+}
+
+const incBy1 = counter(1);
+const incBy3 = counter(3);
+
+incBy1(); // 1
+incBy1(); // 2
+
+incBy3(); // 3
+incBy3(); // 6
+incBy3(); // 9
+
+
+// closure most common when working with asynchronous code, such as callbacks
+function getSomeData(url) {
+  ajax(url, function onResponse(resp) {
+    console.log(\`Response (from \${url}): \${resp}\`);
+  });
+}
+
+getSomeData('https://some.url/wherever');
+// Response (from https://some.url/wherever): ...whatever...
+
+// another closure sample
+for (let [idx, btn] of buttons.entries()) {
+  btn.addEventListener('click', function onClick(evt) {
+    console.log(\`Clicked on button (\${idx})!\`);
+  });
+}
+
+// this keyword
+function classroom(teacher) {
+  return function study() {
+    console.log(\`\${teacher} wants you to study \${this.topic}\`);
+  };
+}
+
+const assignment = classroom('Nils-Holger'); // Nils-Holger wants you to study undfined
+
+const homework = {
+  topic: 'Javascript',
+  assignment
+};
+
+homework.assignment(); // Nils-Holger wants you to study Javascript
+
+const otherHomework = {
+  topic: 'Math'
+};
+
+assignment.call(otherHomework); // Nils-Holger wants you to study Math
+
+
+// prototypes
+// object normal literal, default prototype linkage connects to Object.prototype
+const homeworkOne = {
+  topic: 'Javascript'
+};
+
+homeworkOne.toString(); // [object Object]
+
+// define object prototype linkage
+const otherHomeworkOne = Object.create(homeworkOne);
+
+otherHomeworkOne.topic; // Javascript
+
+
+// this revisited, this powers prototype delegated function calls
+const homeworkTwo = {
+  study() {
+      console.log(\`Please study \${ this.topicTwo }\`);
+  }
+};
+
+const jsHomework = Object.create(homeworkTwo);
+jsHomework.topicTwo = 'Javascript';
+jsHomework.study();
+// Please study Javascript
+
+const mathHomework = Object.create(homeworkTwo);
+mathHomework.topicTwo = 'Mathematics';
+mathHomework.study();
+// Please study Mathematics
 
 
 
@@ -12728,6 +12896,13 @@ forAgainstLet2.print();
     this.location.back();
   }
 }
+
+// practice, practice, prcatice
+
+
+
+
+
 
 
 
