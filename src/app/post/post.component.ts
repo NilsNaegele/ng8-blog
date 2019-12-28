@@ -12216,8 +12216,460 @@ function validate1<T>(target: any, propertyKey: string,
   heading: 'Du kannst nicht Javascript- Teil 1',
   subHeading: 'Javascript Goodness',
   metaPublishedDate: 'am 29 Dezember, 2019',
-  sectionHeading: 'Mehr Javascript Techniken',
+  sectionHeading: 'You don\'t know JavaScript',
   code: `
+  // values
+// value embedded using literal
+console.log('My name is Nils-Holger.');
+const firstName = 'Nils-Holger';
+// delimit string literal with back-tick
+console.log(\`My name is \${firstName}\`);
+// primitive literal values such as boolean and numbers
+// while (false) {
+//   console.log(3.141592);
+// }
+const names = ['Joe', 'Nils-Holger', 'Mark'];
+// access array element in second postion like this
+console.log(\`My name is \${names[1]}\`);
+// better use undefined as as single empty value
+const value = null;
+// while (value !== undefined) {
+//   console.log('Still got something');
+// }
+const hitchhikersGuide = [];
+// primitive symbol is a hidden unguessable value, unique identifier
+const result = hitchhikersGuide[Symbol('meaning of life')];
+// 42
+
+// arrays and objects
+// arrays special type of object comprised of an ordered and numerically
+// indexed list of data
+const names1 = ['Peter', 'Nils', 'Tim', 'Ernst'];
+const len = names1.length; // 4
+const first = names1[0]; // Peter
+const second = names1[1]; // Nils
+
+// objects, unordered keyed collection of any various values
+const name = {
+  first: 'Nils-Holger',
+  last: 'Nägele',
+  age: 48,
+  specialties: ['JS', 'HTML']
+};
+console.log(\`My name is \${name.first}\`);
+
+// value type determination
+console.log(typeof 42); // number
+const str = typeof 'abc'; // string
+const bool = typeof true; // boolean
+const undef = typeof undefined; // undefined
+const nul = typeof null; // 'object' --oops, JS bug
+const obj = typeof { a: 1 }; // 'object'
+const obj1 = typeof [1, 2, 3]; // 'object'
+const func = typeof function hello() {}; // 'function'
+
+// declaring and using variables
+// global scope
+var name = 'Nils-Holger';
+var name;
+
+// block scoped
+let name = 'Nils-Holger';
+let name;
+
+
+var adult true;
+if (adult) {
+  var name = 'Nils-Holger';
+  let age = 48;
+  console.log('Shhh, this is a secret');
+}
+
+console.log(name); // Nils-Holger
+console.log(age); // error
+
+// const block scoped, value must be assigned at declaration
+const myBirthday = true;
+let age = 48;
+if (myBirthday) {
+  age = age + 1;
+  myBirthday = false; // error
+}
+
+// const variables are not unchangeable, they just cannot be reassigned
+const actors = ['Morgan Freeman', 'Jennifer Anniston'];
+actors[2] = 'Tom Cruise';
+
+actors = []; // error
+
+
+function hello(firstName) {
+  console.log(\`Hello \${firstName}\`);
+}
+
+hello('Nils-Holger');
+
+// err is block scoped, exists only inside catch clause
+try {
+  someError();
+} catch (err) {
+  console.log(err);
+}
+
+
+// functions
+// function declaration
+function awesomeFunction(coolThings) {
+  // ...
+  return amazingStuff;
+}
+
+// function expression
+const awesomeFunction1 = function (coolThings) {
+  // ...
+  return amazingStuff;
+};
+
+// arrow function
+const awesomeFunction2 = (coolThings) => amazingStuff;
+
+// function paramater input
+function greeting(myName) {
+  console.log(\`Hello \${myName}\`);
+}
+
+greeting('Nils-Holger');
+
+// function with return value
+function greeting1(myName) {
+  return \`Hello \${myName}!\`;
+}
+
+const msg = greeting1('Nils-Holger');
+console.log(msg); // Hello Nils-Holger!
+
+
+// functions assigned as properties on objects
+const whatToSay = {
+  greeting() {
+    console.log('Hello!');
+  },
+  question() {
+    console.log('What is your name?');
+  },
+  answer() {
+    console.log('My name is Nils-Holger.');
+  }
+};
+
+whatToSay.greeting(); // Hello!
+
+// comparisons
+3 === 3; // true
+'yes' === 'yes'; // true
+null === null; // true
+false === false; // true
+
+
+42 === '42'; // false
+'hello' === 'Hello'; // false
+true === 1; // false
+0 === null; // false
+'' === null; // false
+null === undefined; // false
+
+
+NaN === NaN; // false
+0 === -0; // true
+
+
+// comparisons object values, non-primitives
+[1, 2, 3] === [1, 2, 3]; // false
+{ a: 42 } === { a: 42 }; // false
+(x => x * 2) === (x => x * 2); // false
+
+
+// in JS all object values are held by reference, assigned and passed by reference copy
+// are compared by reference(identity) equality
+const x = [1, 2, 3];
+
+// assignment is by reference copy, y references the same array as x, not another copy of it
+const y = x;
+
+y === x; // true
+y === [1, 2, 3]; // false
+x === [1, 2, 3]; // false
+
+// coercive comparisons ==
+
+42 == '42'; // true
+1 === true; // true
+
+
+const arr = ['1', '10', '100', '1000'];
+for (let i = 0; i < arr.length && arr[i] < 500; i++) {
+    // will run 3 times
+}
+
+const x1 = '10';
+const y1 = '9';
+x1 < y1; // true, be careful!
+
+
+// classes
+class Page {
+  text: string;
+  constructor(text) {
+    this.text = text;
+  }
+  print() {
+    console.log(this.text);
+  }
+}
+
+class Notebook {
+  pages: Page[];
+  constructor() {
+    this.pages = [];
+  }
+  addPage(text) {
+    const page = new Page(text);
+    this.pages.push(page);
+  }
+  print() {
+    for (let page of this.pages) {
+      page.print();
+    }
+  }
+}
+
+const mathNotes = new Notebook();
+mathNotes.addPage('Arithmetic: + - * / ...');
+mathNotes.addPage('Trigonometry: sin cos tan ...');
+mathNotes.print();
+// ...
+
+// class inheritance
+
+class Publication {
+  title: string;
+  author: string;
+  pubDate: string;
+  constructor(title, author, pubDate) {
+    this.title = title;
+    this.author = author;
+    this.pubDate = pubDate;
+  }
+  print() {
+    console.log(\`
+        Title: \${this.title}
+        By: \${this.author}
+        \${this.pubDate}
+    \`);
+  }
+}
+
+class Book extends Publication {
+  publisher: string;
+  ISBN: string;
+  constructor(bookDetails) {
+    super(bookDetails.title, bookDetails.author, bookDetails.publishedOn);
+    this.publisher = bookDetails.publisher;
+    this.ISBN = bookDetails.ISBN;
+  }
+  print() {
+    super.print();
+    console.log(\`
+        Published By: \${this.publisher}
+        ISBN: \${this.ISBN}
+    \`);
+  }
+}
+
+class BlogPost extends Publication {
+  URL: string;
+  constructor(title, author, pubDate, URL) {
+    super(title, author, pubDate);
+    this.URL = URL;
+  }
+  print() {
+    super.print();
+    console.log(this.URL);
+  }
+}
+
+
+const YDKJS = new Book({
+  title: 'You don\'t know JS',
+  author: 'Kyle Simpson',
+  publishedOn: 'June 2014',
+  publisher: 'O\'Reilly',
+  ISBN: '123456-789'
+});
+
+YDKJS.print();
+// Title: You Don't know JS
+// By: Kyle Simpson
+// June 2014
+// Published By: O'Reilly
+// ISBN: 123456-789
+
+const forAgainstLet = new BlogPost(
+  'For and against Let',
+  'Kyle Simpson',
+  'October 27, 2014',
+  'https://davidwalsh.name/for-and-against-let'
+);
+
+forAgainstLet.print();
+// Title: For and against Let
+// By: Kyle Simpson
+// October 27, 2014
+// https://davidwalsh.name/for-and-against-let
+
+
+// modules, group behavior into logical units
+// classic module form
+function Publication1(title, author, pubDate) {
+  const publicAPI = {
+      print() {
+          console.log(\`
+              Title: \${ title }
+              By: \${ author }
+              \${ pubDate }
+          \`);
+      }
+  };
+
+  return publicAPI;
+}
+
+function Book1(bookDetails) {
+  const pub = Publication1(
+      bookDetails.title,
+      bookDetails.author,
+      bookDetails.publishedOn
+  );
+
+  const publicAPI = {
+      print() {
+          pub.print();
+          console.log(\`
+              Published By: \${ bookDetails.publisher }
+              ISBN: \${ bookDetails.ISBN }
+          \`);
+      }
+  };
+
+  return publicAPI;
+}
+
+function BlogPost1(title,author,pubDate,URL) {
+  const pub = Publication1(title,author,pubDate);
+
+  const publicAPI = {
+      print() {
+          pub.print();
+          console.log(URL);
+      }
+  };
+
+  return publicAPI;
+}
+
+// usage of these module factory functions
+const YDKJS1 = Book1({
+  title: 'You Don\'t know JS',
+  author: 'Kyle Simpson',
+  publishedOn: 'June 2014',
+  publisher: 'O\'Reilly',
+  ISBN: '123456-789'
+});
+
+YDKJS1.print();
+// Title: You Don't know JS
+// By: Kyle Simpson
+// June 2014
+// Published By: O'Reilly
+// ISBN: 123456-789
+
+const forAgainstLet1 = BlogPost1(
+  'For and against Let',
+  'Kyle Simpson',
+  'October 27, 2014',
+  'https://davidwalsh.name/for-and-against-let'
+);
+
+forAgainstLet1.print();
+// Title: For and against Let
+// By: Kyle Simpson
+// October 27, 2014
+// https://davidwalsh.name/for-and-against-let
+
+
+// ES Modules
+// file publication.js
+const printDetails = (title, author, pubDate) => {
+  console.log(\`
+      Title: \${ title }
+      By: \${ author }
+      \${ pubDate }
+  \`);
+};
+
+export function create(title, author, pubDate) {
+  const publicAPI = {
+      print() {
+          printDetails(title, author, pubDate);
+      }
+  };
+
+  return publicAPI;
+}
+
+// import and use thid module from another ES module, like blogpost.js
+import { create as createPub } from 'publication.js';
+
+const printDetails1 = (pub, URL) => {
+    pub.print();
+    console.log(URL);
+}
+
+export function create1(title, author, pubDate, URL) {
+    const pub = createPub(title, author, pubDate);
+
+    const publicAPI = {
+        print() {
+            printDetails1(pub, URL);
+        }
+    };
+
+    return publicAPI;
+}
+
+
+// use this module, import into main.js
+import { create1 as createBlogPost } from 'blogpost.js';
+
+const forAgainstLet2 = createBlogPost(
+    'For and against Let',
+    'Kyle Simpson',
+    'October 27, 2014',
+    'https://davidwalsh.name/for-and-against-let'
+);
+
+forAgainstLet2.print();
+// Title: For and against Let
+// By: Kyle Simpson
+// October 27, 2014
+// https://davidwalsh.name/for-and-against-let
+
+// let us dive deeper into the JavaScript rabbit hole... ;-)
+
+
+
+
+
   `,
   blockQuote: `
   Wir beabsichtigen zum Mond zu fliegen in diesem Jahrzehnt und andere Sachen zu tun, nicht weil sie einfach sind,
@@ -12276,61 +12728,6 @@ function validate1<T>(target: any, propertyKey: string,
     this.location.back();
   }
 }
-
-
-// values
-// value embedded using literal
-console.log('My name is Nils-Holger.');
-const firstName = 'Nils-Holger';
-// delimit string literal with back-tick
-console.log(`My name is ${firstName}`);
-// primitive literal values such as boolean and numbers
-// while (false) {
-//   console.log(3.141592);
-// }
-const names = ['Joe', 'Nils-Holger', 'Mark'];
-// access array element in second postion like this
-console.log(`My name is ${names[1]}`);
-// better use undefined as as single empty value
-const value = null;
-// while (value !== undefined) {
-//   console.log('Still got something');
-// }
-const hitchhikersGuide = [];
-// primitive symbol is a hidden unguessable value, unique identifier
-const result = hitchhikersGuide[Symbol('meaning of life')];
-// 42
-
-// arrays and objects
-// arrays special type of object comprised of an ordered and numerically
-// indexed list of data
-const names1 = ['Peter', 'Nils', 'Tim', 'Ernst'];
-const len = names1.length; // 4
-const first = names1[0]; // Peter
-const second = names1[1]; // Nils
-
-// objects, unordered keyed collection of any various values
-const name = {
-  first: 'Nils-Holger',
-  last: 'Nägele',
-  age: 48,
-  specialties: ['JS', 'HTML']
-};
-console.log(`My name is ${name.first}`);
-
-// value type determination
-console.log(typeof 42); // number
-const str = typeof 'abc'; // string
-const bool = typeof true; // boolean
-const undef = typeof undefined; // undefined
-const nul = typeof null; // 'object' --oops, JS bug
-const obj = typeof { a: 1 }; // 'object'
-const obj1 = typeof [1, 2, 3]; // 'object'
-const func = typeof function hello() {}; // 'function'
-
-// decalaring and using variables
-
-
 
 
 
