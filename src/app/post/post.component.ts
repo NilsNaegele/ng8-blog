@@ -14012,8 +14012,6 @@ for (const num of randoms) {
   }
 }
 
-// continue here: https://github.com/getify/You-Dont-Know-JS/blob/2nd-ed/objects-classes/ch4.md
-
   `,
   blockQuote: `
   Wir beabsichtigen zum Mond zu fliegen in diesem Jahrzehnt und andere Sachen zu tun, nicht weil sie einfach sind,
@@ -17156,6 +17154,49 @@ import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
   `,
   imageFooterUrl: 'assets/img/post10.jpg',
   footerQuote: 'Wir sind alle miteinander verbunden; zueinander biologisch. Zu der Erde, chemisch. Zum Rest des Universums, atomar.'
+},
+{
+  id: 11,
+  imageHeaderUrl: 'url(assets/img/post11-bg.jpg)',
+  heading: 'Javascript, Basis- Teil 2',
+  subHeading: 'Javascript, Dynamisch, Prototypen, Klassen, Objekt-Orientiert',
+  metaPublishedDate: 'am 31 Dezember, 2019',
+  sectionHeading: 'Javascript, Dynamisch, Prototypen, Klassen, Objekt-Orientiert',
+  code: `
+// classes constructor
+class CoolGuy {
+  private specialTrick;
+  private nothing;
+  private output = (a, b) => a + b;
+
+    constructor(trick) {
+		this.specialTrick = trick;
+	}
+
+showOff() {
+		return this.output('Here\'s my trick: ', this.specialTrick);
+	}
+}
+
+const Joe = new CoolGuy('running marathons in 02:10');
+
+console.log(Joe.showOff()); // Here's my trick: running marathons in 02:10
+
+// class inheritance
+
+
+
+
+
+  `,
+  blockQuote: `
+  Wir beabsichtigen zum Mond zu fliegen in diesem Jahrzehnt und andere Sachen zu tun, nicht weil sie einfach sind,
+  sondern weil sie schwer sind, weil das Ziel uns dienen wird zu organisieren und messen die Beste unserer Energien
+  und Kompetenzen, weil diese Herausforderung ist eine welche wir annehmen, eine die wir nicht vertagen wollen
+  und eine die wir vorhaben zu gewinnen.
+  `,
+  imageFooterUrl: 'assets/img/post11.jpg',
+  footerQuote: 'Wir sind alle miteinander verbunden; zueinander biologisch. Zu der Erde, chemisch. Zum Rest des Universums, atomar.'
 }
   ];
 
@@ -17198,7 +17239,10 @@ import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
     if (this.articleId === 'angular-basics-3') {
       this.articleId = 10;
     }
-    if (!(+this.articleId) || +this.articleId > 10) {
+    if (this.articleId === 'you-do-not-know-javascript-part-2') {
+      this.articleId = 11;
+    }
+    if (!(+this.articleId) || +this.articleId > 11) {
       this.isNotFound = true;
       this.router.navigate(['page-not-found']);
     }
@@ -17208,6 +17252,9 @@ import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
     this.location.back();
   }
 }
+
+
+
 
 
 
