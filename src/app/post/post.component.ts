@@ -14028,9 +14028,9 @@ for (const num of randoms) {
   id: 10,
   imageHeaderUrl: 'url(assets/img/post10-bg.jpg)',
   heading: 'Angular 8/9, Basis- Teil 3',
-  subHeading: 'API + TS, TOH, RxJS, Animations + Core API',
+  subHeading: 'API + TS, RxJS',
   metaPublishedDate: 'am 30 Dezember, 2019',
-  sectionHeading: 'API + Template Syntax, Tour Of Heroes, Intro RxJS, Animations + Core API',
+  sectionHeading: 'API + Template Syntax, Intro RxJS',
   code: `
 // currency pipe
 import { Component } from '@angular/core';
@@ -16427,6 +16427,726 @@ export enum Color { Red, Green, Blue };
     }
   }
 
+
+// observable of
+import { Component } from '@angular/core';
+
+import { of } from 'rxjs';
+
+
+@Component({
+    selector: 'app-root',
+    template: \`
+            <ul>
+                  <li *ngFor="let number of myNumbers$ | async">
+                          {{ number * 2 }}
+                  </li>
+            </ul>
+    \`
+  })
+  export class AppComponent {
+
+    myNumbers$ = of([2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]);
+
+  }
+
+
+// subject
+import { Component } from '@angular/core';
+
+import { Subject } from 'rxjs';
+
+
+@Component({
+    selector: 'app-root',
+    template: \`
+           <button (click)="upVote(1)">
+              Up Vote
+            </button>
+    \`
+  })
+  export class AppComponent {
+
+    counter$ = new Subject<number>();
+
+    upVote(vote: number) {
+      this.counter$.next(vote);
+    }
+
+    constructor() {
+      this.counter$.subscribe(value => {
+        console.log(value);
+      });
+    }
+  }
+
+// range pipe filter map subscribe
+import { Component } from '@angular/core';
+
+import { Observable } from 'rxjs/Observable';
+import { range } from 'rxjs/observable/range';
+import { map, filter } from 'rxjs/operators';
+
+@Component({
+  selector: 'app-observable',
+  template: \`
+
+  \`
+})
+export class ObservableComponent {
+
+    constructor() {
+      range(1, 100)
+          .pipe(
+            filter(x => x % 2 === 1),
+            map(x => x + x))
+          .subscribe(x => console.log(x));
+    }
+
+}
+
+// scan
+import { Component } from '@angular/core';
+
+import { Observable } from 'rxjs/Observable';
+import { range } from 'rxjs/observable/range';
+import { map, filter, scan } from 'rxjs/operators';
+
+@Component({
+  selector: 'app-observable',
+  template: \`
+
+  \`
+})
+export class ObservableComponent {
+
+   source$ = range(0, 10);
+
+    constructor() {
+      this.source$
+          .pipe(
+            filter(x => x % 2 === 0),
+            map(x => x + x),
+            scan((acc, x) => acc + x, 0))
+          .subscribe(x => console.log(x));
+    }
+
+}
+
+
+// observable from event
+import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/fromEvent';
+
+@Component({
+  selector: 'app-observable',
+  template: \`
+          <button #herSexyButton>Click</button>
+  \`
+})
+export class ObservableComponent implements AfterViewInit {
+    @ViewChild('herSexyButton', { static: false }) button: ElementRef;
+
+    ngAfterViewInit() {
+      const btnSubscription = Observable.fromEvent(this.button.nativeElement, 'click')
+                          .subscribe(() => console.log('Clicked'));
+
+    }
+}
+
+
+// button scan
+import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/fromEvent';
+import { scan } from 'rxjs/operators';
+
+@Component({
+  selector: 'app-observable',
+  template: \`
+          <button #herSexyButton>Click</button>
+  \`
+})
+export class ObservableComponent implements AfterViewInit {
+    @ViewChild('herSexyButton', { static: false }) button: ElementRef;
+
+    ngAfterViewInit() {
+      const btnSubscription =
+                      Observable.fromEvent(this.button.nativeElement, 'click')
+                              .pipe(
+                              scan(count => count + 1, 0)
+                              )
+                              .subscribe((count) => console.log(\`Clicked \$\{count} times\`));
+    }
+}
+
+
+// throttle time
+import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/fromEvent';
+import { scan, throttleTime } from 'rxjs/operators';
+
+@Component({
+  selector: 'app-observable',
+  template: \`
+          <button #herSexyButton>Click</button>
+  \`
+})
+export class ObservableComponent implements AfterViewInit {
+    @ViewChild('herSexyButton', { atatic: false}) button: ElementRef;
+
+    ngAfterViewInit() {
+      const btnSubscription = Observable.fromEvent(this.button.nativeElement, 'click').pipe(
+                                throttleTime(1000),
+                                scan(count => count + 1, 0)
+                              )
+                              .subscribe((count) => console.log(\`Clicked \${count} times\`));
+    }
+}
+
+
+// map
+import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+
+  import { Observable } from 'rxjs/Observable';
+  import 'rxjs/add/observable/fromEvent';
+  import { scan, throttleTime, map } from 'rxjs/operators';
+
+  @Component({
+    selector: 'app-observable',
+    template: \`
+            <button #herSexyButton>Click</button>
+    \`
+  })
+  export class ObservableComponent implements AfterViewInit {
+      @ViewChild('herSexyButton', { static: false }) button: ElementRef;
+
+      ngAfterViewInit() {
+        const btnSubscription = Observable.fromEvent(this.button.nativeElement, 'click').pipe(
+                                  throttleTime(1000),
+                                  map(event => event.clientX),
+                                  scan((count, clientX) => count + clientX, 0)
+                                )
+                                .subscribe((count) => console.log(count));
+      }
+  }
+
+
+// observable
+import { Component } from '@angular/core';
+
+import { Observable } from 'rxjs/Observable';
+
+
+@Component({
+  selector: 'app-observable',
+  template: \` \`
+})
+export class ObservableComponent {
+
+  private myObservable = Observable.create((observer) => {
+    observer.next(1);
+    observer.next(2);
+    observer.next(3);
+    setTimeout(() => {
+      observer.next(4);
+      observer.complete();
+    }, 1000);
+    observer.next(5);
+    observer.next(6);
+});
+
+
+  constructor() {
+    console.log('just before subscribe');
+    this.myObservable.subscribe({
+      next: x => console.log('got value ' + x),
+      error: err => console.log('something wrong occured: ' + err),
+      complete: () => console.log('done')
+    });
+    console.log('just after subscribe');
+  }
+
+}
+
+
+// interval
+import { Component } from '@angular/core';
+
+import { Observable } from 'rxjs/Observable';
+import { interval } from 'rxjs/observable/interval';
+import { filter, map, take, toArray } from 'rxjs/operators';
+
+
+@Component({
+  selector: 'app-observable',
+  template: \` \`
+})
+export class ObservableComponent {
+
+    takeEveryNth = (n: number) => <T>(source: Observable<T>) =>
+                   new Observable<T>(observer => {
+                    let count = 0;
+                    return source.subscribe({
+                      next(x) {
+                        if (count++ % n === 0) {
+                          observer.next(x);
+                        }
+                      },
+                        error(err) { observer.error(err); },
+                        complete() { observer.complete(); }
+                    });
+                   })
+    takeEveryNthSimple = (n: number) => <T>(source: Observable<T>) =>
+                      source.pipe(
+                        filter((value, index) => index % n === 0)
+                      )
+
+   takeEveryNthSimplest = (n: number) => filter((value, index) => index % n === 0);
+
+
+
+    constructor() {
+            interval(1).pipe(
+                this.takeEveryNth(2),
+                map(x => x + x),
+                this.takeEveryNthSimple(3),
+                map(x => x * x),
+                this.takeEveryNthSimplest(4),
+                take(3),
+                toArray()
+                ).subscribe(x => console.log(x));
+   }
+
+}
+
+
+
+// observables generalizations functions
+import { Component } from '@angular/core';
+
+import { Observable } from 'rxjs/Observable';
+
+@Component({
+  selector: 'app-observable',
+  template: \` \`
+})
+export class ObservableComponent {
+
+          myFun = Observable.create((observer) => {
+            console.log('Hi Nils-Holger ...');
+            observer.next(42);
+          });
+
+          constructor() {
+            this.myFun.subscribe((x) => console.log(x));
+            this.myFun.subscribe((y) => console.log(y));
+            this.myFun.subscribe((z) => console.log(z));
+          }
+
+}
+
+
+// behavior subject
+import { Component } from '@angular/core';
+
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+
+@Component({
+  selector: 'app-observable',
+  template: \` \`
+})
+export class ObservableComponent {
+
+    subject = new BehaviorSubject(100);
+
+    constructor() {
+
+      this.subject.subscribe({
+        next: (v) => console.log('observerA: ' + v)
+      });
+
+      this.subject.next(101);
+      this.subject.next(102);
+
+      this.subject.subscribe({
+        next: (v) => console.log('observerB: ' + v)
+      });
+
+      this.subject.next(103);
+
+    }
+}
+
+
+// replay subject
+import { Component } from '@angular/core';
+
+import { ReplaySubject } from 'rxjs/ReplaySubject';
+
+@Component({
+  selector: 'app-observable',
+  template: \` \`
+})
+export class ObservableComponent {
+
+    subject = new ReplaySubject(2);
+
+    constructor() {
+
+      this.subject.subscribe({
+        next: (v) => console.log('observerA: ' + v)
+      });
+
+      this.subject.next(1);
+      this.subject.next(2);
+      this.subject.next(3);
+      this.subject.next(4);
+      this.subject.next(5);
+      this.subject.next(6);
+
+      this.subject.subscribe({
+        next: (v) => console.log('observerB: ' + v)
+      });
+
+      this.subject.next(7);
+
+    }
+
+}
+
+
+// async subject
+import { Component } from '@angular/core';
+
+import { AsyncSubject } from 'rxjs/AsyncSubject';
+
+@Component({
+  selector: 'app-observable',
+  template: \` \`
+})
+export class ObservableComponent {
+
+    subject = new AsyncSubject();
+
+    constructor() {
+
+      this.subject.subscribe({
+        next: (v) => console.log('observerA: ' + v)
+      });
+
+      this.subject.next(1);
+      this.subject.next(2);
+      this.subject.next(3);
+      this.subject.next(4);
+      this.subject.next(5);
+
+      this.subject.subscribe({
+        next: (v) => console.log('observerB: ' + v)
+      });
+
+      this.subject.next(6);
+      this.subject.complete();
+
+    }
+
+}
+
+
+
+// create
+import { Component } from '@angular/core';
+
+  import { Observable } from 'rxjs/Observable';
+  import 'rxjs/add/observable/from';
+
+
+  @Component({
+    selector: 'app-observable',
+    template: \` \`
+  })
+  export class ObservableComponent {
+      input = Observable.from([2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]);
+      multiplyByTen(input) {
+        const output = Observable.create(function subscribe(observer) {
+                  input.subscribe({
+                  next: (cp) => observer.next(10 * cp),
+                  error: (err) => observer.error(err),
+                  complete: () => observer.complete()
+              });
+        });
+        return output;
+      }
+
+      constructor() {
+        const output = this.multiplyByTen(this.input);
+        output.subscribe(a => console.log(a));
+      }
+
+  }
+
+
+// instance operators
+import { Component } from '@angular/core';
+
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/from';
+
+
+@Component({
+  selector: 'app-observable',
+  template: \` \`
+})
+export class ObservableComponent {
+    i = Observable.prototype.multiplyByTen = function multiplyByTen() {
+      const input = this;
+      return Observable.create(function subscribe(observer) {
+                input.subscribe({
+                next: (cp) => observer.next(10 * cp),
+                error: (err) => observer.error(err),
+                complete: () => observer.complete()
+            });
+      });
+    };
+
+    constructor() {
+      const observable = Observable.from([2, 4, 8, 16, 32, 64, 128]).multiplyByTen();
+      observable.subscribe(a => console.log(a));
+    }
+
+}
+
+
+// scheduler
+import { Component } from '@angular/core';
+
+import { Observable } from 'rxjs/Observable';
+import { Scheduler } from 'rxjs/Scheduler';
+import { async } from 'rxjs/scheduler/async';
+import 'rxjs/add/operator/observeOn';
+
+
+@Component({
+  selector: 'app-observable',
+  template: \` \`
+})
+export class ObservableComponent {
+    observable = Observable.create((observer) => {
+        observer.next(10);
+        observer.next(20);
+        observer.next(30);
+        observer.complete();
+    })
+    .observeOn(async);
+
+    constructor() {
+      console.log('just before subscribe');
+      this.observable.subscribe({
+        next: cp => console.log('got value ' + cp),
+        error: err => console.log('something wrong occured ' + err),
+        complete: () => console.log('done')
+      });
+      console.log('just after subscribe');
+    }
+
+}
+
+
+// converting to observables
+const obs = Observable.of('hi', 'baby', 'cpu2');
+const obsArr = Observable.from([1, 2, 3, 4, 5, 6]);
+const obsEvent = Observable.fromEvent(document.querySelector('button'), 'click');
+const obsProm = Observable.fromPromise(fetch('/data'));
+
+
+// creating observables
+export class ObservableComponent {
+
+  myObservable = new Subject();
+
+  constructor() {
+    this.myObservable.subscribe(value => console.log(value));
+    this.myObservable.next('foo');
+    this.myObservable.next('bar');
+    this.myObservable.next('baz');
+
+    const myObservable1 = Observable.create(observer => {
+            observer.next('oof');
+            setTimeout(() => observer.next('rab'), 500);
+            setTimeout(() => observer.next('zab'), 1000);
+    });
+    myObservable1.subscribe(value => console.log(value));
+
+  }
+
+}
+
+
+// controlling the flow
+import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/fromEvent';
+import { filter, map, delay, throttleTime,
+         debounceTime, take, takeUntil } from 'rxjs/operators';
+
+
+@Component({
+  selector: 'app-observable',
+  template: \`
+
+        <input type="text" #box>
+        <button #herSexyButton>Button</button>
+
+  \`
+})
+export class ObservableComponent implements AfterViewInit {
+    @ViewChild('box', { static; false }) input: ElementRef;
+    @ViewChild('herSexyButton', { static: false }) button: ElementRef;
+
+    constructor() { }
+
+    ngAfterViewInit() {
+      const input = Observable.fromEvent(this.input.nativeElement, 'input');
+
+      input.pipe(
+        filter(event => event.target.value.length > 3),
+        map(event => event.target.value)
+      )
+      .subscribe(value => console.log(value));
+
+      input.pipe(
+        delay(2000),
+        map(event => event.target.value)
+      )
+      .subscribe(value => console.log(value));
+
+      input.pipe(
+        throttleTime(200),
+        map(event => event.target.value)
+      )
+      .subscribe(value => console.log(value));
+
+      input.pipe(
+        debounceTime(200),
+        map(event => event.target.value)
+      )
+      .subscribe(value => console.log(value));
+
+      input.pipe(
+        take(3),
+        map(event => event.target.value)
+      )
+      .subscribe(value => console.log(value));
+
+      const stopStream = Observable.fromEvent(this.button.nativeElement, 'click');
+      input.pipe(
+        takeUntil(stopStream),
+        map(event => event.target.value)
+      )
+      .subscribe(value => console.log(value));
+
+    }
+
+}
+
+
+// producing values
+import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+
+  import { Observable } from 'rxjs/Observable';
+  import 'rxjs/add/observable/fromEvent';
+  import { map, pluck, pairwise, distinct, distinctUntilChanged } from 'rxjs/operators';
+
+
+  @Component({
+    selector: 'app-observable',
+    template: \`
+
+          <input type="text" #box>
+
+    \`
+  })
+  export class ObservableComponent implements AfterViewInit {
+      @ViewChild('box', { static; false }) input: ElementRef;
+
+      constructor() { }
+
+      ngAfterViewInit() {
+        const input = Observable.fromEvent(this.input.nativeElement, 'input');
+
+        input.pipe(
+          map(event => event.target.value)
+        )
+        .subscribe(value => console.log(value));
+
+        input.pipe(
+          pluck('target', 'value')
+        )
+        .subscribe(value => console.log(value));
+
+        input.pipe(
+          pluck('target', 'value'),
+          pairwise()
+        )
+        .subscribe(value => console.log(value));
+
+        input.pipe(
+          pluck('target', 'value'),
+          distinct()
+        )
+        .subscribe(value => console.log(value));
+
+        input.pipe(
+          pluck('target', 'value'),
+          distinctUntilChanged()
+        )
+        .subscribe(value => console.log(value));
+
+      }
+
+  }
+
+
+ // simple store
+ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+ import { Observable } from 'rxjs/Observable';
+
+ export interface StoreOptions {
+   debug?: boolean;
+   mutateState?: boolean;
+ }
+
+ export abstract class Store<T extends object> extends Observable<T> {
+   private stateSubject: BehaviorSubject<T>;
+   private options: StoreOptions;
+
+   get state() {
+     return this.stateSubject.value;
+   }
+
+   constructor(initialState: T, options: StoreOptions = {}) {
+     const stateSubject = new BehaviorSubject(initialState);
+     super(observer => stateSubject.subscribe(observer));
+     this.stateSubject = stateSubject;
+     this.options = options;
+   }
+
+   protected mutate(newState: Partial<T>) {
+     const state = this.options.mutateState ?
+     Object.assign(this.state, newState) : Object.assign({}, this.state, newState);
+     if (this.options.debug) {
+       console.log(\`State changed [\${this.constructor.name}]:\`, state);
+     }
+     this.stateSubject.next(state);
+   }
+
+ }
   `,
   blockQuote: `
   Wir beabsichtigen zum Mond zu fliegen in diesem Jahrzehnt und andere Sachen zu tun, nicht weil sie einfach sind,
