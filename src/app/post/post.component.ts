@@ -12217,9 +12217,9 @@ function validate1<T>(target: any, propertyKey: string,
   heading: 'Du kannst kein Javascript- Teil 1',
   subHeading: 'Javascript Unter der Haube',
   metaPublishedDate: 'am 29 Dezember, 2019',
-  sectionHeading: 'Du kannst kein JavaScript!?!',
+  sectionHeading: 'Du kannst kein Javascript!?!',
   code: `
-// values, I value Javascript
+// values, I value JavaScript
 // value embedded using literal
 console.log('My name is Nils-Holger.');
 const firstName = 'Nils-Holger';
@@ -14023,6 +14023,2419 @@ for (const num of randoms) {
   `,
   imageFooterUrl: 'assets/img/post9.jpg',
   footerQuote: 'Wir sind alle miteinander verbunden; zueinander biologisch. Zu der Erde, chemisch. Zum Rest des Universums, atomar.'
+},
+{
+  id: 10,
+  imageHeaderUrl: 'url(assets/img/post10-bg.jpg)',
+  heading: 'Angular 8/9, Basis- Teil 3',
+  subHeading: 'API + TS, TOH, RxJS, Animations + Core API',
+  metaPublishedDate: 'am 30 Dezember, 2019',
+  sectionHeading: 'API + Template Syntax, Tour Of Heroes, Intro RxJS, Animations + Core API',
+  code: `
+// currency pipe
+import { Component } from '@angular/core';
+
+  @Component({
+    selector: 'app-ng-api',
+    template: \`
+            <h1>Currency Pipe</h1>
+
+            <p>A: {{ a | currency }}</p>
+
+            <p>A: {{ a | currency:'EUR' }}</p>
+
+            <p>A: {{ a | currency:'EUR':'code' }}</p>
+
+            <p>B: {{ b | currency:'EUR':'symbol':'4.2-2' }}</p>
+
+            <p>B: {{ b | currency:'EUR':'symbol-narrow':'4.2-2' }}</p>
+
+            <p>B: {{ b | currency:'EUR':'symbol':'4.2-2':'de' }}</p>
+    \`
+  })
+  export class ApiComponent {
+    a: number = 0.259;
+    b: number = 1.3495;
+  }
+
+
+// json pipe
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-ng-api',
+  template: \`
+          <h1>JSON Pipe</h1>
+            <div>
+              <p>Without JSON pipe:</p>
+              <pre>{{ object }}</pre>
+              <p>With JSON pipe:</p>
+              <pre>{{ object | json }}</pre>
+            </div>
+  \`
+})
+export class ApiComponent {
+  object: Object = { foo: 'bar', baz: 'qux',
+                     nested: { xyz: 33, numbers: [1, 2, 3, 4, 5, 6]}};
+}
+
+
+// lower/uppercase pipe
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-ng-api',
+  template: \`
+          <h1>Lower/Uppercase Pipe</h1>
+           <div>
+              <label>Name: </label><input #name (keyup)="change(name.value)" type="text">
+              <p>In lowercase: <pre>'{{ value | lowercase }}'</pre>
+              <p>In uppercase: <pre>'{{ value | uppercase }}'</pre>
+          </div>
+  \`
+})
+export class ApiComponent {
+
+  value = 'Hi Nils-Holger, I love you.';
+  change(value: string) {
+    this.value = value;
+  }
+
+}
+
+// ngforof directive
+import { Component } from '@angular/core';
+
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/from';
+
+@Directive({
+  selector: '[ngFor][ngForOf]'
+})
+class NgForOf<T> implements DoCheck, OnChanges {
+  ngForOf: NgIterable<T>
+  ngForTrackBy: TrackByFunction<T>
+  set ngForTemplate: TemplateRef<NgForOfContext<T>>
+  ngOnChanges(changes: SimpleChanges): void
+  ngDoCheck(): void
+}
+
+@Component({
+  selector: 'app-ng-api',
+  template: \`
+          <h1>NgForOf Directive</h1>
+           <div>
+                  <ul>
+                      <li *ngFor="let user of userObservable | async as users;
+                                  index as i; first as isFirst;">
+                          {{ i + 1 }}/{{ users.length}}.{{ user }}
+                          <span *ngIf="isFirst">default</span>
+                      </li>
+                  </ul>
+                  <ul>
+                        <li *ngFor="let item of items; index as i; trackBy: trackByFn">
+                               {{ i }} {{ item }}
+                        </li>
+                  </ul>
+
+                  <div *ngFor="let hero of heroes; let i = index; let odd = odd;
+                  trackBy: trackById;" [class.odd]="odd">
+                    ({{ i }}) {{ hero.name }}
+                  </div>
+
+                  <ng-template ngFor let-hero [ngForOf]="heroes" let-i="index"
+                  let-odd="odd" [ngForTrackBy]="trackById">
+                    <div [class.odd]="odd">
+                        ({{ i }}) {{ hero.name }}
+                    </div>
+                  </ng-template>
+
+          </div>
+  \`
+})
+export class ApiComponent {
+
+  private names = ['Flash', 'Wonderwoman', 'Superman', 'Spiderman', 'Green Arrow'];
+  heroes = [{ name: 'Nils-Holger' }, { name: 'Julia' }, { name: 'Andre' }, { name: 'Niko'},
+  { name: 'Jens' }, { name: 'Björn' }, { name: 'Niels' },
+  { name: 'Stephan' }, { name: 'Markus'}];
+  items = ['Computer', 'Mobile Device', 'Watch', 'Chromebook'];
+
+  userObservable: Observable<string[]>;
+
+
+  constructor() {
+    this.userObservable = Observable.from([this.names]);
+  }
+
+  trackByFn(idx: number, item: any) {
+    console.log(idx, item);
+  }
+
+  trackById(id: number, hero: any) {
+    console.log(id, hero);
+  }
+
+}
+
+
+// ngplural directive
+import { Component } from '@angular/core';
+import { NgPlural } from '@angular/common';
+
+
+@Component({
+  selector: 'app-ng-api',
+  template: \`
+          <h1>NgPlural Directive</h1>
+          <div [ngPlural]="value">
+                <ng-template ngPluralCase="0">there is nothing</ng-template>
+                <ng-template ngPluralCase="1">there is one</ng-template>
+                <ng-template ngPluralCase="2">there are a couple</ng-template>
+          </div>
+  \`
+})
+export class ApiComponent {
+
+      values = [0, 1, 2];
+      value = this.values[2];
+
+}
+
+// ngswitch directive
+import { Component } from '@angular/core';
+
+
+@Component({
+  selector: 'app-ng-api',
+  template: \`
+          <h1>NgSwitch Directive</h1>
+            <ng-container [ngSwitch]="hero?.emotion">
+                <div *ngSwitchCase="'happy'">{{ hero.name }} is {{ hero.emotion}}.</div>
+                <div *ngSwitchCase="'angry'">{{ hero.name }} is {{ hero.emotion}}.</div>
+                <div *ngSwitchCase="'indifferent'">{{ hero.name }} is {{ hero.emotion}}.
+                </div>
+                <div *ngSwitchDefault>no emotions.</div>
+            <ng-container>
+  \`
+})
+export class ApiComponent {
+      hero = { name: 'Razor', emotion: 'indifferent' };
+}
+
+
+// async pipe
+import { Component } from '@angular/core';
+
+  import { Observable } from 'rxjs/Observable';
+  import { Subscriber } from 'rxjs/Subscriber';
+
+
+  @Component({
+    selector: 'app-ng-api',
+    template: \`
+            <h1>Async Pipe</h1>
+                <div>
+                    <code>observable | async</code>:
+                    Time: {{ time | async }}
+
+                </div>
+              <div>
+                  <code>promise | async</code>:
+                  <button (click)="clicked()">
+                      {{ arrived ? 'Reset' : 'Resolve' }}
+                  </button>
+                  <span>Wait for it ... {{ greeting | async }}</span>
+              </div>
+    \`
+  })
+  export class ApiComponent {
+      time = new Observable<string>((observer: Subscriber<string>) => {
+          setInterval(() => observer.next(new Date().toString()), 1000);
+      });
+
+
+      greeting: Promise<string> | null = null;
+      arrived: boolean = false;
+
+      private resolve: Function | null = null;
+
+      constructor() {
+        this.reset();
+      }
+
+      reset() {
+        this.arrived = false;
+        this.greeting = new Promise<string>((resolve, reject) => { this.resolve = resolve; });
+      }
+
+      clicked() {
+        if (this.arrived) {
+          this.reset();
+        } else {
+          this.resolve !('Hi Nils-Holger!!!');
+          this.arrived = true;
+        }
+      }
+  }
+
+
+// date pipe
+import { Component } from '@angular/core';
+
+  @Component({
+    selector: 'app-ng-api',
+    template: \`
+            <h1>Date Pipe</h1>
+
+            <p>Today is {{ today | date }}</p>
+            <p>Or if you prefer, {{ today | date:'fullDate' }}</p>
+            <p>The time is {{ today | date:'shortTime' }}</p>
+            <p>The full date/time is {{ today | date:'full' }}</p>
+            <p>The full date/time in german is: {{ today | date:'full':'':'de' }}</p>
+            <p>The custom date is {{ today | date:'dd-MM-yyyy HH:mm:ss a z':'+0100' }}</p>
+            <p>The custom date with fixed timezone is
+            {{ fixedTimezone | date:'dd-MM-yyyy HH:mm:ss a z':'+0100' }}</p>
+    \`
+  })
+  export class ApiComponent {
+    today = Date.now();
+    fixedTimezone = '2019-12-29T10:32:42+0100';
+
+  }
+
+
+// ngclass directive
+import { Component } from '@angular/core';
+
+
+  @Component({
+    selector: 'app-ng-api',
+    template: \`
+            <h1>NgClass Directive</h1>
+            <div [ngClass]="currentClasses">
+                This div is initially saveable, unchanged and special.
+            </div>
+
+    \`,
+    styles: [\`.saveable { font-size: 150%; }
+              .modified { background-color: yellow; }
+              .special { color: red; }
+            \`]
+  })
+  export class ApiComponent {
+        currentClasses: {};
+        canSave = true;
+        isUnchanged = true;
+        isSpecial = true;
+
+        constructor() {
+          this.setCurrentClasses();
+        }
+
+        setCurrentClasses() {
+          this.currentClasses = {
+            'saveable': this.canSave,
+            'modified': !this.isUnchanged,
+            'special': this.isSpecial
+          };
+        }
+
+  }
+
+
+// percent pipe
+import { Component } from '@angular/core';
+
+
+@Component({
+  selector: 'app-ng-api',
+  template: \`
+          <h1>Percent Pipe</h1>
+          <p>A: {{ a | percent }}</p>
+          <p>B: {{ b | percent:'4.3-5' }}</p>
+          <p>B: {{ b | percent:'4.3-5':'de' }}</p>
+  \`
+})
+export class ApiComponent {
+      a: number = 0.259;
+      b: number = 1.3495;
+
+}
+
+
+// decimal pipe
+import { Component } from '@angular/core';
+
+
+@Component({
+  selector: 'app-ng-api',
+  template: \`
+          <h1>Decimal Pipe</h1>
+          <p>e (no formatting): {{ e | number }}</p>
+          <p>e (3.1-5): {{ e | number:'3.1-5' }}</p>
+          <p>e (4.5-5): {{ e | number:'4.5-5' }}</p>
+          <p>e (german): {{ e | number:'4.5-5':'de' }}</p>
+
+          <p>pi (no formatting): {{ pi | number }}</p>
+          <p>pi (3.1-5): {{ pi | number:'3.1-5' }}</p>
+          <p>pi (3.5-5): {{ pi | number:'3.5-5' }}</p>
+
+  \`
+})
+export class ApiComponent {
+      pi: number = 3.14;
+      e: number = 2.718281828459045;
+
+}
+
+
+// ngif directive
+import { Component } from '@angular/core';
+
+
+@Component({
+  selector: 'app-ng-api',
+  template: \`
+          <h1>NgIf Directive</h1>
+          <button (click)="show = !show">{{ show ? 'hide' : 'show' }}</button>
+          show = {{ show }}
+          <br>
+          <div *ngIf="show; else elseBlock">Text to show</div>
+          <ng-template #elseBlock>Alternate text while primary text is hidden</ng-template>
+  \`
+})
+export class ApiComponent {
+        show: boolean = true;
+
+}
+
+*****************************************************************
+
+import { Component, ViewChild, TemplateRef, OnInit } from '@angular/core';
+
+
+@Component({
+selector: 'app-ng-api',
+template: \`
+        <h1>NgIf Directive</h1>
+        <button (click)="show = !show">{{ show ? 'hide' : 'show' }}</button>
+        <button (click)="switchPrimary()">Switch Primary</button>
+        show = {{ show }}
+        <br>
+        <div *ngIf="show; then thenBlock; else elseBlock">this is ignored</div>
+        <ng-template #primaryBlock>Primary text to show</ng-template>
+        <ng-template #secondaryBlock>Secondary text to show</ng-template>
+        <ng-template #elseBlock>Alternate text while primary text is hidden</ng-template>
+\`
+})
+export class ApiComponent implements OnInit {
+      thenBlock: TemplateRef<any> | null = null;
+      show: boolean = true;
+
+      @ViewChild('primaryBlock', { static: false })
+      primaryBlock: TemplateRef<any> | null = null;
+      @ViewChild('secondaryBlock', { static: false })
+      secondaryBlock: TemplateRef<any> | null = null;
+
+      switchPrimary() {
+        this.thenBlock = this.thenBlock === this.primaryBlock ?
+                         this.secondaryBlock : this.primaryBlock;
+      }
+
+      ngOnInit() {
+        this.thenBlock = this.primaryBlock;
+      }
+
+}
+
+*****************************************************************
+
+import { Component } from '@angular/core';
+
+import { Subject } from 'rxjs/Subject';
+
+@Component({
+selector: 'app-ng-api',
+template: \`
+        <h1>NgIf Directive</h1>
+        <button (click)="nextUser()">Next User</button>
+        <br>
+        <div *ngIf="userObservable | async as user; else loading;">
+            Hello {{ user.last }}, {{ user.first }}!
+        </div>
+        <ng-template #loading let-user>Waiting ...
+                              (user is {{ user | json }} )</ng-template>
+\`
+})
+export class ApiComponent {
+      userObservable = new Subject<{first: string, last: string}>();
+      first = ['Nils-Holger', 'Julia', 'Max', 'Peter', 'Angular'];
+      firstIndex = 0;
+      last = ['Nägele', 'Betten', 'Tor', 'Haferstein', '9'];
+      lastIndex = 0;
+
+      nextUser() {
+        let first = this.first[this.firstIndex++];
+        if (this.firstIndex >= this.first.length) {
+          this.firstIndex = 0;
+        }
+        let last = this.last[this.lastIndex++];
+        if (this.lastIndex >= this.last.length) {
+          this.lastIndex = 0;
+        }
+        this.userObservable.next({first, last});
+      }
+
+}
+
+
+// ngstyle directive
+import { Component } from '@angular/core';
+
+
+@Component({
+  selector: 'app-ng-api',
+  template: \`
+          <h1>NgStyle Directive</h1>
+
+          <div [style.font-size]="isSpecial ? 'x-large' : 'smaller'">
+                This div is x-large.
+          </div>
+
+          <div [ngStyle]="currentStyles">
+                This div is initially italic, normal weight and x-large (24px).
+          </div>
+  \`
+})
+export class ApiComponent {
+      isSpecial = true;
+      canSave = true;
+      isUnchanged = true;
+
+      currentStyles = {
+            'font-style': this.canSave ? 'italic' : 'normal',
+            'font-weight': !this.isUnchanged ? 'bold' : 'normal',
+            'font-size': this.isSpecial ? '24px' : '12px'
+      };
+
+}
+
+
+// viewchildren decorator
+import { Component, Directive, Input,
+  QueryList, ViewChildren, AfterViewInit } from '@angular/core';
+
+
+  @Directive({
+      selector: 'app-pane'
+  })
+  export class PaneDirective {
+  @Input() id: string;
+}
+
+
+  @Component({
+      selector: 'app-ng-api',
+      template: \`
+                    <h1>ViewChildren Decorator</h1>
+                    <app-pane id="1"></app-pane>
+                    <app-pane id="2"></app-pane>
+                    <app-pane id="3" *ngIf="shouldShow"></app-pane>
+                    <button (click)="show()">Show 3</button>
+                    <div>panes: {{ serializedPanes }}</div>
+            \`
+        })
+        export class ApiComponent implements AfterViewInit {
+        @ViewChildren(PaneDirective) panes: QueryList<PaneDirective>;
+        serializedPanes: string = '';
+
+        shouldShow = false;
+
+        show() {
+            this.shouldShow = true;
+        }
+
+        ngAfterViewInit() {
+        this.calculateSerializedPanes();
+        this.panes.changes.subscribe((r) => { this.calculateSerializedPanes(); });
+        }
+
+        calculateSerializedPanes() {
+        setTimeout(() =>
+              { this.serializedPanes = this.panes.map(p => p.id).join(', '); }, 0);
+        }
+    }
+
+// contentchild decorator
+import { Component, Directive, Input, ContentChild } from '@angular/core';
+
+
+@Directive({
+  selector: 'app-pane'
+})
+export class PaneDirective {
+  @Input() id: string;
+}
+
+@Component({
+  selector: 'app-tab',
+  template: \`
+          <div>pane: {{ pane?.id }}</div>
+  \`
+})
+export class TabComponent {
+  @ContentChild(PaneDirective, { static: false }) pane: PaneDirective;
+}
+
+
+@Component({
+  selector: 'app-ng-api',
+  template: \`
+          <h1>ContentChild Decorator</h1>
+          <app-tab>
+            <app-pane id="1" *ngIf="shouldShow"></app-pane>
+            <app-pane id="2" *ngIf="!shouldShow"></app-pane>
+          </app-tab>
+
+          <button (click)="toggle()">Toggle</button>
+  \`
+})
+export class ApiComponent {
+        shouldShow = true;
+
+        toggle() {
+          this.shouldShow = !this.shouldShow;
+        }
+
+}
+
+
+// directive decorator
+import { Component, Input } from '@angular/core';
+
+
+@Component({
+  selector: 'app-bank-account',
+  template: \`
+          Bank Name: {{ bankName }}
+          Account ID: {{ id }}
+  \`
+})
+export class BankAccountComponent {
+  @Input('bank-name') bankName: string;
+  @Input('account-id') id: string;
+
+}
+
+
+@Component({
+  selector: 'app-ng-api',
+  template: \`
+          <h1>Directive Decorator</h1>
+          <app-bank-account bank-name='ABC' account-id="123"></app-bank-account>
+  \`
+})
+export class ApiComponent { }
+
+*****************************************************************
+
+import { Component, Directive, Output, EventEmitter } from '@angular/core';
+
+
+@Directive({
+  selector: 'app-interval-dir'
+})
+export class IntervalDirective {
+  @Output() everySecond = new EventEmitter();
+  @Output('everyFiveSeconds') five5Seconds = new EventEmitter();
+
+  constructor() {
+    setInterval(() => this.everySecond.emit('event'), 1000);
+    setInterval(() => this.five5Seconds.emit('event'), 5000);
+  }
+
+}
+
+
+@Component({
+  selector: 'app-ng-api',
+  template: \`
+          <h1>Directive Decorator</h1>
+          <app-interval-dir (everySecond)="everySecond()"
+          (everyFiveSeconds)="everyFiveSeconds()">
+          </app-interval-dir>
+  \`
+})
+export class ApiComponent {
+
+  everySecond() {
+    console.log('second');
+  }
+
+  everyFiveSeconds() {
+    console.log('five seconds');
+  }
+
+}
+
+*****************************************************************
+
+import { Component, Directive } from '@angular/core';
+
+
+@Directive({
+  selector: 'button[counting]',
+  host: {
+  '(click)': 'onClick($event.target)'
+  }
+})
+export class CountClicksDirective {
+    numberOfClicks = 0;
+
+    onClick(btn) {
+      console.log('button', btn, 'number of clicks: ', this.numberOfClicks++);
+    }
+
+}
+
+
+@Component({
+selector: 'app-ng-api',
+template: \`
+        <h1>Directive Decorator</h1>
+        <button counting>Increment</button>
+\`
+})
+export class ApiComponent {
+
+}
+
+*****************************************************************
+
+import { Component, Directive } from '@angular/core';
+import { NgModel } from '@angular/forms';
+
+
+@Directive({
+selector: '[ngModel]',
+host: {
+  '[class.valid]': 'valid',
+  '[class.invalid]' : 'invalid'
+}
+})
+export class NgModelStatusDirective {
+
+constructor(public control: NgModel) { }
+
+get valid() { return this.control.valid; }
+get invalid() { return this.control.invalid; }
+
+}
+
+
+@Component({
+selector: 'app-ng-api',
+template: \`
+        <h1>Directive Decorator</h1>
+        <input [(ngModel)]="prop">
+\`
+})
+export class ApiComponent {
+  prop: any;
+}
+
+
+*****************************************************************
+
+import { Component, Directive } from '@angular/core';
+
+
+@Directive({
+selector: '[my-button]',
+host: {
+  'role': 'button'
+}
+})
+export class MyButtonDirective {
+
+}
+
+
+@Component({
+selector: 'app-ng-api',
+template: \`
+        <h1>Directive Decorator</h1>
+        <div my-button>My Button</div>
+\`
+})
+export class ApiComponent {
+
+}
+
+
+*****************************************************************
+
+import { Component, Directive, ElementRef, HostListener } from '@angular/core';
+
+
+@Directive({
+selector: '[appHighlight]'
+})
+export class HighlightDirective {
+    @HostListener('mouseenter') onMouseEnter() {
+      this.highlight('red');
+    }
+
+    @HostListener('mouseleave') onMouseLeave() {
+      this.highlight('yellow');
+    }
+
+    constructor(private el: ElementRef) {
+      el.nativeElement.style.color = 'white';
+      this.el.nativeElement.style.backgroundColor = 'green';
+     }
+
+     private highlight(color: string) {
+      this.el.nativeElement.style.backgroundColor = color;
+     }
+}
+
+
+@Component({
+selector: 'app-ng-api',
+template: \`
+        <h1>Directive Decorator</h1>
+        <p appHighlight>Highlight me!</p>
+\`
+})
+export class ApiComponent {
+
+}
+
+*****************************************************************
+
+import { Component, Directive, Input,
+TemplateRef, ViewContainerRef } from '@angular/core';
+
+
+@Directive({
+selector: '[appUnless]'
+})
+export class UnlessDirective {
+private hasView = false;
+
+@Input() set appUnless(condition: boolean) {
+if (!condition && !this.hasView) {
+this.viewContainerRef.createEmbeddedView(this.templateRef);
+this.hasView = true;
+} else if (condition && this.hasView) {
+this.viewContainerRef.clear();
+this.hasView = false;
+}
+}
+
+constructor(private templateRef: TemplateRef<any>,
+     private viewContainerRef: ViewContainerRef) { }
+
+
+
+}
+
+
+@Component({
+selector: 'app-ng-api',
+template: \`
+ <h1>Directive Decorator</h1>
+ <p *appUnless="condition">Show this sentence unless the condition is true</p>
+ <p *appUnless="!condition">This condition is true so this paragraph is not displayed</p>
+
+\`
+})
+export class ApiComponent {
+condition = false;
+}
+
+
+// event emitter class
+import { Component, Output, EventEmitter } from '@angular/core';
+
+
+@Component({
+  selector: 'app-zippy',
+  template: \`
+          <div class="zippy">
+            <div (click)="toggle()">Toggle</div>
+            <div [hidden]="!visible">
+              <ng-content></ng-content>
+            </div>
+          </div>
+  \`
+})
+export class ZippyComponent {
+        visible: boolean = false;
+        @Output() open: EventEmitter<string> = new EventEmitter();
+        @Output() close: EventEmitter<string> = new EventEmitter();
+
+        toggle() {
+          this.visible = !this.visible;
+          if (this.visible) {
+            this.open.emit('open');
+          } else {
+            this.close.emit('close');
+          }
+        }
+
+}
+
+
+@Component({
+  selector: 'app-ng-api',
+  template: \`
+          <h1>EventEmitter Class</h1>
+
+          <app-zippy (open)="onOpen($event)"
+                    (close)="onClose($event)">
+          <app-zippy>
+  \`
+})
+export class ApiComponent {
+      onOpen(evt) {
+        console.log(evt);
+      }
+
+      onClose(evt) {
+        console.log(evt);
+      }
+}
+
+
+// contentchildren decorator
+import { Component, ContentChildren, Directive, Input, QueryList } from '@angular/core';
+
+
+@Directive({
+  selector: 'app-pane'
+})
+export class PaneDirective {
+  @Input() id: string;
+}
+
+@Component({
+  selector: 'app-tab',
+  template: \`
+            <div class="top-level">Top level panes: {{ serializedPanes }}</div>
+            <div class="nested">Arbitrary nested panes: {{ serializedNestedPanes }}</div>
+  \`
+})
+export class TabComponent {
+  @ContentChildren(PaneDirective) topLevelPanes: QueryList<PaneDirective>;
+  @ContentChildren(PaneDirective, { descendants: true })
+  arbitraryNestedPanes: QueryList<PaneDirective>;
+
+  get serializedPanes(): string {
+    return this.topLevelPanes ?
+           this.topLevelPanes.map(p => p.id).join(', ') : '';
+  }
+
+  get serializedNestedPanes(): string {
+    return this.arbitraryNestedPanes ?
+           this.arbitraryNestedPanes.map(p => p.id).join(', ') : '';
+  }
+}
+
+
+@Component({
+  selector: 'app-ng-api',
+  template: \`
+          <h1>ContentChildren Decorator</h1>
+
+          <app-tab>
+              <app-pane id="1"></app-pane>
+              <app-pane id="2"></app-pane>
+              <app-pane id="3" *ngIf="shouldShow">
+                  <app-tab>
+                      <app-pane id="3_1"></app-pane>
+                      <app-pane id="3_2"></app-pane>
+                  </app-tab>
+              </app-pane>
+          </app-tab>
+
+          <button (click)="show()">Show 3</button>
+  \`
+})
+export class ApiComponent {
+      shouldShow = false;
+
+      show() {
+        this.shouldShow = true;
+      }
+
+}
+
+
+// animate function
+import { Component } from '@angular/core';
+import { animate, state, style, transition, trigger } from '@angular/animations';
+
+@Component({
+  selector: 'app-ng-api',
+  template: \`
+          <h1>Animate Function</h1>
+
+          <button (click)="expand()">Open</button>
+          <button (click)="collapse()">Closed</button>
+          <hr>
+          <div class="toggle-container" [@openClose]="stateExpression">
+                Look at this box
+          </div>
+  \`,
+  animations: [trigger(
+        'openClose',
+        [
+          state('collapsed, void', style({ height: '0px', color: 'red',
+                borderColor: 'red'})),
+          state('expanded', style({ height: '*', borderColor: 'green', color: 'green'})),
+          transition(
+            'collapsed <=> expanded', [animate(1500, style({height: '250px'})),
+             animate(1500)]
+          )
+        ]
+  )],
+  styles: [\`
+    .toggle-container {
+      background-color: white;
+      border: 10px solid black;
+      width: 200px;
+      text-align: center;
+      line-height: 100px;
+      font-size: 50px;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+  \`]
+})
+export class ApiComponent {
+      stateExpression: string;
+      constructor() {
+        this.collapse();
+      }
+
+      expand() { this.stateExpression = 'expanded'; }
+      collapse() { this.stateExpression = 'collapsed'; }
+
+}
+
+
+// interpolation
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-ng-api',
+  template: \`
+          <h1>Interpolation</h1>
+          <p>My current technology is {{ currentTechnology.name }}.</p>
+          <h3>
+              {{ title }}
+            <img src="{{heroImageUrl}}" style="height:50px">
+          </h3>
+          <p>The product of 10 x 10 is {{ 10 * 10 }}</p>
+          <p>The product of 10 x 10 is not {{ 10 * 10 * getVal() }}</p>
+  \`
+})
+export class ApiComponent {
+  technologies = [
+      { id: 1, name: 'Angular' },
+      { id: 2, name: 'React' },
+      { id: 3, name: 'VueJS' }
+  ];
+  currentTechnology = this.technologies[0];
+  title = 'Hi Nils-Holger';
+  heroImageUrl = 'https://ng8-photo-gallery.firebaseapp.com/assets/my_images/a1.jpg';
+  getVal() {
+    return 2;
+  }
+
+}
+
+
+// expression context
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-ng-api',
+  template: \`
+          <h1>Expression Context</h1>
+          <span [hidden]="isUnchanged">changed</span>
+          <ng-template>
+                <div *ngFor="let technology of technologies">
+                    {{ technology.name }}
+                </div>
+          <ng-template>
+          <div (keyup)="0">
+            Type something:
+            <input #technologyInput> {{ technologyInput.value }}
+          </div>
+  \`
+})
+export class ApiComponent {
+  technologies = [
+      { id: 1, name: 'Angular' },
+      { id: 2, name: 'React' },
+      { id: 3, name: 'VueJS' }
+  ];
+  isUnchanged = true;
+
+}
+
+
+// statement context
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-ng-api',
+  template: \`
+          <h1>Statement Context</h1>
+          <div class="context">
+            <button (click)="deleteTechnology()">Delete technology</button>
+          </div>
+          <div class="context">
+            <button (click)="onSave($event)">Save</button>
+          </div>
+          <div class="context">
+              <button *ngFor="let technology of technologies"
+              (click)="deleteTechnology(technology)">
+                    {{ technology.name }}
+              </button>
+          </div>
+          <div class="context">
+            <form #technologyForm (ngSubmit)="onSubmit(technologyForm)">
+                ...
+            </form>
+          </div>
+
+  \`
+})
+export class ApiComponent {
+  technologies = [
+      { id: 1, name: 'Angular' },
+      { id: 2, name: 'React' },
+      { id: 3, name: 'VueJS' }
+  ];
+
+  deleteTechnology() {
+    alert('delete the technology.');
+  }
+
+  onSave(evt: KeyboardEvent) {
+    alert('Saved. Event target is ' + (<HTMLElement>evt.target).textContent);
+  }
+
+}
+
+
+// new mental model
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-ng-api',
+  template: \`
+          <h1>New Mental Model</h1>
+
+            <div>
+              <h3>New Mental Model</h3>
+              <img src="assets/hero.jpg">
+              <button disabled>Save</button>
+            </div>
+
+            <div>
+                  <h3>New Mental Model</h3>
+                  <app-technology-detail></app-technology-detail>
+            </div>
+
+            <div>
+                <button [disabled]="isUnchanged">Save</button>
+            </div>
+
+            <div>
+                <img [src]="heroImageUrl">
+                <app-technology-detail [technology]="currentTechnology">
+                </app-technology-detail>
+                <div [ngClass]="{'special': isSpecial}">this div is special</div>
+            </div>
+
+            <div>
+                <button (click)="onSave()">Save</button>
+                <app-technology-detail (deleteRequest)="deleteTechnology()">
+                </app-technology-detail>
+                <div (appMyClick)="clicked=$event">Click me!</div>
+                   {{ clicked }}
+            </div>
+
+            <div>
+                Technology Name:
+                <input [(ngModel)]="name">
+                {{ name }}
+            </div>
+
+            <div>
+                <button [attr.aria-label]="help">Help</button>
+                <div [class.special]="isSpecial">Special</div>
+                <button [style.color]="isSpecial ? 'red' : 'green'">
+                  button
+                </button>
+            </div>
+  \`,
+  styles: [\`
+      img {
+        height: 100px;
+      }
+      .special {
+        font-weight: bold;
+        font-size: x-large;
+        color: red;
+      }
+  \`]
+})
+export class ApiComponent {
+  technologies = [
+      { id: 1, name: 'Angular' },
+      { id: 2, name: 'React' },
+      { id: 3, name: 'VueJS' }
+  ];
+  isUnchanged = true;
+  heroImageUrl = '../../assets/hero.jpg';
+  currentTechnology = this.technologies[1];
+  isSpecial = true;
+  clicked = '';
+  name = this.technologies[2].name;
+  help = 'help';
+  onSave() {
+    alert('Saved.');
+  }
+
+  deleteTechnology() {
+    alert('Delete the technology.');
+  }
+
+}
+
+
+// technology class
+export class Technology {
+  static nextId = 0;
+
+  static technologies: Technology[] = [
+      new Technology(
+        null,
+        'Angular 9',
+        'awesome',
+        new Date(2020, 1, 14),
+        'https://angular.io',
+        150
+      ),
+      new Technology(1, 'Angular CLI 8.2', 'strong'),
+      new Technology(2, 'Angular Material 8.2', 'happy'),
+      new Technology(3, 'ECMAScript 6/7/8', 'energetic'),
+      new Technology(4, 'Firebase')
+  ];
+
+  constructor(public id?: number,
+              public name?: string,
+              public emotion?: string,
+              public birthDate?: Date,
+              public url?: string,
+              public rating = 100) {
+                this.id = id ? id : Technology.nextId++;
+              }
+
+  clone(): Technology {
+      return Object.assign(new Technology(), this);
+  }
+
+}
+
+
+
+// click directive
+import { Directive, ElementRef, EventEmitter, Output } from '@angular/core';
+
+  @Directive({
+    selector: '[appMyClick]'
+  })
+  export class ClickDirective {
+    @Output('appMyClick') clicks = new EventEmitter<string>();
+
+    toggle = false;
+
+    constructor(el: ElementRef) {
+      el.nativeElement.addEventListener('click', (event: Event) => {
+              this.toggle = !this.toggle;
+              this.clicks.emit(this.toggle ? 'Click!' : '');
+      });
+    }
+
+  }
+
+  @Directive({
+    selector: '[appMyClick2]',
+    outputs: ['clicks:appMyClick']
+  })
+  export class Click2Directive {
+    clicks = new EventEmitter<string>();
+    toggle = false;
+
+    constructor(el: ElementRef) {
+      el.nativeElement.addEventListener('click', (event: Event) => {
+              this.toggle = !this.toggle;
+              this.clicks.emit(this.toggle ? 'Click2!' : '');
+      });
+    }
+
+  }
+
+
+// technology switch components
+import { Component, Input } from '@angular/core';
+
+import { Technology } from '../technology';
+
+@Component({
+  selector: 'app-awesome-technology',
+  template: \`
+          Wow. You like {{ technology.name }}. What an awesome technology ... just like you.
+  \`
+})
+export class AwesomeTechnologyComponent {
+  @Input() technology: Technology;
+
+}
+
+@Component({
+  selector: 'app-strong-technology',
+  template: \`
+          You like {{ technology.name }}? Such a strong technology. Are you strong too?
+  \`
+})
+export class StrongTechnologyComponent {
+  @Input() technology: Technology;
+
+}
+
+@Component({
+  selector: 'app-happy-technology',
+  template: \`
+          Are you as happy as {{ technology.name }}?
+  \`
+})
+export class HappyTechnologyComponent {
+  @Input() technology: Technology;
+
+}
+
+@Component({
+  selector: 'app-future-technology',
+  template: \`
+          {{ message }}
+  \`
+})
+export class FutureTechnologyComponent {
+  @Input() technology: Technology;
+
+  get message() {
+    return this.technology && this.technology.name ?
+        \`\${this.technology.name} is not born yet.\` :
+        'Are you feeling stubborn and curious?';
+  }
+
+}
+
+export const technologySwitchComponents =
+        [ AwesomeTechnologyComponent, StrongTechnologyComponent,
+          HappyTechnologyComponent, FutureTechnologyComponent ];
+
+
+
+// technology form component
+import { Component, Input, ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
+
+import { Technology } from '../technology';
+
+@Component({
+  selector: 'app-technology-form',
+  template: \`
+            <div id="technologyForm">
+                  <form (ngSubmit)="onSubmit(technologyForm)" #technologyForm="ngForm">
+                        <div class="form-group">
+                              <label for="name">Name
+                                <input class="form-control" name="name" required
+                                [(ngModel)]="technology.name">
+                              </label>
+                        </div>
+                        <button type="submit" [disabled]="!technologyForm.form.valid">
+                          Submit
+                        </button>
+                  </form>
+                  <div [hidden]="!technologyForm.form.valid">
+                      {{ submitMessage }}
+                  </div>
+            </div>
+  \`,
+  styles: [\`
+    button {
+              margin: 6px 0;
+        }
+    #technologyForm {
+                border: 1px solid black;
+                margin: 20px 0;
+                padding: 8px;
+                max-width: 350px;
+        }
+  \`]
+})
+export class TechnologyFormComponent  {
+      @Input() technology: Technology;
+      @ViewChild('technologyForm') form: NgForm;
+
+      private _submitMessage = '';
+
+      get submitMessage() {
+        if (!this.form.valid) {
+          this._submitMessage = '';
+        }
+        return this._submitMessage;
+      }
+
+      onSubmit(form: NgForm) {
+        this._submitMessage = 'Submitted. Form value is ' + JSON.stringify(form.value);
+      }
+
+}
+
+
+// technology detail component
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+
+import { Technology } from '../technology';
+
+@Component({
+  selector: 'app-technology-detail',
+  inputs: ['technology'],
+  outputs: ['deleteRequest'],
+  template: \`
+          <div>
+              <img src="{{ heroImageUrl }}">
+              <span [style.text-decoration]="lineThrough">
+                  {{ prefix }} {{ technology?.name }}
+              </span>
+              <button (click)="delete()">Delete</button>
+          </div>
+  \`,
+  styles: [\`
+        button {
+          margin-left: 8px;
+        }
+        div {
+          margin: 8px 0;
+        }
+        img {
+          height: 24px;
+        }
+
+  \`]
+})
+export class TechnologyDetailComponent {
+  technology: Technology = new Technology(-1, '', 'Zzzzzzzzzzzzzzz');
+  heroImageUrl = '../../assets/hero.jpg';
+
+  lineThrough = '';
+  @Input() prefix = '';
+
+  deleteRequest = new EventEmitter<Technology>();
+
+  delete() {
+    this.deleteRequest.emit(this.technology);
+    this.lineThrough = this.lineThrough ? '' : 'line-through';
+  }
+
+}
+
+@Component({
+  selector: 'app-big-technology-detail',
+  template: \`
+            <div class="detail">
+                  <img src="{{ heroImageUrl }}">
+                  <div><b>{{ technology?.name }}</b></div>
+                  <div>Name: {{ technology?.name }}</div>
+                  <div>Emotion: {{ technology?.emotion }}</div>
+                  <div>Birthdate: {{ technology?.birthDate }}</div>
+                  <div>Web: <a href="{{ technology?.url }}" target="_blank">
+                    {{ technology?.url }}</a>
+                  </div>
+                  <div>
+                      Rating: {{ technology?.rating | number:'3.1-5' }}
+                  </div>
+                  <br>
+                  <button (click)="delete()">Delete</button>
+            </div>
+  \`
+})
+export class BigTechnologyDetailComponent extends TechnologyDetailComponent {
+  @Input() technology: Technology;
+  @Output() deleteRequest = new EventEmitter<Technology>();
+
+  delete() {
+    this.deleteRequest.emit(this.technology);
+  }
+
+}
+
+
+// property vs attribute binding, buttons
+import { Component } from '@angular/core';
+
+  @Component({
+    selector: 'app-ng-api',
+    template: \`
+            <h1>Property vs. Attribute Binding. Buttons</h1>
+            <img src="../../assets/ng-logo.png"
+                 [src]="heroImageUrl">
+            <br><br>
+           <img [src]="iconUrl">
+           <img bind-src="heroImageUrl">
+           <img [attr.src]="villainImageUrl">
+
+           <h2>Buttons</h2>
+           <button>Enabled but does nothing</button>
+           <button disabled>Disabled</button>
+           <button disabled=false>Still disabled</button>
+           <br><br>
+           <button disabled>Disabled by attribute</button>
+           <button [disabled]="isUnchanged">Disabled by property binding</button>
+           <br><br>
+           <button bind-disabled="isUnchanged" on-click="onSave($event)">
+              Disabled Cancel
+           </button>
+           <button [disabled]="!canSave" (click)="onSave($event)">Enabled Save</button>
+    \`,
+    styles: [\`
+      img {
+        height: 100px;
+      }
+    \`]
+  })
+  export class ApiComponent {
+    heroImageUrl = '../../assets/hero.jpg';
+    iconUrl = '../../assets/ng-logo.png';
+    villainImageUrl = '../../assets/hang.jpg';
+    isUnchanged = true;
+    canSave = true;
+
+    onSave(evt: KeyboardEvent) {
+      alert('Event target class is ' + (<HTMLElement>evt.target).textContent);
+    }
+  }
+
+
+// property binding
+import { Component } from '@angular/core';
+import { Technology } from './../technology';
+
+  @Component({
+    selector: 'app-ng-api',
+    template: \`
+            <h1>Property Binding</h1>
+            <img [src]="heroImageUrl">
+            <button [disabled]="isUnchanged">Cancel is disabled</button>
+            <div [ngClass]="classes">[ngClass] is binding to the classes property</div>
+            <app-technology-detail [technology]="currentTechnology"></app-technology-detail>
+            <img bind-src="heroImageUrl">
+            <app-technology-detail prefix="You are my" [technology]="currentTechnology">
+            </app-technology-detail>
+
+            <p><img src="{{ heroImageUrl }}"> is the <i>interpolated</i> image.</p>
+            <p><img [src]="heroImageUrl"> is the <i>property bound</i> image.</p>
+
+            <p><span>"{{ title }}" is the <i>interpolated title</i> title.</span></p>
+            <p>"<span [innerHTML]="title"></span>" is the <i>property bound</i> title.</p>
+
+            <p><span>"{{ evilTitle }}" is the <i>interpolated title</i>
+            evil title.</span></p>
+            <p>"<span [innerHTML]="evilTitle"></span>" is the <i>property bound</i>
+            evil title.</p>
+    \`,
+    styles: [\`
+      img {
+        height: 100px;
+      }
+      .special {
+        font-weight: bold;
+        font-size: x-large;
+        color: red;
+      }
+    \`]
+  })
+  export class ApiComponent {
+    heroImageUrl = '../../assets/hero.jpg';
+    isUnchanged = true;
+    classes = 'special';
+    currentTechnology = Technology.technologies[0];
+    title = 'Hello Nils-Holger';
+    evilTitle = 'Template <script>alert("extermination through work")</script>Syntax';
+
+  }
+
+
+// attribute binding
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-ng-api',
+  template: \`
+          <h1>Attribute Binding</h1>
+          <table border="1">
+            <tr><td [attr.colspan]="1 + 1">One-Two</td></tr>
+            <tr><td>Three</td><td>Four</td></tr>
+          </table>
+          <br>
+          <button [attr.aria-label]="actionName">{{ actionName }} with Aria</button>
+          <br>
+          <br>
+          <div>
+              <button [attr.disabled]="isUnchanged">Disabled</button>
+              <button [attr.disabled]="!isUnchanged">Disabled as well</button>
+              <button disabled [disabled]="false">Enabled (but inert)</button>
+          </div>
+   \`
+})
+export class ApiComponent {
+  actionName = 'Go for it';
+  isUnchanged = true;
+
+}
+
+
+// class binding
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-ng-api',
+  template: \`
+          <h1>Class Binding</h1>
+          <div class="nice girly special">Nice girly special</div>
+
+          <div class="nice girly special" [class]="niceGirly">Nice girly</div>
+
+          <div [class.special]="isSpecial">This class binding is special</div>
+
+          <div class="special" [class.special]="!isSpecial">This one is not so special</div>
+
+          <div bind-class.special="isSpecial">This class binding is special too</div>
+  \`,
+  styles: [\`
+    .nice {
+      color: red;
+    }
+    .girly {
+      font-family: Brush Script MT;
+    }
+    .special {
+      font-weight: bold;
+      font-size: x-large;
+    }
+  \`]
+})
+export class ApiComponent {
+  niceGirly = 'nice girly';
+  isSpecial = true;
+
+}
+
+
+// style binding
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-ng-api',
+  template: \`
+          <h1>Style Binding</h1>
+          <button [style.color]="isSpecial ? 'red' : 'green'">Red</button>
+          <button [style.background-color]="canSave ? 'cyan' : 'grey'">Save Her</button>
+          <button [style.font-size.em]="isSpecial ? 3 : 1">Big</button>
+          <button [style.font-size.%]="!isSpecial ? 150 : 50">Small</button>
+
+  \`
+})
+export class ApiComponent {
+  niceGirly = 'nice girly'; // gets a date
+  isSpecial = true;
+  canSave = true;
+
+}
+
+
+// event binding
+import { Component } from '@angular/core';
+
+import { Technology } from './../technology';
+
+  @Component({
+    selector: 'app-ng-api',
+    template: \`
+            <h1>Event Binding</h1>
+
+            <button (click)="onSaveHer()">Save Her</button>
+            <button on-click="onSaveHer()">Save Her</button>
+
+            <div>
+                <div (appMyClick)="clickMessage=$event">Click with MyClick!</div>
+                {{ clickMessage }}
+            </div>
+
+            <app-technology-detail (deleteRequest)="deleteTechnology($event)"
+                                    [technology]="currentTechnology">
+            </app-technology-detail>
+            <br>
+
+            <app-big-technology-detail (deleteRequest)="deleteTechnology($event)"
+                                        [technology]="currentTechnology">
+            </app-big-technology-detail>
+
+            <div class="parent-div" (click)="onClickMe($event)">Click me
+                <div class="child-div">Click me too!</div>
+            </div>
+
+            <div (click)="onSave()">
+                <button (click)="onSave($event)">Save, no propagation</button>
+            </div>
+
+            <div (click)="onSave()">
+                <button (click)="onSave()">Save, with propagation</button>
+            </div>
+
+    \`
+  })
+  export class ApiComponent {
+          clickMessage = '';
+          currentTechnology = new Technology(100, 'React', 'hungry', new Date(2020, 1, 1),
+                                            'https://reactjs.org/', 1000);
+          onSaveHer() {
+            alert('Save Her ...');
+          }
+
+          deleteTechnology(technology: Technology) {
+            alert(\`Delete \${technology ? technology.name : 'the technology'}.\`);
+          }
+
+          onClickMe(event: KeyboardEvent) {
+            let eventMessage = event ?
+                            ' Event target class is ' +
+                            (<HTMLElement>event.target).className : '';
+            alert('Click me.' + eventMessage);
+          }
+
+          onSave(event?: KeyboardEvent) {
+            let eventMessage = event ?
+                            ' Event target is ' +
+                            (<HTMLElement>event.target).textContent : '';
+            alert('Saved.' + eventMessage);
+            if (event) {
+              event.stopPropagation();
+            }
+          }
+
+  }
+
+
+// two-way binding
+import { Component } from '@angular/core';
+
+
+@Component({
+  selector: 'app-ng-api',
+  template: \`
+          <h1>Two-Way Binding</h1>
+          <div>
+            <app-sizer [(size)]="fontSizePx"></app-sizer>
+            <div [style.font-size.px]="fontSizePx">Resizable Text</div>
+            <label>FontSize (px): <input [(ngModel)]="fontSizePx"></label>
+          </div>
+          <h3>De-Sugared Two-Way Binding</h3>
+          <app-sizer [size]="fontSizePx"
+                     (sizeChange)="fontSizePx=$event">
+          </app-sizer>
+  \`
+})
+export class ApiComponent {
+  fontSizePx = 18;
+
+}
+
+
+// ngclass binding
+import { Component, OnInit } from '@angular/core';
+
+
+@Component({
+  selector: 'app-ng-api',
+  template: \`
+          <h1>NgClass Binding</h1>
+
+          <p>currentClasses is {{ currentClasses | json }}</p>
+          <div [ngClass]="currentClasses">
+                This div is initially saveable, unchanged and special
+          </div>
+          <br>
+          <label>saveable <input type="checkbox" [(ngModel)]="canSave"></label>
+          <label>modified: <input type="checkbox" [value]="!isUnchanged"
+            (change)="isUnchanged = !isUnchanged"></label> |
+          <label>special: <input type="checkbox" [(ngModel)]="isSpecial"></label>
+          <button (click)="setCurrentClasses()">Refresh currentClasses</button>
+          <br><br>
+              <div [ngClass]="currentClasses">
+                    This div should be {{ canSave ? "" : "not"}} saveable,
+                                       {{ isUnchanged ? "unchanged" : "modified" }} and,
+                                       {{ isSpecial ? "" : "not" }}
+                                       special after clicking "Refresh".
+              </div>
+          <br><br>
+          <div [ngClass]="isSpecial ? 'special' : ''">This div is special</div>
+
+          <div class="nice girly special">Nice girly special</div>
+          <div [ngClass]="{'nice': false, 'girly': true, 'special': true }">
+                    Girly special
+          </div>
+  \`,
+  styles: [\`
+        .saveable {
+          color: red;
+        }
+        .girly, .modified {
+          font-family: Brush Script MT;
+        }
+        .special {
+          font-weight: bold;
+          font-size: x-large;
+        }
+        .nice {
+          color: red;
+        }
+  \`]
+})
+export class ApiComponent implements OnInit {
+  currentClasses: {};
+  canSave = true;
+  isUnchanged = true;
+  isSpecial = true;
+
+  setCurrentClasses() {
+    this.currentClasses = {
+      'saveable': this.canSave,
+      'modified': !this.isUnchanged,
+      'special': this.isSpecial
+    };
+  }
+
+  ngOnInit() {
+    this.setCurrentClasses();
+  }
+
+}
+
+
+// ngstyle binding
+import { Component, OnInit } from '@angular/core';
+
+
+@Component({
+  selector: 'app-ng-api',
+  template: \`
+          <h1>NgStyle Binding</h1>
+
+          <div [style.font-size]="isSpecial ? 'x-large' : 'smaller'">
+                This div is x-large or smaller.
+          </div>
+
+          <p>currentStyles is {{ currentStyles | json }}</p>
+          <div [ngStyle]="currentStyles">
+              This div is initially italic, normal weight, and extra large (24px).
+          </div>
+          <br>
+
+          <label>italic: <input type="checkbox" [(ngModel)]="canSave"></label> |
+          <label>normal: <input type="checkbox" [(ngModel)]="isUnchanged"></label> |
+          <label>x-large: <input type="checkbox" [(ngModel)]="isSpecial"></label>
+          <button (click)="setCurrentStyles()">Refresh currentStyles</button>
+          <br><br>
+          <div [ngStyle]="currentStyles">
+                This div should be {{ canSave ? "italic" : "plain" }},
+                                   {{ isUnchanged ? "normal weight" : "bold" }} and,
+                                   {{ isSpecial ? "extra large" : "normal size" }} after
+                clicking "Refresh".
+          </div>
+  \`
+})
+export class ApiComponent implements OnInit {
+  currentStyles: {};
+  canSave = true;
+  isUnchanged = true;
+  isSpecial = true;
+
+  setCurrentStyles() {
+    this.currentStyles = {
+      'font-style': this.canSave ? 'italic' : 'normal',
+      'font-weight': !this.isUnchanged ? 'bold' : 'normal',
+      'font-size': this.isSpecial ? '24px' : '12px'
+    };
+  }
+
+  ngOnInit() {
+    this.setCurrentStyles();
+  }
+
+}
+
+
+// ngif binding
+import { Component } from '@angular/core';
+
+
+@Component({
+  selector: 'app-ng-api',
+  template: \`
+          <h1>NgIf Binding</h1>
+
+          <app-technology-detail *ngIf="isActive"></app-technology-detail>
+
+          <div *ngIf="currentTechnology">Hello, {{ currentTechnology.name }}</div>
+          <div *ngIf="nullTechnology">Hello, {{ nullTechnology.name }}</div>
+
+          <ng-template [ngIf]="currentTechnology">
+                       Add {{ currentTechnology.name }} with template
+          </ng-template>
+
+          <div>Technology Detail removed from DOM (via template)
+                                 because isActive is false</div>
+          <ng-template [ngIf]="isActive">
+              <app-technology-detail></app-technology-detail>
+          </ng-template>
+
+          <div [class.hidden]="!isSpecial">Show with class</div>
+          <div [class.hidden]="isSpecial">Hide with class</div>
+
+          <app-technology-detail [class.hidden]="isSpecial"></app-technology-detail>
+
+          <div [style.display]="isSpecial ? 'block' : 'none'">Show with style</div>
+          <div [style.display]="isSpecial ? 'none' : 'block'">Hide with style</div>
+
+  \`,
+  styles: [\`
+      .hidden {
+        display: none;
+      }
+  \`]
+})
+export class ApiComponent {
+        isActive = false;
+        isSpecial = true;
+        nullTechnology = null;
+
+        technologies = [
+          { id: 1, name: 'Angular 8.2.14' },
+          { id: 2, name: 'Angular CLI 8.2.14' },
+          { id: 3, name: 'Angular Material 8.2.14'}
+        ];
+
+        currentTechnology = this.technologies[1];
+
+}
+
+
+// ngfor binding
+import { Component, OnInit, AfterViewInit,
+  QueryList, ElementRef, ViewChildren } from '@angular/core';
+
+import { Technology } from '../technology';
+
+@Component({
+selector: 'app-ng-api',
+template: \`
+<h1>NgFor Binding</h1>
+
+<div class="box">
+  <div *ngFor="let technology of technologies">
+            {{ technology.name }}
+  </div>
+</div>
+<br>
+<div class="box">
+      <app-technology-detail *ngFor="let technology of technologies"
+                        [technology]="technology">
+      </app-technology-detail>
+</div>
+<br>
+<h4>*ngFor with index</h4>
+<p>with <i>semi-colon</i> separator</p>
+<div class ="box">
+  <div *ngFor="let technology of technologies; let i = index;">
+          ({{ i + 1 }}) - {{ technology.name }}
+  </div>
+</div>
+
+<p>with <i>comma</i> separator</p>
+<div class="box">
+  <div *ngFor="let technology of technologies, let i = index;">
+        ({{ i + 1 }}) - {{ technology.name }}
+  </div>
+</div>
+
+<h4>*ngFor trackBy</h4>
+<button (click)="resetTechnologies()">Reset Technologies</button>
+<button (click)="changeIds()">Change Ids</button>
+<button (click)="clearTrackByCounts()">Clear Counts</button>
+
+<p><i>without</i> trackBy</p>
+    <div class="box">
+          <div #noTrackBy *ngFor="let technology of technologies">
+                ({{ technology.id }}) {{ technology.name }}
+          </div>
+          <div *ngIf="technologiesNoTrackByCount">
+                  Technology DOM elements change #{{ technologiesNoTrackByCount }}
+                  without trackBy
+          </div>
+    </div>
+<p>with trackBy</p>
+<div class="box">
+    <div #withTrackBy *ngFor="let technology of technologies;
+         trackBy: trackByTechnologies;">
+                ({{ technology.id }}) {{ technology.name }}
+    </div>
+    <div *ngIf="technologiesWithTrackByCount">
+          Technology DOM elements change #{{ technologiesWithTrackByCount }}
+          with trackBy
+    </div>
+</div>
+<br>
+<br>
+<br>
+
+<p>with trackBy and <i>semi-colon</i> separator</p>
+<div class="box">
+  <div *ngFor="let technology of technologies; trackBy: trackByTechnologies;">
+        ({{ technology.id }}) {{ technology.name }}
+  </div>
+</div>
+
+<p>with trackBy and <i>comma</i> separator</p>
+<div class="box">
+  <div *ngFor="let technology of technologies, trackBy: trackByTechnologies;">
+        ({{ technology.id }}) {{ technology.name }}
+  </div>
+</div>
+
+<p>with trackBy and <i>space</i> separator</p>
+<div class="box">
+  <div *ngFor="let technology of technologies trackBy: trackByTechnologies;">
+      ({{ technology.id }}) {{ technology.name }}
+  </div>
+</div>
+
+<p>with <i>generic</i> trackById function</p>
+<div class="box">
+  <div *ngFor="let technology of technologies, trackBy: trackById;">
+    ({{ technology.id }}) {{ technology.name }}
+  </div>
+</div>
+\`,
+styles: [\`
+.box {
+border: 3px solid red;
+padding: 6px;
+max-width: 300px;
+}
+\`]
+})
+export class ApiComponent implements OnInit, AfterViewInit {
+@ViewChildren('noTrackBy') technologiesNoTrackBy: QueryList<ElementRef>;
+@ViewChildren('withTrackBy') technologiesWithTrackBy: QueryList<ElementRef>;
+
+technologiesNoTrackByCount = 0;
+technologiesWithTrackByCount = 0;
+technologiesWithTrackByCountReset = 0;
+
+technologyIdIncrement = 1;
+
+technologies: Technology[] = [];
+
+resetTechnologies() {
+this.technologies = Technology.technologies.map(technology => technology.clone());
+this.technologiesWithTrackByCountReset = 0;
+}
+
+changeIds() {
+this.resetTechnologies();
+this.technologies.forEach(t => t.id += 10 * this.technologyIdIncrement++);
+this.technologiesWithTrackByCountReset = -1;
+}
+
+clearTrackByCounts() {
+const trackByCountReset = this.technologiesWithTrackByCountReset;
+this.resetTechnologies();
+this.technologiesNoTrackByCount = -1;
+this.technologiesWithTrackByCount = trackByCountReset;
+this.technologyIdIncrement = 1;
+}
+
+ngOnInit() {
+this.technologies = Technology.technologies;
+}
+
+ngAfterViewInit() {
+trackChanges(this.technologiesNoTrackBy,
+           () => this.technologiesNoTrackByCount++);
+trackChanges(this.technologiesWithTrackBy,
+           () => this.technologiesWithTrackByCount++);
+}
+
+
+trackByTechnologies(index: number, technology: Technology):
+                number { return technology.id; }
+
+trackById(index: number, item: any):
+                number { return item['id']; }
+
+}
+
+function trackChanges(views: QueryList<ElementRef>, changed: () => void) {
+let oldRefs = views.toArray();
+views.changes.subscribe((changes: QueryList<ElementRef>) => {
+const changedRefs = changes.toArray();
+const isSame = oldRefs.every((v, i) =>
+                    v.nativeElement === changedRefs[i].nativeElement);
+if (!isSame) {
+  oldRefs = changedRefs;
+  setTimeout(changed, 0);
+}
+});
+}
+
+
+// ngswitch binding
+import { Component, OnInit } from '@angular/core';
+
+import { Technology } from '../technology';
+
+  @Component({
+    selector: 'app-ng-api',
+    template: \`
+            <h1>NgSwitch Binding</h1>
+
+            <p>Select your favorite technology</p>
+
+            <div>
+                <label *ngFor="let tech of technologies">
+                <input type="radio" name="technologies" [(ngModel)]="currentTechnology"
+                       [value]="tech">{{ tech.name }}
+                </label>
+            </div>
+
+            <div [ngSwitch]="currentTechnology.emotion">
+                <app-awesome-technology
+                                        *ngSwitchCase="'awesome'"
+                                        [technology]="currentTechnology">
+                </app-awesome-technology>
+                <app-strong-technology
+                                        *ngSwitchCase="'strong'"
+                                        [technology]="currentTechnology">
+                </app-strong-technology>
+                <app-happy-technology
+                                        *ngSwitchCase="'happy'"
+                                        [technology]="currentTechnology">
+                </app-happy-technology>
+                <div *ngSwitchCase="'happy'">
+                        Are you as happy as {{ currentTechnology.name }}?
+                </div>
+                <app-future-technology *ngSwitchDefault [technology]="currentTechnology">
+                </app-future-technology>
+            </div>
+    \`
+  })
+  export class ApiComponent implements OnInit {
+          technologies: Technology[] = [];
+          currentTechnology: Technology;
+
+          ngOnInit() {
+            this.technologies = Technology.technologies;
+            this.currentTechnology = this.technologies[0];
+          }
+  }
+
+
+// template reference variables
+import { Component } from '@angular/core';
+
+import { Technology } from './../technology';
+
+  @Component({
+    selector: 'app-ng-api',
+    template: \`
+            <h1>Template Reference Variables</h1>
+
+            <input #phone placeholder="phone number">
+
+            <button (click)="callPhone(phone.value)">Call</button>
+
+            <input ref-fax placeholder="fax number">
+            <button (click)="callFax(fax.value)">Fax</button>
+
+            <button #btn disabled [innerHTML]="'disabled by attribute: '
+                                               +btn.disabled"></button>
+
+            <h4>Technology Form</h4>
+            <app-technology-form [technology]="currentTechnology"></app-technology-form>
+    \`
+  })
+  export class ApiComponent {
+    currentTechnology: Technology;
+
+    callPhone(value: string) {
+      alert(\`Calling \${value} ...\` );
+    }
+
+    callFax(value: string) {
+      alert(\`Faxing \${value} ...\`);
+    }
+
+    constructor() {
+      this.currentTechnology = Technology.technologies[0];
+    }
+
+  }
+
+
+// inputs and outputs
+import { Component } from '@angular/core';
+
+import { Technology } from './../technology';
+
+  @Component({
+    selector: 'app-ng-api',
+    template: \`
+            <h1>Inputs && Outputs</h1>
+            <img [src]="iconUrl">
+            <button (click)="onSave()">Save Her</button>
+
+            <app-technology-detail [technology]="currentTechnology"
+                                  (deleteRequest)="deleteTechnology($event)">
+            <app-technology-detail>
+
+            <div (appMyClick)="clickMessage2=$event">MyClick2</div>
+            {{ clickMessage2 }}
+    \`
+  })
+  export class ApiComponent {
+    currentTechnology: Technology;
+    iconUrl = '../../assets/ng-logo.png';
+    clickMessage2 = '';
+    onSave() {
+      alert('Save Her.');
+    }
+
+    deleteTechnology(evt) {
+      alert(\`Delete \${evt.name}.\`);
+    }
+
+    constructor() {
+      this.currentTechnology = Technology.technologies[0];
+    }
+
+  }
+
+
+// pipes
+import { Component } from '@angular/core';
+
+import { Technology } from './../technology';
+
+  @Component({
+    selector: 'app-ng-api',
+    template: \`
+            <h1>Pipes</h1>
+
+            <div>Title through uppercase pipe: {{ title | uppercase }}</div>
+
+            <div>
+                  Title through a pipe chain:
+                  {{ title | uppercase | lowercase }}
+            </div>
+
+            <div>{{ currentTechnology | json }}</div>
+
+            <div>Birthdate: {{ (currentTechnology?.birthDate | date:'longDate')
+                                                             | uppercase }}</div>
+
+            <div>
+                <label>Price: </label> {{ price | currency:'EUR':true }}
+            </div>
+    \`
+  })
+  export class ApiComponent {
+    title = 'Super Technology';
+    currentTechnology: Technology;
+    price = 42;
+
+    constructor() {
+      this.currentTechnology = Technology.technologies[0];
+    }
+
+  }
+
+
+// safe navigation operator ?.
+import { Component } from '@angular/core';
+
+import { Technology } from './../technology';
+
+  @Component({
+    selector: 'app-ng-api',
+    template: \`
+            <h1>Safe Navigation Operator ?.</h1>
+
+            <div>
+                The title is {{ title }}
+            </div>
+
+            <div>
+                The current technologies name is {{ currentTechnology?.name }}
+            </div>
+
+            <div>
+                The current technologies name is {{ currentTechnology.name }}
+            </div>
+
+            <div *ngIf="nullTechnology">
+                The null technologies name is {{ nullTechnology.name }}
+            </div>
+
+            <div>
+                The null technologies name is {{ nullTechnology && nullTechnology.name }}
+            </div>
+
+            <div>
+              The null technologies name is {{ nullTechnology?.name }}
+            </div>
+    \`
+  })
+  export class ApiComponent {
+    title = 'Super Code';
+    currentTechnology: Technology;
+
+    constructor() {
+      this.currentTechnology = Technology.technologies[0];
+    }
+
+    get nullTechnology(): Technology {
+      return null;
+    }
+
+  }
+
+
+// non-null assertion operator !.
+import { Component } from '@angular/core';
+
+import { Technology } from './../technology';
+
+  @Component({
+    selector: 'app-ng-api',
+    template: \`
+            <h1>Non-Null Assertion Operator !.</h1>
+
+            <div *ngIf="technology">
+                  The technologies name is {{ technology!.name }}
+            </div>
+    \`
+  })
+  export class ApiComponent {
+    technology: Technology;
+
+    constructor() {
+      this.technology = Technology.technologies[0];
+    }
+  }
+
+// any type cast function
+import { Component } from '@angular/core';
+
+import { Technology } from './../technology';
+
+  @Component({
+    selector: 'app-ng-api',
+    template: \`
+            <h1>Any Type Cast Function $any()</h1>
+
+            <div>
+                  <div>
+                        The technology's marker is {{ $any(technology).marker }}
+                  </div>
+            </div>
+
+            <div>
+                    <div>
+                        Undeclared member is {{ $any(this).member }}
+                    </div>
+            </div>
+    \`
+  })
+  export class ApiComponent {
+    technology: Technology;
+
+    constructor() {
+      this.technology = Technology.technologies[0];
+    }
+  }
+
+
+// enums in binding
+import { Component } from '@angular/core';
+
+
+export enum Color { Red, Green, Blue };
+
+  @Component({
+    selector: 'app-ng-api',
+    template: \`
+            <h1>Enums In Binding</h1>
+
+            <p>
+                The name of the Color.Red enum is {{ Color[Color.Red] }}.<br>
+                The current color is {{ Color[color] }} and its number is {{ color }}.<br>
+                <button [style.color]="Color[color]" (click)="colorToggle()">
+                    Enum Toggle
+                </button>
+            </p>
+    \`
+  })
+  export class ApiComponent {
+    Color = Color;
+    color = Color.Red;
+
+    colorToggle() {
+      this.color = (this.color === Color.Red) ? Color.Blue : Color.Red;
+    }
+  }
+
+  `,
+  blockQuote: `
+  Wir beabsichtigen zum Mond zu fliegen in diesem Jahrzehnt und andere Sachen zu tun, nicht weil sie einfach sind,
+  sondern weil sie schwer sind, weil das Ziel uns dienen wird zu organisieren und messen die Beste unserer Energien
+  und Kompetenzen, weil diese Herausforderung ist eine welche wir annehmen, eine die wir nicht vertagen wollen
+  und eine die wir vorhaben zu gewinnen.
+  `,
+  imageFooterUrl: 'assets/img/post10.jpg',
+  footerQuote: 'Wir sind alle miteinander verbunden; zueinander biologisch. Zu der Erde, chemisch. Zum Rest des Universums, atomar.'
 }
   ];
 
@@ -14062,7 +16475,10 @@ for (const num of randoms) {
     if (this.articleId === 'you-do-not-know-javascript-part-1') {
       this.articleId = 9;
     }
-    if (!(+this.articleId) || +this.articleId > 9) {
+    if (this.articleId === 'angular-basics-3') {
+      this.articleId = 10;
+    }
+    if (!(+this.articleId) || +this.articleId > 10) {
       this.isNotFound = true;
       this.router.navigate(['page-not-found']);
     }
