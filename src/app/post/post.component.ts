@@ -12219,7 +12219,7 @@ function validate1<T>(target: any, propertyKey: string,
   metaPublishedDate: 'am 29 Dezember, 2019',
   sectionHeading: 'Du kannst kein JavaScript!?!',
   code: `
-  // values
+// values, I value Javascript
 // value embedded using literal
 console.log('My name is Nils-Holger.');
 const firstName = 'Nils-Holger';
@@ -12230,7 +12230,7 @@ console.log(\`My name is \${firstName}\`);
 //   console.log(3.141592);
 // }
 const names = ['Joe', 'Nils-Holger', 'Mark'];
-// access array element in second postion like this
+// access array element in second position like this
 console.log(\`My name is \${names[1]}\`);
 // better use undefined as as single empty value
 const value = null;
@@ -13504,6 +13504,516 @@ var obj = {
 foo.call( obj ); // 2
 
 
+// objects and classes ch. 3 objects
+
+// object literal syntax
+var myObj = {
+  key: 'value'
+};
+
+// constructed form
+var myObj1 = new Object();
+myObj1.key = value;
+
+
+// built in functions
+var strPrimitive = 'I am a string';
+typeof strPrimitive;							// 'string'
+strPrimitive instanceof String;		// false
+
+var strObject = new String( 'I am a string' );
+typeof strObject; 								// object
+strObject instanceof String;			// true
+
+// inspect the object sub-type
+Object.prototype.toString.call( strObject );	// [object String]
+
+// consider
+var strPrimitive1 = 'I am a string';
+
+console.log(strPrimitive1.length);			// 13
+
+console.log(strPrimitive1.charAt(3));	// m
+
+// contents
+var myObject = {
+  a: 42
+};
+
+myObject.a; // 42
+myObject['a']; // 42
+
+
+// ['...'] syntax
+const wantA = true;
+const myObject1 = {
+	a: 42
+};
+
+let idx;
+
+if (wantA) {
+	idx = 'a';
+}
+
+// later
+
+console.log( myObject1[idx] ); // 42
+
+
+// in objects property names are always strings
+const myObject2 = { };
+
+myObject2[true] = 'foo';
+myObject2[3] = 'bar';
+myObject2[myObject2] = 'baz';
+
+myObject2['true'];				// foo
+myObject2['3'];					// bar
+myObject2['[object Object]'];	// baz
+
+
+// computed property names
+const prefix = 'foo';
+
+const myObject3 = {
+	[prefix + 'bar']: 'hello',
+	[prefix + 'baz']: 'javascript'
+};
+
+myObject3['foobar']; // hello
+myObject3['foobaz']; // javascript
+
+
+// symbol
+const myObject4 = {
+	[Symbol.Something]: 'hello from symbol'
+};
+
+// property vs. method
+
+// for example
+function foo1() {
+	console.log('foo1');
+}
+
+const someFoo1 = foo1;	// variable reference to foo1
+
+const myObject1 = {
+	someFoo1: foo1
+};
+
+foo1;				// function foo1(){..}
+
+someFoo1;			// function foo1(){..}
+
+myObject1.someFoo1;	// function foo1(){..}
+
+// function expression as part of object literal,
+// just multiple references to same function object
+const myObject5 = {
+  foo2: () => { console.log('foo2'); }
+};
+
+const someFoo2 = myObject5.foo2;
+
+someFoo2; // function foo2(){..}
+myObject5.foo2; // function foo2(){..}
+
+
+// arrays
+const myArray = ['foo', 42, 'bar'];
+
+myArray.length; // 3
+myArray[0]; // foo
+myArray[2]; // bar
+
+// arrays are objects, can add properties
+const myArray1 = ['foo', 42, 'bar'];
+myArray1.baz = 'baz';
+myArray1.length; // 3
+myArray1.baz; // baz
+
+// add property to array, property name looks like number, will end up as numeric index
+const myArray2 = [ 'foo', 42, 'bar' ];
+
+myArray2['3'] = 'baz';
+
+myArray2.length;	// 4
+
+myArray2[3];		// 'baz'
+
+
+// duplicating objects
+const anotherFunction = () => { /*..*/ };
+
+const anotherObject = {
+  c: true
+};
+
+const anotherArray = [];
+
+const myObject = {
+  a: 42,
+  b: anotherObject,	// reference, not a copy!
+  c: anotherArray,	// another reference!
+  d: anotherFunction
+};
+
+anotherArray.push(anotherObject, myObject);
+
+// solution subset
+const newObje = JSON.parse(JSON.stringify(someObj));
+
+// duplicate shallow copy
+const newObj = Object.assign({}, myObject );
+
+newObj.a;						// 42
+newObj.b === anotherObject;		// true
+newObj.c === anotherArray;		// true
+newObj.d === anotherFunction;	// true
+
+
+// property descriptors
+const myObject1 = {
+	a: 42
+};
+
+Object.getOwnPropertyDescriptor(myObject1, 'a');
+// {
+//    value: 42,
+//    writable: true,
+//    enumerable: true,
+//    configurable: true
+// }
+
+
+// add or modify an existing property
+const myObject2 = {};
+
+Object.defineProperty(myObject2, 'b', {
+	value: 33,
+	writable: true,
+	configurable: true,
+	enumerable: true
+} );
+
+myObject2.b; // 33
+
+
+// writable
+const myObject3 = {};
+
+Object.defineProperty(myObject3, 'c', {
+	value: 42,
+	writable: false, // not writable!
+	configurable: true,
+	enumerable: true
+} );
+
+myObject3.c = 33;
+
+myObject.c; // 42
+
+
+// writable, in strict mode, get an error
+'use strict';
+
+const myObject4 = {};
+
+Object.defineProperty(myObject4, 'd', {
+	value: 1,
+	writable: false, // not writable!
+	configurable: true,
+	enumerable: true
+});
+
+myObject4.d = 2; // TypeError
+
+
+// configurable
+const myObject5 = {
+	e: 42
+};
+
+myObject5.e = 33;
+myObject5.e;					// 33
+
+Object.defineProperty( myObject, 'e', {
+	value: 42,
+	writable: true,
+	configurable: false,	// not configurable!
+	enumerable: true
+} );
+
+myObject5.e;					// 42
+myObject5.e = 65;
+myObject5.e;					// 65
+
+Object.defineProperty( myObject5, 'e', {
+	value: 99,
+	writable: true,
+	configurable: true,
+	enumerable: true
+} ); // TypeError
+
+
+// configurable: false prevents to use delete operator to remove an existing property
+var myObject6 = {
+	f: 22
+};
+
+myObject6.f;				// 22
+delete myObject6.f;
+myObject6.f;				// undefined
+
+Object.defineProperty( myObject6, 'f', {
+	value: 22,
+	writable: true,
+	configurable: false,
+	enumerable: true
+} );
+
+myObject6.f;				// 22
+delete myObject6.f;
+myObject6.f;				// 22
+
+
+// immutability
+const myImmutableObject = {
+  foo:  [1, 2, 3]
+};
+myImmutableObject.foo; // [1,2,3]
+myImmutableObject.foo.push(4);
+myImmutableObject.foo; // [1,2,3,4]
+
+
+// object constant
+const myObject = {};
+
+Object.defineProperty( myObject, 'FAVORITE_NUMBER', {
+	value: 42,
+	writable: false,
+	configurable: false
+});
+
+// prevent extensions
+const myObject1 = {
+	a: 42
+};
+
+Object.preventExtensions(myObject1);
+
+myObject1.b = 33;
+myObject1.b; // undefined
+
+
+// [[Get]]
+const myObject2 = {
+  a: 42,
+  c: undefined
+};
+
+myObject2.a; // 42
+myObject2.b // undefined
+myObject2.c // undefined
+
+
+// getters && setters
+const myObject3 = {
+	// define a getter for a
+	get a() {
+		return 42;
+	}
+};
+
+Object.defineProperty(
+	myObject3,	// target
+	'b',		// property name
+	{			// descriptor
+		// define a getter for b
+		get: () => this.a * 2 ,
+
+		// make sure b shows up as an object property
+		enumerable: true
+	}
+);
+
+myObject3.a; // 42
+
+myObject3.b; // 84
+
+myObject3.a = 65;
+myObject3.a; // undefined
+
+
+// object with defined setter
+const myObject4 = {
+	// define a getter for a
+	get a() {
+		return this._a_;
+	},
+
+	// define a setter for a
+	set a(val) {
+		this._a_ = val * 2;
+	}
+};
+
+myObject4.a = 3;
+
+myObject4.a; // 6
+
+
+// existence
+const myObject5 = {
+	a: 42
+};
+
+('a' in myObject5);				// true
+('b' in myObject5);				// false
+
+myObject.hasOwnProperty('a');	// true
+myObject.hasOwnProperty('b');	// false
+
+// enumeration
+const myObject6 = { };
+
+Object.defineProperty(
+	myObject6,
+	'a',
+	// make a enumerable, as normal
+	{ enumerable: true, value: 42 }
+);
+
+Object.defineProperty(
+	myObject6,
+	'b',
+	// make b NON-enumerable
+	{ enumerable: false, value: 33 }
+);
+
+myObject6.b; // 33
+('b' in myObject6); // true
+myObject6.hasOwnProperty( 'b' ); // true
+
+// .......
+
+for (let k in myObject6) {
+	console.log( k, myObject6[k] );
+}
+// 'a' 42
+
+// another way that enumerable and non-enumerable properties can be distinguished
+const myObject7 = {};
+
+Object.defineProperty(
+	myObject7,
+	'a',
+	// make a enumerable, as normal
+	{ enumerable: true, value: 42 }
+);
+
+Object.defineProperty(
+	myObject7,
+	'b',
+	// make b non-enumerable
+	{ enumerable: false, value: 33 }
+);
+
+myObject7.propertyIsEnumerable( 'a' ); // true
+myObject7.propertyIsEnumerable( 'b' ); // false
+
+Object.keys( myObject7 ); // ['a']
+Object.getOwnPropertyNames( myObject7 ); // ['a', 'b']
+
+// iteration
+// iterate over values in numerically indexed array
+const myArray = [1, 2, 3];
+
+for (let i = 0; i < myArray.length; i++) {
+	console.log(myArray[i]);
+}
+// 1 2 3
+
+// iterate over values directly
+for (let v of myArray) {
+	console.log(v);
+}
+// 1
+// 2
+// 3
+
+// using iterator
+const it = myArray[Symbol.iterator]();
+
+it.next(); // { value:1, done:false }
+it.next(); // { value:2, done:false }
+it.next(); // { value:3, done:false }
+it.next(); // { done:true }
+
+
+// default @@iterator for any object want to iterate over
+const myObject = {
+	a: 4,
+	b: 2
+};
+
+Object.defineProperty(myObject, Symbol.iterator, {
+	enumerable: false,
+	writable: false,
+	configurable: true,
+	value: function() {
+		const o = this;
+		let idx = 0;
+		const ks = Object.keys(o);
+		return {
+			next: function() {
+				return {
+					value: o[ks[idx++]],
+					done: (idx > ks.length)
+				};
+			}
+		};
+	}
+} );
+
+// iterate myObject manually
+const ite = myObject[Symbol.iterator]();
+ite.next(); // { value:4, done:false }
+ite.next(); // { value:2, done:false }
+ite.next(); // { value:undefined, done:true }
+
+// iterate myObject with for...of
+for (const v of myObject) {
+	console.log(v);
+}
+// 4
+// 2
+
+
+// random number iterator, breaks at 10
+const randoms = {
+	[Symbol.iterator]: () => {
+		return {
+			next: () => {
+				return { value: Math.random() };
+			}
+		};
+	}
+};
+
+const randomsPool = [];
+for (const num of randoms) {
+  randomsPool.push(num);
+  console.log(num);
+  if (randomsPool.length === 10) {
+    break;
+  }
+}
+
+// continue here: https://github.com/getify/You-Dont-Know-JS/blob/2nd-ed/objects-classes/ch4.md
+
   `,
   blockQuote: `
   Wir beabsichtigen zum Mond zu fliegen in diesem Jahrzehnt und andere Sachen zu tun, nicht weil sie einfach sind,
@@ -13549,7 +14059,7 @@ foo.call( obj ); // 2
     if (this.articleId === 'angular-basics-2') {
       this.articleId = 8;
     }
-    if (this.articleId === 'you-do-not-know-javascript') {
+    if (this.articleId === 'you-do-not-know-javascript-part-1') {
       this.articleId = 9;
     }
     if (!(+this.articleId) || +this.articleId > 9) {
@@ -13562,15 +14072,6 @@ foo.call( obj ); // 2
     this.location.back();
   }
 }
-
-
-
-
-
-
-
-
-
 
 
 
