@@ -12214,10 +12214,10 @@ function validate1<T>(target: any, propertyKey: string,
 {
   id: 9,
   imageHeaderUrl: 'url(assets/img/post9-bg.jpg)',
-  heading: 'Du kannst nicht Javascript- Teil 1',
-  subHeading: 'Javascript Goodness',
+  heading: 'Du kannst kein Javascript- Teil 1',
+  subHeading: 'Javascript Unter der Haube',
   metaPublishedDate: 'am 29 Dezember, 2019',
-  sectionHeading: 'You don\'t know JavaScript',
+  sectionHeading: 'Du kannst kein JavaScript!?!',
   code: `
   // values
 // value embedded using literal
@@ -13000,6 +13000,508 @@ const bar5 = () => console.log(this.a);
 foo5(); // undefined
 
 
+// objects and classes, call-site
+function baz() {
+  // call-stack is: baz
+  // so, our call-site is in the global scope
+
+  console.log('baz');
+  bar(); // <-- call-site for bar
+}
+
+function bar() {
+  // call-stack is: baz -> bar
+  // so, our call-site is in baz
+
+  console.log('bar');
+  foo(); // <-- call-site for foo
+}
+
+function foo() {
+  // call-stack is: baz -> bar -> foo
+  // so, our call-site is in bar
+
+  console.log('foo');
+}
+
+baz(); // <-- call-site for baz
+
+// default binding
+function foo1() {
+  console.log(this.a);
+}
+
+const a = 2;
+foo(); // 2
+
+// strict mode
+function foo2() {
+  'use strict';
+  console.log(this.a1);
+}
+
+const a1 = 2;
+foo2(); // undefined
+
+function foo3() {
+  console.log(this.a2);
+}
+
+const a2 = 2;
+
+(() => {
+  'use strict';
+  foo3(); // 2
+})();
+
+
+// implicit binding
+const foo4 = () => console.log(this.a3);
+
+const obj = {
+  a3: 2,
+  foo4
+};
+
+obj.foo4(); // 2
+
+
+// only top/last level of an object property reference chain matters to the call-site
+
+const foo5 = () => console.log(this.a5);
+
+const obj2 = {
+  a5: 42,
+  foo5
+};
+
+const obj1 = {
+  a5: 2,
+  obj2
+};
+
+obj1.obj2.foo5(); // 42
+
+
+
+// implicitly lost
+function foo() {
+  console.log( this.a );
+}
+
+const obj = {
+  a: 2,
+  foo
+};
+
+const bar = obj.foo; // function reference/alias!
+
+var a = 'oops, global'; // 'a' also property on global object
+
+bar(); // 'is global'
+
+// implicitly lost when passing a callback function
+function foo1() {
+  console.log( this.a );
+}
+
+function doFoo(fn) {
+  // fn is just another reference to foo
+
+  fn(); // <-- call-site!
+}
+
+const obj1 = {
+  a1: 2,
+  foo1
+};
+
+var a1 = 'is global'; // a1 also property on global object
+
+doFoo( obj1.foo1 ); // 'is global
+
+// function passing in callback, built into the language
+function foo2() {
+	console.log(this.a2);
+}
+
+var obj2 = {
+	a2: 2,
+	foo2
+};
+
+var a2 = 'is global'; // a also property on global object
+
+setTimeout( obj2.foo2, 1000 ); // is global
+
+
+// crude theoretical pseudo code of setTimeout
+function settimeout(fn, delay) {
+  // wait for delay in milliseconds
+  fn(); // call-site
+}
+
+
+// this binding => explicitly stating what this is
+const foo3 = () => console.log(this.a3);
+
+
+var obj3 = {
+  a3: 2
+};
+
+foo3.call(obj3); // 2
+
+
+// hard binding
+function foo4() {
+	console.log( this.a4 );
+}
+
+var obj4 = {
+	a4: 42
+};
+
+var bar4 = () => foo4.call( obj4 );
+
+bar4(); // 42
+setTimeout( bar4, 100 ); // 42
+
+// bar4 hard binds foo4's this to obj4
+// so that it cannot be overriden
+bar4.call( window ); // 42
+
+
+// wrap function with hard binding, create pass thru of any arguments like this
+function foo5(something) {
+	console.log(this.a5, something);
+	return this.a5 + something;
+}
+
+var obj5 = {
+	a5: 42
+};
+
+var bar5 = () => foo5.apply(obj5, arguments);
+
+var b5 = bar5(3); // 42 3
+console.log(b5); // 45
+
+
+
+// express this pattern, create reusable helper
+function foo6(something) {
+	console.log( this.a6, something );
+	return this.a6 + something;
+}
+
+// simple bind helper
+function bind(fn, obj6) {
+	return () => {
+		return fn.apply( obj6, arguments );
+	};
+}
+
+var obj6 = {
+	a: 42
+};
+
+var bar6 = bind(foo5, obj6);
+
+var b6 = bar6(3); // 42 3
+console.log(b6); // 45
+
+// hard binding is built in ES5 with bind instruction
+const foo7 = (something) => {
+	console.log( this.a7, something );
+	return this.a7 + something;
+}
+
+const obj7 = {
+	a7: 42
+};
+
+const bar7 = foo7.bind(obj7);
+
+const b7 = bar7( 3 ); // 42 3
+console.log(b7); // 45
+
+
+// api call contexts
+// optional parameter context provided, ensures particular callbak function uses particular this
+
+const foo = (el) => console.log(el, this.id);
+
+const obj = {
+  id: 'awesome'
+};
+
+[1, 2, 3].forEach(foo, obj); // 1 awesome 2 awesome 3 awesome
+
+// new binding
+function foo1(a1) { this.a1 = a1; }
+
+const bar1 = new foo1(42);
+console.log(bar1.a); // 42
+
+
+// explicit binding takes precedence over implicit binding
+const foo2 = () => { console.log( this.a2 );
+}
+
+const obj2 = {
+	a2: 42,
+	foo2
+};
+
+const obj3 = {
+	a3: 33,
+	foo2
+};
+
+obj2.foo2(); // 42
+obj3.foo2(); // 33
+
+obj2.foo2.call( obj3 ); // 33
+obj3.foo2.call( obj2 ); // 42
+
+
+// where does new binding fit in precedence, new is more precedant than implicit
+let a3;
+const foo3 = (something) => { this.a3 = something; };
+
+const obj4 = {
+	foo3
+};
+
+const obj5 = {};
+
+obj4.foo3(42);
+console.log( obj4.a3 ); // 42
+
+obj4.foo3.call( obj5, 33 );
+console.log( obj5.a3 ); // 33
+
+const bar4 = new obj4.foo3( 42 );
+console.log( obj4.a3 ); // 42
+console.log( bar4.a3 ); // 42
+
+// let's check...
+function foo(something) {
+	this.a = something;
+}
+
+const obj1 = {};
+
+const bar = foo.bind( obj1 );
+bar(42);
+console.log( obj1.a ); // 42
+
+const baz = new bar(33);
+console.log( obj1.a ); // 42
+console.log( baz.a ); // 33
+
+// how the fake bind helper works
+function bind(fn, obj) {
+	return function() {
+		fn.apply( obj, arguments );
+	};
+}
+
+
+// polyfill provided for prototype.bind from MDN
+if (!Function.prototype.bind) {
+	Function.prototype.bind = function(oThis) {
+		if (typeof this !== "function") {
+			// closest thing possible to the ECMAScript 5
+			// internal IsCallable function
+			throw new TypeError( "Function.prototype.bind - what " +
+				"is trying to be bound is not callable"
+			);
+		}
+
+		var aArgs = Array.prototype.slice.call( arguments, 1 ),
+			fToBind = this,
+			fNOP = function(){},
+			fBound = function(){
+				return fToBind.apply(
+					(
+						this instanceof fNOP &&
+						oThis ? this : oThis
+					),
+					aArgs.concat( Array.prototype.slice.call( arguments ) )
+				);
+			}
+		;
+
+		fNOP.prototype = this.prototype;
+		fBound.prototype = new fNOP();
+
+		return fBound;
+	};
+}
+
+
+// part that allwos new overriding is this
+this instanceof fNOP &&
+oThis ? this : oThis
+
+// ... and:
+
+fNOP.prototype = this.prototype;
+fBound.prototype = new fNOP();
+
+
+// partial application, a subset of currying
+
+function foo(p1, p2) {
+  this.val = p1 + p2;
+}
+var bar = foo.bind(null, 'p1');
+var baz = new bar('p2');
+console.log(baz.val); // p1p2
+
+
+// this ignored
+function foo() {
+  console.log(this.a);
+}
+
+var a = 42;
+foo.call(null); // 42
+
+
+// use apply spread out arrays of values as parameters to a function call
+function foo1(a, b) {
+	console.log( 'a:' + a + '', 'b:' + b );
+}
+
+// spreading out array as parameters with apply
+foo1.apply( null, [4, 2] ); // a:4, b:2
+
+// currying with bind(..)
+var bar = foo1.bind( null, 4 );
+bar(2); // a:4, b:2
+
+
+// Object.create(null) is similar to { }
+function foo(a, b) {
+	console.log( 'a:' + a + ', b:' + b );
+}
+
+// emp DMZ empty object
+var emp = Object.create( null );
+
+// spreading out array as parameters
+foo.apply( emp, [4, 2] ); // a:4, b:2
+
+// currying with bind(..)
+var bar = foo.bind(emp, 4);
+bar(4); // a:2, b:3
+
+
+// indirection
+function foo() {
+	console.log( this.a );
+}
+
+var a = 2;
+var o = { a: 3, foo };
+var p = { a: 4 };
+
+console.log(o.foo()); // 3
+console.log((p.foo = o.foo)()); // undefined
+
+// softening binding
+if (!Function.prototype.softBind) {
+	Function.prototype.softBind = function(obj) {
+		var fn = this,
+			curried = [].slice.call( arguments, 1 ),
+			bound = function bound() {
+				return fn.apply(
+					(!this ||
+						(typeof window !== "undefined" &&
+							this === window) ||
+						(typeof global !== "undefined" &&
+							this === global)
+					) ? obj : this,
+					curried.concat.apply( curried, arguments )
+				);
+			};
+		bound.prototype = Object.create( fn.prototype );
+		return bound;
+	};
+}
+
+
+// usage
+function foo() {
+  console.log('name: ' + this.name);
+}
+
+var obj = { name: 'obj' },
+   obj2 = { name: 'obj2' },
+   obj3 = { name: 'obj3' };
+
+var fooOBJ = foo.softBind( obj );
+
+fooOBJ(); // name: obj
+
+obj2.foo = foo.softBind(obj);
+obj2.foo(); // name: obj2   <---- look!!!
+
+fooOBJ.call( obj3 ); // name: obj3   <---- look!
+
+setTimeout( obj2.foo, 10 ); // name: obj   <---- falls back to soft-binding
+
+
+// lexical this, arrow function lexical scope
+function foo() {
+	// return an arrow function
+	return (a) => {
+		// this here is lexically adopted from foo()
+		console.log( this.a );
+	};
+}
+
+var obj1 = {
+	a: 2
+};
+
+var obj2 = {
+	a: 3
+};
+
+var bar = foo.call( obj1 );
+bar.call( obj2 ); // 2, not 3.
+
+// most common use, callbacks, event handlers or timers
+function foo() {
+	setTimeout(() => {
+		// this here is lexically adopted from foo()
+		console.log( this.a );
+	},100);
+}
+
+var obj = {
+	a: 2
+};
+
+foo.call( obj ); // 2
+
+prior to ES6, lexical scoping like this
+function foo() {
+	var self = this; // lexical capture of this
+	setTimeout( function(){
+		console.log( self.a );
+	}, 100 );
+}
+
+var obj = {
+	a: 2
+};
+
+foo.call( obj ); // 2
 
 
   `,
@@ -13060,18 +13562,6 @@ foo5(); // undefined
     this.location.back();
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
