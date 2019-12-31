@@ -17599,6 +17599,430 @@ myObject2.doCool(); // super cool!
 
 
 // objects and classes, behavior delegation
+// class theory (pseudo code)
+class Task {
+  id;
+  output = (a) => a;
+  constructor(ID) { this.id = ID; }
+  outputTask() { this.output(this.id); }
+}
+
+class XYZ extends Task {
+  label;
+
+  constructor(ID,Label) { super(ID); this.label = Label; }
+  outputTask() { super(); this.output( this.label ); }
+}
+
+class ABC extends Task {
+  // ...
+}
+
+
+//delegation theory
+const Task = {
+  setID: function(ID) { this.id = ID; },
+  outputID: function() { console.log( this.id ); }
+};
+
+// make xyz delegate to task
+const XYZ = Object.create(Task);
+
+XYZ.prepareTask = function(ID,Label) {
+  this.setID(ID);
+  this.label = Label;
+};
+
+XYZ.outputTaskDetails = function() {
+  this.outputID();
+  console.log(this.label);
+};
+
+const ABC = Object.create(Task);
+
+// debugged, classical prototypal oo style
+function Foo() {}
+
+const a1 = new Foo();
+
+Foo.prototype.constructor = function Gotcha() {};
+
+console.log(a1.constructor); // Gotcha(){}
+console.log(a1.constructor.name); // Gotcha
+
+console.log(a1); // Foo {}
+
+
+// mental models compared
+// classical prototypa oo style
+function Foo1(who) {
+  this.me = who;
+}
+Foo1.prototype.identify1 = function() {
+  return 'I am ' + this.me;
+};
+
+function Bar1(who) {
+  Foo1.call(this, who);
+}
+Bar1.prototype = Object.create(Foo1.prototype);
+
+Bar1.prototype.speak = function() {
+  alert( 'Hello, ' + this.identify1() + '.' );
+};
+
+const b1 = new Bar1('b1');
+const b2 = new Bar1('b2');
+
+b1.speak();
+b2.speak();
+
+
+// exact same functionality using oloo style code
+const Foo = {
+  init: function(who) {
+      this.me = who;
+  },
+  identify: function() {
+      return 'I am ' + this.me;
+  }
+};
+
+const Bar = Object.create(Foo);
+
+Bar.speak = function() {
+  console.log( 'Hello, ' + this.identify() + '.' );
+};
+
+const b1 = Object.create(Bar);
+b1.init( 'b1' );
+const b2 = Object.create(Bar);
+b2.init( 'b2' );
+
+b1.speak();
+b2.speak();
+
+
+// class design classic style pure js
+// Parent class
+function Widget(width,height) {
+  this.width = width || 50;
+  this.height = height || 50;
+  this.$elem = null;
+}
+
+Widget.prototype.render = function($where){
+  if (this.$elem) {
+      this.$elem.css( {
+          width: this.width + "px",
+          height: this.height + "px"
+      } ).appendTo( $where );
+  }
+};
+
+// Child class
+function Button(width, height, label) {
+  // super constructor call
+  Widget.call( this, width, height );
+  this.label = label || 'Default';
+
+  this.$elem = $('<button>').text(this.label);
+}
+
+// make button inherit from widget
+Button.prototype = Object.create(Widget.prototype);
+
+// override base inherited render()
+Button.prototype.render = function($where) {
+  // super call
+  Widget.prototype.render.call(this, $where);
+  this.$elem.click(this.onClick.bind(this) );
+};
+
+Button.prototype.onClick = function(evt) {
+  console.log('Button \'' + this.label + '\' clicked!' );
+};
+
+$(document).ready(function() {
+  const $body = $( document.body );
+  const btn1 = new Button( 125, 30, 'Hello');
+  const btn2 = new Button( 150, 40, 'World');
+
+  btn1.render($body);
+  btn2.render($body);
+});
+
+
+// es6 class sugar, same implementation
+class Widget {
+  private width;
+  private height;
+  $elem;
+
+  constructor(width, height) {
+      this.width = width || 50;
+      this.height = height || 50;
+      this.$elem = null;
+  }
+  render($where) {
+      if (this.$elem) {
+          this.$elem.css( {
+              width: this.width + 'px',
+              height: this.height + 'px'
+          } ).appendTo( $where );
+      }
+  }
+}
+
+class Button extends Widget {
+  private label;
+
+  constructor(width, height, label) {
+      super( width, height );
+      this.label = label || 'Default';
+      this.$elem = $('<button>' ).text(this.label);
+  }
+  render($where) {
+      super.render( $where );
+      this.$elem.click(this.onClick.bind(this));
+  }
+  onClick(evt) {
+      console.log('Button \'' + this.label + '\' clicked!');
+  }
+}
+
+$(document).ready(function(){
+  const $body = $( document.body );
+  const btn1 = new Button( 125, 30, 'Hello');
+  const btn2 = new Button( 150, 40, 'World');
+
+  btn1.render($body);
+  btn2.render($body);
+});
+
+
+// delegating widgte object using oloo style delegation
+const Widget = {
+  init: function(width, height) {
+      this.width = width || 50;
+      this.height = height || 50;
+      this.$elem = null;
+  },
+  insert: function($where) {
+      if (this.$elem) {
+          this.$elem.css( {
+              width: this.width + 'px',
+              height: this.height + 'px'
+          } ).appendTo( $where );
+      }
+  }
+};
+
+const Button = Object.create(Widget);
+
+Button.setup = function(width, height, label){
+  // delegated call
+  this.init(width, height);
+  this.label = label || 'Default';
+
+  this.$elem = $('<button>').text(this.label);
+};
+Button.build = function($where) {
+  // delegated call
+  this.insert($where);
+  this.$elem.click(this.onClick.bind(this));
+};
+Button.onClick = function(evt) {
+  console.log( 'Button \'' + this.label + '\' clicked!' );
+};
+
+$(document).ready(function(){
+  const $body = $(document.body);
+
+  const btn1 = Object.create(Button);
+  btn1.setup(125, 30, 'Hello');
+
+  const btn2 = Object.create( Button );
+  btn2.setup(150, 40, 'World');
+
+  btn1.build($body);
+  btn2.build($body);
+});
+
+
+// oloo behavior delegation pattern
+// parent class
+function Controller() {
+  this.errors = [];
+}
+Controller.prototype.showDialog = function(title,msg) {
+  // display title & message to user in dialog
+};
+Controller.prototype.success = function(msg) {
+  this.showDialog('Success', msg);
+};
+Controller.prototype.failure = function(err) {
+  this.errors.push(err);
+  this.showDialog('Error', err);
+};
+
+
+// child class
+function LoginController() {
+  Controller.call(this);
+}
+// link child class to parent
+LoginController.prototype = Object.create(Controller.prototype);
+LoginController.prototype.getUser = function() {
+  return document.getElementById('login_username').value;
+};
+LoginController.prototype.getPassword = function() {
+  return document.getElementById('login_password').value;
+};
+LoginController.prototype.validateEntry = function(user, pw) {
+  user = user || this.getUser();
+  pw = pw || this.getPassword();
+
+  if (!(user && pw)) {
+      return this.failure('Please enter a username & password!');
+  }
+  else if (pw.length < 5) {
+      return this.failure('Password must be 5+ characters!');
+  }
+
+  // got here? validated!
+  return true;
+};
+// override to extend base failure()
+LoginController.prototype.failure = function(err) {
+  // 'super' call
+  Controller.prototype.failure.call( this, 'Login invalid: ' + err );
+};
+
+// child class
+function AuthController(login) {
+  Controller.call(this);
+  // in addition to inheritance, we also need composition
+  this.login = login;
+}
+// link child class to parent
+AuthController.prototype = Object.create(Controller.prototype);
+AuthController.prototype.server = function(url, data) {
+  return $.ajax( {
+      url,
+      data
+  } );
+};
+AuthController.prototype.checkAuth = function() {
+  const user = this.login.getUser();
+  const pw = this.login.getPassword();
+
+  if (this.login.validateEntry( user, pw )) {
+      this.server( '/check-auth',{
+          user,
+          pw
+      } )
+      .then( this.success.bind(this))
+      .fail( this.failure.bind(this));
+  }
+};
+// override to extend base success()
+AuthController.prototype.success = function() {
+  // super call
+  Controller.prototype.success.call(this, 'Authenticated!');
+};
+// Override to extend base failure()
+AuthController.prototype.failure = function(err) {
+  // 'super' call
+  Controller.prototype.failure.call( this, 'Auth Failed: ' + err );
+};
+
+const auth = new AuthController(
+  // in addition to inheritance, we also need composition
+  new LoginController()
+);
+auth.checkAuth();
+
+
+// take advantage of oloo style behavior delegation have much simpler design
+const LoginController = {
+  errors: [],
+  getUser: function() {
+      return document.getElementById('login_username').value;
+  },
+  getPassword: function() {
+      return document.getElementById('login_password').value;
+  },
+  validateEntry: function(user, pw) {
+      user = user || this.getUser();
+      pw = pw || this.getPassword();
+
+      if (!(user && pw)) {
+          return this.failure('Please enter a username & password!');
+      } else if (pw.length < 5) {
+          return this.failure('Password must be 5+ characters!');
+      }
+
+      // got here? validated!
+      return true;
+  },
+  showDialog: function(title, msg) {
+      // display success message to user in dialog
+  },
+  failure: function(err) {
+      this.errors.push(err);
+      this.showDialog('Error','Login invalid: ' + err);
+  }
+};
+// Link AuthController to delegate to LoginController
+const AuthController = Object.create(LoginController);
+
+AuthController.errors = [];
+AuthController.checkAuth = function() {
+  const user = this.getUser();
+  const pw = this.getPassword();
+
+  if (this.validateEntry( user, pw )) {
+      this.server( '/check-auth',{
+          user,
+          pw
+      } )
+      .then( this.accepted.bind( this ) )
+      .fail( this.rejected.bind( this ) );
+  }
+};
+AuthController.server = function(url, data) {
+  return $.ajax( {
+      url,
+      data
+  } );
+};
+AuthController.accepted = function() {
+  this.showDialog( 'Success', 'Authenticated!' )
+};
+AuthController.rejected = function(err) {
+  this.failure( 'Auth Failed: ' + err );
+};
+
+AuthController.checkAuth();
+
+
+// unlexical
+const Foo = {
+  bar: (x) =>  x < 10 ? Foo.bar(x * 2) : x,
+  baz: (x) => (x < 10) ? Foo.baz( x * 2 ) : x
+};
+
+const f = Foo;
+console.log(f.bar(2)); // 16
+console.log(f.baz(8)); // 16
+
+
+
+
+
+
+
 
 
 
@@ -17613,7 +18037,7 @@ myObject2.doCool(); // super cool!
 * Technology & Progress
 * Volunteerism
 * Work & Leisure
-* Health * Fitness
+* Health & Fitness
 * Enjoy Life...
 
   `,
@@ -17680,9 +18104,6 @@ myObject2.doCool(); // super cool!
     this.location.back();
   }
 }
-
-
-
 
 
 
