@@ -18018,14 +18018,86 @@ console.log(f.bar(2)); // 16
 console.log(f.baz(8)); // 16
 
 
+// class gotchas
+// class is syntactic sugar on top of prototype delegation mechanism
+class C {
+  private num;
+	constructor() {
+		this.num = Math.random();
+	}
+	rand() {
+		console.log('Random: ' + this.num);
+	}
+}
 
+const c1 = new C();
+c1.rand(); // Random: 0.45706427521117954
 
+C.prototype.rand = function() {
+	console.log( 'Random: ' + Math.round(this.num * 1000));
+};
 
+const c2 = new C();
+c2.rand(); // Random: 9
 
+c1.rand(); // Random: 457 no
 
+// track shared state among instances, then use the prototype syntax
+class D {
+	constructor() {
+		// make sure to modify the shared state,
+		// not set a shadowed property on the
+		// instances!
+		D.prototype.count++;
 
+		// here, this.count works as expected
+		// via delegation
+		console.log('hello: ' + this.count);
+	}
+}
 
+// add a property for shared state directly to
+// prototype object
+D.prototype.count = 0;
 
+const d1 = new D();
+// hello: 1
+
+const d2 = new D();
+// hello: 2
+
+console.log(d1.count === 2); // true
+console.log(d1.count === d2.count); // true
+
+// what super does against d  and e
+class P1 {
+	foo() { console.log('P.foo'); }
+}
+
+class C1 extends P1 {
+	foo() {
+    super();
+  }
+}
+
+const c1 = new C1();
+c1.foo(); // "P.foo"
+
+const D1 = {
+	foo: function() { console.log('D.foo'); }
+};
+
+const E1 = {
+	foo: C1.prototype.foo
+};
+
+// Link E to D for delegation
+Object.setPrototypeOf(E1, D1);
+
+E1.foo(); // "P.foo"
+
+// Happy New Year 2020: Health, Love, Success, Fitness and Achievement. 
+// Have fun und build some great stuff. :-)
 
 // American Core Values I appreciate:
 * Individualism
@@ -18104,6 +18176,9 @@ console.log(f.baz(8)); // 16
     this.location.back();
   }
 }
+
+
+
 
 
 
