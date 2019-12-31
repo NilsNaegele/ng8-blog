@@ -17183,7 +17183,166 @@ const Joe = new CoolGuy('running marathons in 02:10');
 console.log(Joe.showOff()); // Here's my trick: running marathons in 02:10
 
 // class inheritance
+class Vehicle {
+  engines;
+  output = (a, b = '', c = '') => a + b + c;
 
+  constructor(engines = 1) {
+    this.engines = engines;
+  }
+
+	ignition() {
+    return this.output('Turning on my engine.');
+	}
+
+	drive() {
+		return this.ignition() + ' ' + this.output('Steering and moving forward!');
+	}
+}
+
+class Car extends Vehicle {
+ wheels;
+
+ constructor(wheels = 4) {
+   super(wheels);
+   this.wheels = wheels;
+ }
+
+  drive() {
+    return super.drive() + ' ' + this.output('Rolling on all ', this.wheels, ' wheels!');
+  }
+}
+
+class SpeedBoat extends Vehicle {
+
+  constructor(engines = 2) {
+    super(engines);
+    this.engines = engines;
+  }
+
+	ignition() {
+		return this.output('Turning on my ', this.engines, ' engines.');
+	}
+
+	pilot() {
+		return super.drive() + ' ' + this.output('Speeding through the water with ease!');
+	}
+}
+
+
+const vehicle = new Vehicle();
+const car = new Car();
+const speedBoat = new SpeedBoat();
+console.log(vehicle.engines, vehicle.drive());
+console.log(car.wheels, car.drive());
+console.log(speedBoat.engines, speedBoat.pilot());
+
+
+// explicit mixin, manually copy behavior form one object to the next
+// simple mixin
+const mixin = (sourceObj, targetObj ) => {
+	for (const key in sourceObj) {
+		if (!(key in targetObj)) {
+			targetObj[key] = sourceObj[key];
+		}
+	}
+	return targetObj;
+}
+
+const Vehicle = {
+	engines: 1,
+	ignition: function() {
+		console.log('Turning on my engine.');
+	},
+	drive: function () {
+		this.ignition();
+		console.log('Steering and moving forward!');
+	}
+};
+
+const Car = mixin( Vehicle, {
+	wheels: 4,
+	drive: function() {
+		Vehicle.drive.call(this);
+		console.log('Rolling on all ' + this.wheels + ' wheels!');
+	}
+} );
+
+const vehicle = Vehicle;
+const car = Car;
+vehicle.drive();
+console.log(vehicle.engines);
+car.drive();
+console.log(car.engines, car.wheels);
+
+
+// parasitic inheritance
+// traditional JS class vehicle
+function Vehicle() {
+	this.engines = 1;
+}
+Vehicle.prototype.ignition = () => {
+	console.log('Turning on my engine.');
+};
+Vehicle.prototype.drive = function() {
+	this.ignition();
+	console.log('Steering and moving forward!');
+};
+
+// parasitic class car
+function Car() {
+	// first car is a vehicle
+	const car = new Vehicle();
+
+	// modify car to specialize
+	car.wheels = 6;
+
+	// save a privileged reference vehicle.drive
+	const vehDrive = car.drive;
+
+	// override vehicle.drive
+	car.drive = function() {
+		vehDrive.call(this);
+		console.log('Rolling on all ' + this.wheels + ' wheels!');
+	};
+
+	return car;
+}
+
+const myCar = Car();
+
+myCar.drive();
+// Turning on my engine.
+// Steering and moving forward!
+// Rolling on all 6 wheels!
+
+
+
+// implicit mixin
+const Something = {
+	cool() {
+		this.greeting = 'Guten Morgen, Nils-Holger!';
+		this.count = this.count ? this.count + 1 : 42;
+	}
+};
+
+Something.cool();
+console.log(Something.greeting); // 'Guten Morgen, Nils-Holger!'
+console.log(Something.count); // 42
+
+const Another = {
+	cool() {
+		// implicit mixin of something to another
+		Something.cool.call(this);
+	}
+};
+
+Another.cool();
+console.log(Another.greeting); // 'Guten Morgen, Nils-Holger!'
+console.log(Another.count); // 42 (not shared state with something)
+
+
+// prototypes
 
 
 
@@ -17252,6 +17411,12 @@ console.log(Joe.showOff()); // Here's my trick: running marathons in 02:10
     this.location.back();
   }
 }
+
+
+
+
+
+
 
 
 
