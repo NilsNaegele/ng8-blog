@@ -17343,9 +17343,278 @@ console.log(Another.count); // 42 (not shared state with something)
 
 
 // prototypes
+const myObject = {
+	a: 42
+};
+
+console.log(myObject.a); // 2
+
+
+const anotherObject = {
+	a: 24
+};
+
+// create an object linked to anotherobject
+const myObject1 = Object.create(anotherObject);
+
+console.log(myObject1.a); // 24
+
+// for in loop reaches any property in the chain, will be enumerated
+for (const k in myObject1) {
+  console.log('found: ' + k);
+}
+
+console.log(('a' in myObject1)); // true
+
+// setting & shadowing properties
+myObject1.foo = 'bar';
+
+
+// shadowing can occur implicitly in subtle ways
+const anotherObject2 = {
+	a: 4
+};
+
+const myObject2 = Object.create(anotherObject2);
+
+console.log(anotherObject2.a); // 4
+console.log(myObject2.a); // 4
+
+console.log(anotherObject2.hasOwnProperty('a' )); // true
+console.log(myObject2.hasOwnProperty('a')); // false
+
+myObject2.a++; // implicit shadowing!
+
+console.log(anotherObject2.a); // 4
+console.log(myObject2.a); // 5
+
+console.log(myObject2.hasOwnProperty('a')); // true
+
+
+// class functions
+function Foo() {}
+
+console.log(Foo.prototype); // { }
+
+const a = new Foo();
+console.log(Object.getPrototypeOf(a) === Foo.prototype); // true
+
+// constructors
+console.log(Foo.prototype.constructor === Foo); // true
+const b = new Foo();
+console.log(b.constructor === Foo); // true
+
+// constructor or call
+function NothingSpecial() {
+  console.log('don\'t mind me!');
+}
+
+const c = new NothingSpecial();
+console.log(c); // { }
+
+
+// mechanics of simulating class orientation
+function Foo(name) {
+	this.name = name;
+}
+
+Foo.prototype.myName = function() {
+	return this.name;
+};
+
+const a = new Foo('a');
+const b = new Foo('b');
+
+console.log(a.myName()); // a
+console.log(b.myName()); // b
+
+function Foo1() { /* .. */ }
+
+Foo1.prototype = { /* .. */ }; // create a new prototype object
+
+const a1 = new Foo1();
+console.log(a1.constructor === Foo1); // false
+console.log(a1.constructor === Object); // true
+
+// fix missing constructor property on new object serving as foo2.prototype
+function Foo2() { /* .. */ }
+
+Foo2.prototype = { /* .. */ }; // create a new prototype object
+
+Object.defineProperty( Foo2.prototype, 'constructor' , {
+	enumerable: false,
+	writable: true,
+	configurable: true,
+	value: Foo2    // point constructor at foo2
+} );
+const a2 = new Foo2();
+console.log(a2.constructor === Foo2); // true
+console.log(a2.constructor === Object); // false
+
+
+// prototype style code that creates delegation links
+function Foo3(name) {
+	this.name = name;
+}
+
+Foo3.prototype.myName3 = function() {
+	return this.name;
+};
+
+function Bar3(name, label) {
+	Foo3.call(this, name);
+	this.label = label;
+}
+
+// bar3.prototype linked to foo3.prototype
+Bar3.prototype = Object.create( Foo3.prototype );
+
+
+Bar3.prototype.myLabel3 = function() {
+	return this.label;
+};
+
+const a3 = new Bar3('a3', 'obj a3');
+
+console.log(a3.myName3()); // a3
+console.log(a3.myLabel3()); // obj a3
+
+// linking bar3.prototype to foo3.prototype
+// pre-es6
+Bar3.prototype = Object.create(Foo3.prototype);
+
+// es6+
+Object.setPrototypeOf(Bar3.prototype, Foo3.prototype);
+
+
+// inspecting class relationships
+function Foo() { }
+
+Foo.prototype.blah = {};
+
+const a = new Foo();
+console.log(a instanceof Foo); // true
+
+// prototype reflection
+console.log(Foo.prototype.isPrototypeOf(a)); // true
+
+
+// retrieve prototype
+Object.getPrototypeOf(a);
+console.log(Object.getPrototypeOf(a) === Foo.prototype); // true
+// another way access internal prototype
+console.log(a.__proto__ === Foo.prototype); // true
+
+// -__proto__ implemented like this
+Object.defineProperty( Object.prototype, '__proto__', {
+	get: function() {
+		return Object.getPrototypeOf(this);
+	},
+	set: function(o) {
+		Object.setPrototypeOf(this, o);
+		return o;
+	}
+});
+
+// creating links
+const foo1 = {
+	something: () => console.log('tell me something good...')
+};
+
+const bar1 = Object.create(foo1);
+
+bar1.something(); // tell me something good...
+
+// object.create() polyfills
+if (!Object.create) {
+	Object.create = function(o) {
+		function F() {}
+		F.prototype = o;
+		return new F();
+	};
+}
+
+const anotherObject1 = {
+	a: 42
+};
+
+const myObject1 = Object.create(anotherObject1, {
+	b: {
+		enumerable: false,
+		writable: true,
+		configurable: false,
+		value: 33
+	},
+	c: {
+		enumerable: true,
+		writable: false,
+		configurable: false,
+		value: 48
+	}
+} );
+
+console.log(myObject1.hasOwnProperty('a')); // false
+console.log(myObject1.hasOwnProperty( 'b')); // true
+console.log(myObject1.hasOwnProperty('c')); // true
+
+console.log(myObject1.a); // 42
+console.log(myObject1.b); // 33
+console.log(myObject1.c); // 48
+
+
+// pre es5 environment, custom utility
+const createAndLinkObject = (o) => {
+	function F(){}
+	F.prototype = o;
+	return new F();
+}
+
+const anotherObject = {
+	a: 42
+};
+
+const myObject = createAndLinkObject( anotherObject );
+
+console.log(myObject.a); // 42
+
+// links as fallbacks?
+const anotherObject1 = {
+	cool: () => console.log('cool!')
+};
+
+const myObject1 = Object.create(anotherObject1);
+
+myObject1.cool(); // cool!
+
+// take advantage of power of prototype linkage
+const anotherObject2 = {
+	cool: function() { console.log('super cool!'); }
+};
+
+const myObject2 = Object.create(anotherObject2);
+
+myObject2.doCool = function() {this.cool(); }; // internal delegation!
+
+myObject2.doCool(); // super cool!
+
+
+// objects and classes, behavior delegation
 
 
 
+
+// American Core Values I appreciate:
+* Individualism
+* Freedom
+* Equality
+* Can Do Attitude
+* Achievement & Success
+* Competition
+* Technology & Progress
+* Volunteerism
+* Work & Leisure
+* Health * Fitness
+* Enjoy Life...
 
   `,
   blockQuote: `
@@ -17411,10 +17680,6 @@ console.log(Another.count); // 42 (not shared state with something)
     this.location.back();
   }
 }
-
-
-
-
 
 
 
