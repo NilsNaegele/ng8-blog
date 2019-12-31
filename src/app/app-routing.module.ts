@@ -1,3 +1,4 @@
+import { BeBerlinComponent } from './be-berlin/be-berlin.component';
 import { PrivacyComponent } from './privacy/privacy.component';
 import { HomeComponent } from './home/home.component';
 import { PostComponent } from './post/post.component';
@@ -14,6 +15,7 @@ const routes: Routes = [
   { path: 'about', component: AboutComponent },
   { path: 'contact', component: ContactComponent },
   { path: 'privacy', component: PrivacyComponent },
+  { path: 'be-berlin', component: BeBerlinComponent },
   { path: 'post/:id', component: PostComponent },
   { path: '**', component: PageNotFoundComponent }
 ];

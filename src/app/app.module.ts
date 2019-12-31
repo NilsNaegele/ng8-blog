@@ -11,6 +11,7 @@ import { FooterComponent } from './footer/footer.component';
 import { HomeComponent } from './home/home.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 import { PrivacyComponent } from './privacy/privacy.component';
+import { BeBerlinComponent } from './be-berlin/be-berlin.component';
 
 @NgModule({
   declarations: [
@@ -23,6 +24,7 @@ import { PrivacyComponent } from './privacy/privacy.component';
     HomeComponent,
     PageNotFoundComponent,
     PrivacyComponent,
+    BeBerlinComponent,
   ],
   imports: [
     BrowserModule,

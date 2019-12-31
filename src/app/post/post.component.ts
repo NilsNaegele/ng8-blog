@@ -18096,7 +18096,7 @@ Object.setPrototypeOf(E1, D1);
 
 E1.foo(); // "P.foo"
 
-// Happy New Year 2020: Health, Love, Success, Fitness and Achievement. 
+// Happy New Year 2020: Health, Love, Success, Fitness and Achievement.
 // Have fun und build some great stuff. :-)
 
 // American Core Values I appreciate:
