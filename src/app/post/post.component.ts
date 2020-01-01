@@ -18121,6 +18121,2613 @@ E1.foo(); // "P.foo"
   `,
   imageFooterUrl: 'assets/img/post11.jpg',
   footerQuote: 'Wir sind alle miteinander verbunden; zueinander biologisch. Zu der Erde, chemisch. Zum Rest des Universums, atomar.'
+},
+{
+  id: 12,
+  imageHeaderUrl: 'url(assets/img/post12-bg.jpg)',
+  heading: 'Angular 8/9, Basis- Teil 4',
+  subHeading: 'Kochbuch, Rezepte',
+  metaPublishedDate: 'am 01 Januar, 2020',
+  sectionHeading: 'Angular Kochbuch mit Rezepten',
+  code: `
+// component interpolation
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-news',
+  template: \`
+        <p>{{ currentDate | date }}</p>
+        <h1>{{ title }}</h1>
+        <h3>Written by: {{ author }}</h3>
+  \`
+})
+export class NewsComponent {
+
+  currentDate = new Date();
+  title = 'Angular 8/9, here to save the world!';
+  author = 'Nils-Holger';
+
+}
+
+
+// component input
+import { Component, Input } from '@angular/core';
+
+@Component({
+  selector: 'app-attribution',
+  template: \`
+      <h3>Written by: {{ author }}</h3>
+  \`
+})
+export class AttributionComponent {
+  @Input() author: string;
+}
+
+@Component({
+  selector: 'app-news',
+  template: \`
+        <p>{{ currentDate | date }}</p>
+        <h1>{{ title }}</h1>
+        <app-attribution [author]="author"></app-attribution>
+  \`
+})
+export class NewsComponent {
+
+  currentDate = new Date();
+  title = 'ES6/7/8 Discovery Challenger';
+  author = 'Nils-Holger';
+
+}
+
+
+// native element attribute binding
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-news',
+  template: \`
+        <img [src]="logoImageUrl">
+  \`
+})
+export class NewsComponent {
+
+    logoImageUrl = 'https://angular.io/assets/images/logos/angular/angular.svg';
+
+}
+
+
+// registering handlers on native browser events
+import { Component } from '@angular/core';
+
+
+@Component({
+  selector: 'app-news',
+  template: \`
+        <h1>{{ title }}</h1>
+        <p>Likes: {{ likeCount }}</p>
+        <button (click)="like()">Like</button>
+  \`
+})
+export class NewsComponent {
+        title = 'Single Page Applications are the Future of the Web with AI && VR';
+        likeCount = 0;
+        like() {
+          ++this.likeCount;
+        }
+}
+
+
+// custom events with eventemitter
+import { Component, EventEmitter, Output } from '@angular/core';
+
+@Component({
+  selector: 'app-text-editor',
+  template: \`
+          <textarea (keyup)="emitWordCount($event)"></textarea>
+  \`
+})
+export class TextEditorComponent {
+  @Output() countUpdate = new EventEmitter<number>();
+
+  emitWordCount(e: Event) {
+    this.countUpdate.emit((e.target.value.match(/S+/g) || []).length);
+  }
+}
+
+
+@Component({
+  selector: 'app-news',
+  template: \`
+        <h1>{{ title }}</h1>
+        <p>Word count: {{ wordCount }}</p>
+        <app-text-editor (countUpdate)="updateWordCount($event)">
+        </app-text-editor>
+  \`
+})
+export class NewsComponent {
+        title = 'Single Page Applications are the Future of the Web with AI && VR';
+        wordCount = 0;
+
+        updateWordCount(count: number): void {
+          this.wordCount = count;
+        }
+
+}
+
+
+// attaching behavior dom elements with directives
+import { Component, Directive, HostListener } from '@angular/core';
+
+@Directive({
+  selector: '[app-click-to-reveal]'
+})
+export class ClickToRevealDirective {
+  @HostListener('click', ['$event.target'])
+    reveal(target) {
+      target.style['white-space'] = 'normal';
+  }
+}
+
+
+@Component({
+  selector: 'app-news',
+  template: \`
+        <h1 app-click-to-reveal>{{ title }}</h1>
+  \`,
+  styles: [\`
+    h1 {
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      max-width: 300px;
+    }
+  \`]
+})
+export class NewsComponent {
+        title = \`
+Space, the final frontier. These are the voyages of the Starship
+  Enterprise. Its five-year mission: to explore strange new worlds, to seek out
+    new life and new civilizations, to boldly go where no man has gone before. Many
+      say exploration is part of our destiny, but it’s actually our duty to future
+         generations and their quest to ensure the survival of the human species.\`;
+
+}
+
+
+// ngcontent projected nested content
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-ad-section',
+  template: \`
+          <a href="#">{{ adText }}</a>
+          <ng-content select="p"></ng-content>
+  \`
+})
+export class AdSectionComponent {
+  adText = 'Loved by millions of Developers worldwide ...';
+}
+
+
+@Component({
+  selector: 'app-news',
+  template: \`
+        <h1>{{ title }}</h1>
+        <app-ad-section>
+            <p>Angular/VueJS/React to make the Web more beautiful and open.</p>
+            <p>An Open Source World full of knowledge, peace and love.</p>
+        </app-ad-section>
+        \`
+})
+export class NewsComponent {
+        title = 'Angular/VueJS/React, here to save the world!!!';
+
+}
+
+
+// dom control with structural directives ngfor && ngif
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-news',
+  template: \`
+        <div *ngFor="let article of articles; let i = index;">
+              <h1 *ngIf="article.active">
+                      ({{ i }}): {{ article.title }}
+              </h1>
+        </div>
+        \`
+})
+export class NewsComponent {
+
+      articles: Object[] = [
+        { title: 'Foo', active: true },
+        { title: 'Bar', active: false },
+        { title: 'Baz', active: true }
+      ];
+
+}
+
+
+// template reference variables reference elements
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-news',
+  template: \`
+          <input #box (keyup)="0">
+          <h1>{{ box.value }}</h1>
+        \`
+})
+export class NewsComponent { }
+
+
+// attribute property binding
+import { Component } from '@angular/core';
+
+  @Component({
+    selector: 'app-news',
+    template: \`
+            <input #box
+                    (keyup.enter)="setValue(box.value)"
+                    (keyup)="checkStale(box.value)">
+            <h1 [style.color]="isStale ? 'red' : 'green'">
+                {{ myBox }}
+            </h1>
+          \`
+  })
+  export class NewsComponent {
+          isStale = false;
+          myBox = '';
+
+          setValue(input: string) {
+            this.myBox = input;
+          }
+
+          checkStale(input: string): void {
+            this.isStale = input !== this.myBox;
+          }
+
+  }
+
+
+// lifecycle hooks
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+
+@Component({
+  selector: 'app-article',
+  template: \`
+          <h1>
+                <ng-content></ng-content>{{ articleTitle }}
+          </h1>
+  \`
+})
+export class ArticleComponent implements OnInit, OnDestroy {
+      @Input() articleTitle: string;
+
+      ngOnInit() {
+        console.log('created', this.articleTitle);
+      }
+
+      ngOnDestroy() {
+        console.log('destroyed', this.articleTitle);
+      }
+}
+
+@Component({
+  selector: 'app-news',
+  template: \`
+          <input (keyup.enter)="add($event)">
+          <app-article *ngFor="let title of titles; let i = index;"
+                        [articleTitle]="title">
+          <button (click)="remove(i)">X</button>
+        \`
+})
+export class NewsComponent {
+        titles: string[] = [];
+
+        add(e: Event): void {
+          this.titles.push(e.target.value);
+          e.target.value = '';
+        }
+
+        remove(index: number): void {
+          this.titles.splice(index, 1);
+        }
+
+}
+
+
+// referencing parent component from child component
+import { Component, Input } from '@angular/core';
+
+@Component({
+  selector: 'app-feedback',
+  template: \`
+          <h1>
+                Number of likes: {{ value }}
+          </h1>
+          <button (click)="likeArticle()">Like this article</button>
+  \`
+})
+export class FeedbackComponent {
+    @Input() value: number;
+
+    constructor(private newsComponent: NewsComponent) { }
+
+    likeArticle(): void {
+      this.newsComponent.incrementLikes();
+    }
+
+}
+
+@Component({
+  selector: 'app-news',
+  template: \`
+          <app-feedback [value]="likes"></app-feedback>
+        \`
+})
+export class NewsComponent {
+        likes = 0;
+
+        incrementLikes() {
+          this.likes++;
+        }
+
+}
+
+
+// viewchild && forwardref mutual parent-child awareness
+import { Component, Input, Inject, forwardRef, ViewChild } from '@angular/core';
+
+@Component({
+  selector: 'app-feedback',
+  template: \`
+          <h1>
+                Number of likes: {{ value }}
+          </h1>
+          <button (click)="likeArticle()"
+                  [disabled]="!likeEnabled">
+                Like this article
+          </button>
+  \`
+})
+export class FeedbackComponent {
+    @Input() value: number;
+
+    likeEnabled = false;
+
+    constructor(@Inject(forwardRef(() => NewsComponent))
+                        private newsComponent: NewsComponent) { }
+
+    likeArticle(): void {
+      this.newsComponent.incrementLikes();
+    }
+
+    setLikeEnabled(newEnabledStatus: boolean): void {
+      this.likeEnabled = newEnabledStatus;
+    }
+
+}
+
+@Component({
+  selector: 'app-news',
+  template: \`
+          <input type="checkbox" (click)="changeLikesEnabled($event)">
+          <app-feedback [value]="likes"></app-feedback>
+        \`
+})
+export class NewsComponent {
+  @ViewChild(FeedbackComponent, { static: false }) feedbackComponent: FeedbackComponent;
+  likes = 0;
+
+  incrementLikes() {
+      this.likes++;
+  }
+
+  changeLikesEnabled(e: Event): void {
+    this.feedbackComponent.setLikeEnabled(e.target.checked);
+  }
+
+}
+
+
+// contentchild && forwardref mutual parent-child awareness
+import { Component, Inject, forwardRef, ContentChild } from '@angular/core';
+
+@Component({
+  selector: 'app-feedback',
+  template: \`
+          <h1>
+                Number of likes: {{ value }}
+          </h1>
+          <button (click)="likeArticle()"
+                  [disabled]="!likeEnabled">
+                Like this article
+          </button>
+  \`
+})
+export class FeedbackComponent {
+    value: number;
+
+    likeEnabled = false;
+
+    constructor(@Inject(forwardRef(() => NewsComponent))
+                        private newsComponent: NewsComponent) {
+                          this.updateLikes();
+                         }
+
+    likeArticle(): void {
+      this.newsComponent.incrementLikes();
+      this.updateLikes();
+    }
+
+    updateLikes() {
+      this.value = this.newsComponent.likes;
+    }
+
+    setLikeEnabled(newEnabledStatus: boolean): void {
+      this.likeEnabled = newEnabledStatus;
+    }
+
+}
+
+@Component({
+  selector: 'app-news',
+  template: \`
+          <input type="checkbox" (click)="changeLikesEnabled($event)">
+          <ng-content></ng-content>
+        \`
+})
+export class NewsComponent {
+  @ContentChild(FeedbackComponent) feedbackComponent: FeedbackComponent;
+  likes = 0;
+
+  incrementLikes() {
+      this.likes++;
+  }
+
+  changeLikesEnabled(e: Event): void {
+    this.feedbackComponent.setLikeEnabled(e.target.checked);
+  }
+
+}
+
+*****************************************************************
+Root App Component Transclusion
+
+<app-news>
+      <app-feedback></app-feedback>
+</app-news>
+
+
+
+// ngmodel two-way binding
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-news',
+  template: \`
+            <h1>{{ title }}</h1>
+            <input [(ngModel)]="title">
+            <input [(ngModel)]="title">
+            <input [(ngModel)]="title">
+        \`
+})
+export class NewsComponent {
+    title = '';
+}
+
+
+// form group bundle controls
+import { Component } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+
+@Component({
+  selector: 'app-news',
+  template: \`
+          <p>Title: <input [formControl]="titleControl"></p>
+          <p>Text: <input [formControl]="textControl"></p>
+          <p><button (click)="saveArticle()">Save</button></p>
+          <hr>
+          <p>Preview:</p>
+          <div style="border: 1px solid #999; margin: 1px;">
+              <h1>{{ article.title }}</h1>
+              <p>{{ article.text }}</p>
+          </div>
+  \`
+})
+export class NewsComponent {
+        article = { title: '', text: ''};
+
+        titleControl = new FormControl(null, Validators.required);
+        textControl = new FormControl(null, Validators.required);
+
+        articleFormGroup = new FormGroup({
+          title: this.titleControl,
+          text: this.textControl
+        });
+
+        saveArticle() {
+          if (this.articleFormGroup.valid) {
+            this.article = this.articleFormGroup.value;
+          } else {
+            console.log('Missing field(s)!');
+          }
+        }
+
+ }
+
+
+// form array bundle form controls
+import { Component } from '@angular/core';
+import { FormControl, FormArray, Validators } from '@angular/forms';
+
+@Component({
+  selector: 'app-news',
+  template: \`
+          <p>Tags:</p>
+          <ul>
+              <li *ngFor="let tag of tags;">
+                  <input [formControl]="tag">
+              </li>
+          </ul>
+          <p><button (click)="addTag()">++</button></p>
+          <p><button (click)="saveArticle()">Save</button></p>
+
+  \`
+})
+export class NewsComponent {
+        tags: Array<FormControl> = [];
+        tagFormArray: FormArray = new FormArray(this.tags);
+
+        addTag(): void {
+          this.tagFormArray.push(new FormControl(null, Validators.required));
+        }
+
+        saveArticle() {
+          if (this.tagFormArray.valid) {
+            alert('Valid!');
+          } else {
+            alert('Missing field(s)!');
+          }
+        }
+
+ }
+
+
+// ngform basic form
+import { Component } from '@angular/core';
+import { NgForm } from '@angular/forms';
+
+@Component({
+  selector: 'app-news',
+  template: \`
+          <form #myForm="ngForm" (ngSubmit)="saveArticle(myForm)">
+              <p><input ngModel name="title" placeholder="Title"></p>
+              <p><input ngModel name="text" placeholder="Text"></p>
+              <p><button type="submit">Save</button></p>
+          </form>
+  \`
+})
+export class NewsComponent {
+      saveArticle(form: NgForm) {
+          console.log(form.value);
+      }
+ }
+
+
+// formbuilder basic form
+import { Component, Inject } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+
+@Component({
+  selector: 'app-news',
+  template: \`
+          <form [formGroup]="articleGroup" (ngSubmit)="saveArticle()">
+            <div formGroupName="article">
+                  <p><input formControlName="title" placeholder="Title"></p>
+                  <p><textarea formControlName="text" placeholder="Text"></textarea></p>
+            </div>
+            <p><button type="submit">Save</button></p>
+          </form>
+  \`
+})
+export class NewsComponent {
+        articleGroup: FormGroup;
+
+        constructor(@Inject(FormBuilder) formBuilder: FormBuilder) {
+          this.articleGroup = formBuilder.group({
+            article: formBuilder.group({
+              title: [null, Validators.required],
+              text: [null, Validators.required]
+            })
+          });
+        }
+
+        saveArticle(): void {
+          console.log(this.articleGroup.value);
+        }
+
+ }
+
+
+// httpclient basic observable
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+
+import { Subscription } from 'rxjs/Subscription';
+
+export class Article {
+  id: number;
+  title: string;
+  author: string;
+}
+
+@Component({
+  selector: 'app-news',
+  template: \`
+          <h2>Improve, Improve, Improve ...</h2>
+          <h1>({{ id }}) {{ title }}</h1>
+          <p>{{ author }}</p>
+  \`
+})
+export class NewsComponent implements OnInit, OnDestroy {
+      id: number;
+      title: string;
+      author: string;
+
+      newsSubscription: Subscription;
+
+      constructor(private http: HttpClient) {}
+
+      ngOnInit() {
+      this.newsSubscription =
+          this.http.get<Article>('assets/news.json').subscribe(response => {
+          this.id = response.id;
+          this.title = response.title;
+          this.author = response.author;
+        },
+        error => console.log(error)
+      );
+      }
+
+      ngOnDestroy() {
+        this.newsSubscription.unsubscribe();
+      }
+
+ }
+
+******************************************************
+News.JSON
+
+{
+"id": 1,
+"title": "The Will To Win Is Nothing Without The Will To Prepare",
+"author": "Nils-Holger Nägele"
+}
+
+
+// subject publish-subscribe model
+import { Component } from '@angular/core';
+import { Subject } from 'rxjs/Subject';
+
+
+@Component({
+  selector: 'app-news',
+  template: \`
+          <button (click)="emitEvent($event)">Emit Event</button>
+
+          <p *ngFor="let click of clicks; let i = index;">
+            ({{ i }}): {{ click }}
+          </p>
+  \`
+})
+export class NewsComponent {
+      clickEmitter = new Subject<Event>();
+      clicks: Array<Event> = [];
+
+      emitEvent(event) {
+        this.clickEmitter.next(event);
+      }
+
+      constructor() {
+        this.clickEmitter.subscribe(clickEvent => this.clicks.push(clickEvent));
+      }
+
+ }
+
+
+// behaviorsubject
+import { Component, Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Observable } from 'rxjs/Observable';
+
+export const enum AuthenticationState {
+            LoggedIn,
+            LoggedOut
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AuthenticationService {
+  private authenticationManager = new BehaviorSubject(AuthenticationState.LoggedOut);
+  private authenticationState: AuthenticationState;
+  authenticationChanged: Observable<AuthenticationState>;
+
+  constructor() {
+    this.authenticationChanged = this.authenticationManager.asObservable();
+  }
+
+  login(): void {
+    this.setAuthenticationState(AuthenticationState.LoggedIn);
+  }
+
+  logout(): void {
+    this.setAuthenticationState(AuthenticationState.LoggedOut);
+  }
+
+  private emitAuthenticationState(): void {
+    this.authenticationManager.next(this.authenticationState);
+  }
+
+  private setAuthenticationState(newAuthenticationState: AuthenticationState): void {
+    this.authenticationState = newAuthenticationState;
+    this.emitAuthenticationState();
+  }
+
+}
+
+@Component({
+  selector: 'app-news',
+  template: \`
+            <button *ngIf="!loggedIn" (click)="login()">Login</button>
+            <button *ngIf="loggedIn" (click)="logout()">Logout</button>
+  \`
+})
+export class NewsComponent {
+      loggedIn = false;
+
+      constructor(private authenticationService: AuthenticationService) {
+          this.authenticationService.authenticationChanged.subscribe(
+            newAuthenticationState => {
+              this.loggedIn = (newAuthenticationState === AuthenticationState.LoggedIn);
+            }
+          );
+      }
+
+      login(): void {
+        this.authenticationService.login();
+      }
+
+      logout(): void {
+        this.authenticationService.logout();
+      }
+
+ }
+
+
+// generalized publish subscribe service
+import { Component, Injectable, Input, AfterViewInit, OnDestroy } from '@angular/core';
+
+import { Observable } from 'rxjs/Observable';
+import { Subject } from 'rxjs/Subject';
+import { Observer } from 'rxjs/Observer';
+import { Subscription } from 'rxjs/Subscription';
+import 'rxjs/add/operator/filter';
+import 'rxjs/add/operator/map';
+
+
+@Injectable()
+export class PublishSubscribeService {
+       private publishSubscribeSubject = new Subject<any>();
+       private emitter: Observable<any>;
+
+       constructor() {
+         this.emitter = this.publishSubscribeSubject.asObservable();
+       }
+
+       publish(channel: string, event: any): void {
+         this.publishSubscribeSubject.next({
+              channel: channel,
+              event: event
+         });
+       }
+
+       subscribe(channel: string, handler: ((value: any) => void)): Subscription {
+         return this.emitter
+                    .filter(emission => emission.channel === channel)
+                    .map(emission => emission.event)
+                    .subscribe(handler);
+       }
+
+}
+
+@Component({
+  selector: 'app-news',
+  template: \`
+            <p>Heard {{ count }} of {{ subscribeChannel }}</p>
+            <button (click)="send()">Send {{ publishChannel }}</button>
+  \`
+})
+export class NewsComponent implements AfterViewInit, OnDestroy {
+      @Input() publishChannel: string;
+      @Input() subscribeChannel: string;
+      private pubSubServiceSubscription: Subscription;
+      count = 0;
+
+      constructor(private pubSubService: PublishSubscribeService) { }
+
+      send() {
+        this.pubSubService.publish(this.publishChannel, {});
+      }
+
+      ngAfterViewInit() {
+        this.pubSubService.subscribe(this.subscribeChannel, event => ++this.count);
+      }
+
+      ngOnDestroy() {
+        this.pubSubServiceSubscription.unsubscribe();
+      }
+
+ }
+
+*****************************************************
+ Root App Component
+
+ <app-news subscribeChannel="Nils-Holger" publishChannel="I love you"></app-news>
+ <app-news subscribeChannel="I love you" publishChannel="Nils-Holger"></app-news>
+
+
+// follow changes in viewchildren with query lists
+import { Component, ViewChildren, QueryList,
+  Input, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+
+
+@Component({
+    selector: 'app-inner',
+    template: \`
+              <p>{{ value }}</p>
+      \`
+    })
+export class InnerComponent {
+@Input() value: number;
+}
+
+
+@Component({
+    selector: 'app-news',
+    template: \`
+        <button (click)="add()">More</button>
+        <button (click)="remove()">Less</button>
+        <button (click)="shuffle()">Shuffle</button>
+        <app-inner *ngFor="let l of list" value="{{l}}"></app-inner>
+        <p>Value of last: {{ lastValue }}</p>
+    \`
+})
+export class NewsComponent implements AfterViewInit {
+@ViewChildren(InnerComponent) innerComponents: QueryList<InnerComponent>;
+list: Array<number> = [];
+lastValue: number;
+
+constructor(private changeDetectorRef: ChangeDetectorRef) { }
+
+add(): void {
+  this.list.push(this.list.length);
+}
+
+remove(): void {
+  this.list.pop();
+}
+
+shuffle(): void {
+  this.list = this.list.sort(() => (4 * Math.random() > 2) ? 1 : -1);
+}
+
+ngAfterViewInit() {
+this.innerComponents.changes.subscribe(innerComponents => {
+this.lastValue = (innerComponents.last || {}).value;
+this.changeDetectorRef.detectChanges();
+});
+}
+
+}
+
+
+// autocomplete
+import { Component, Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { FormControl } from '@angular/forms';
+
+import { Observable } from 'rxjs/Observable';
+
+import 'rxjs/add/operator/map';
+import 'rxjs/add/observable/of';
+import 'rxjs/add/operator/concatMap';
+import 'rxjs/add/operator/delay';
+import 'rxjs/add/operator/debounceTime';
+import 'rxjs/add/operator/distinctUntilChanged';
+import 'rxjs/add/operator/switchMap';
+
+
+export interface Response {
+  prefix: string;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class APIService {
+
+        constructor(private http: HttpClient) { }
+
+        search(query: string): Observable<string> {
+          return this.http.get<Response>('assets/response.json')
+                          .map(response => response.prefix + query)
+                          .concatMap(
+                            a => Observable.of(a).delay(Math.random() * 1000));
+        }
+
+}
+
+
+@Component({
+  selector: 'app-news',
+  template: \`
+            <input [formControl]="queryField">
+                <p *ngFor="let result of results">
+                    {{ result }}
+                </p>
+  \`
+})
+export class NewsComponent  {
+        results: string[] = [];
+        queryField = new FormControl();
+
+        constructor(private apiService: APIService) {
+          this.queryField.valueChanges
+                          .debounceTime(300)
+                          .distinctUntilChanged()
+                          .switchMap(query => this.apiService.search(query))
+                          .subscribe(result => this.results.push(result));
+        }
+
+ }
+
+********************************************************
+Response.JSON
+
+{
+"prefix": "You searched for "
+}
+
+
+// application setup simple route
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: \`
+            <h1>Root Component</h1>
+            <router-outlet></router-outlet>
+  \`
+})
+export class AppComponent { }
+
+/**************************************************************************** */
+
+@Component({
+  selector: 'app-default',
+  template: \`<h1>Hello Nils-Holger...</h1>\`
+})
+export class DefaultComponent { }
+
+/**************************************************************************** */
+
+@Component({
+  selector: 'app-news',
+  template: \`<h1>What's New?</h1>\`
+})
+export class NewsComponent  { }
+
+
+ /**************************************************************************** */
+
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { RouterModule, Routes } from '@angular/router';
+
+const appRoutes: Routes = [
+  { path: '**', component: DefaultComponent }
+];
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    DefaultComponent,
+    NewsComponent
+  ],
+  imports: [
+    BrowserModule,
+    RouterModule.forRoot(appRoutes)
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+
+
+// navigating with routerlinks
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: \`
+            <h1>Root Component</h1>
+            <a [routerLink]="['']">Default</a>
+            <a [routerLink]="['news']">News</a>
+            <router-outlet></router-outlet>
+  \`
+})
+export class AppComponent { }
+
+/**************************************************************************** */
+
+@Component({
+  selector: 'app-default',
+  template: \`<h1>Hello Nils-Holger...</h1>\`
+})
+export class DefaultComponent { }
+
+
+ /**************************************************************************** */
+
+@Component({
+  selector: 'app-news',
+  template: \`<h1>What's New?</h1>\`
+})
+export class NewsComponent  { }
+
+
+ /**************************************************************************** */
+
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { RouterModule, Routes } from '@angular/router';
+
+const appRoutes: Routes = [
+  { path: 'news', component: NewsComponent },
+  { path: '**', component: DefaultComponent }
+];
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    DefaultComponent,
+    NewsComponent
+  ],
+  imports: [
+    BrowserModule,
+    RouterModule.forRoot(appRoutes)
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+
+
+// navigating with router service
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+
+@Component({
+  selector: 'app-root',
+  template: \`
+            <h1>Root Component</h1>
+            <button (click)="visitDefault()">Default</button>
+            <button (click)="visitNews()">News</button>
+            <router-outlet></router-outlet>
+  \`
+})
+export class AppComponent {
+
+      constructor(private router: Router) { }
+
+      visitDefault() {
+        this.router.navigate(['']);
+      }
+
+      visitNews() {
+        this.router.navigate(['news']);
+      }
+
+}
+
+/**************************************************************************** */
+
+@Component({
+  selector: 'app-default',
+  template: \`<h1>Hello Nils-Holger...</h1>\`
+})
+export class DefaultComponent { }
+
+
+ /**************************************************************************** */
+
+@Component({
+  selector: 'app-news',
+  template: \`<h1>What's New?</h1>\`
+})
+export class NewsComponent  { }
+
+
+ /**************************************************************************** */
+
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { RouterModule, Routes } from '@angular/router';
+
+const appRoutes: Routes = [
+  { path: 'news', component: NewsComponent },
+  { path: '**', component: DefaultComponent }
+];
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    DefaultComponent,
+    NewsComponent
+  ],
+  imports: [
+    BrowserModule,
+    RouterModule.forRoot(appRoutes)
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+
+
+// path construction with location strategy
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+
+@Component({
+  selector: 'app-root',
+  template: \`
+            <h1>Root Component</h1>
+            <button (click)="visitDefault()">Default</button>
+            <button (click)="visitNews()">News</button>
+            <router-outlet></router-outlet>
+  \`
+})
+export class AppComponent {
+
+      constructor(private router: Router) { }
+
+      visitDefault() {
+        this.router.navigate(['']);
+      }
+
+      visitNews() {
+        this.router.navigate(['news']);
+      }
+
+}
+
+/**************************************************************************** */
+
+@Component({
+  selector: 'app-default',
+  template: '<h1>Hello Nils-Holger...</h1>'
+})
+export class DefaultComponent { }
+
+
+ /**************************************************************************** */
+
+@Component({
+  selector: 'app-news',
+  template: '<h1>What's New?</h1>'
+})
+export class NewsComponent  { }
+
+
+ /**************************************************************************** */
+
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { RouterModule, Routes } from '@angular/router';
+import { LocationStrategy, HashLocationStrategy } from '@angular/common';
+
+const appRoutes: Routes = [
+  { path: 'news', component: NewsComponent },
+  { path: '**', component: DefaultComponent }
+];
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    DefaultComponent,
+    NewsComponent
+  ],
+  imports: [
+    BrowserModule,
+    RouterModule.forRoot(appRoutes)
+  ],
+  providers: [
+    { provide: LocationStrategy, useClass: HashLocationStrategy }
+  ],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+
+
+// routerlinkactive build stateful route behavior
+import { Component } from '@angular/core';
+  import { Router } from '@angular/router';
+
+  @Component({
+    selector: 'app-root',
+    template: \`
+              <h1>Root Component</h1>
+              <a [routerLink]="['']"
+                 [routerLinkActive]="'active-navlink'"
+                 [routerLinkActiveOptions]="{exact: true}">
+                 Default
+              </a>
+              <a [routerLink]="['news']"
+                 [routerLinkActive]="'active-navlink'"
+                 [routerLinkActiveOptions]="{exact: true}">
+                 News
+              </a>
+              <router-outlet></router-outlet>
+    \`,
+    styles: [\`
+        .active-navlink {
+          color: red;
+          text-transform: uppercase;
+        }
+    \`]
+  })
+  export class AppComponent {
+
+        constructor(private router: Router) { }
+
+        visitDefault() {
+          this.router.navigate(['']);
+        }
+
+        visitNews() {
+          this.router.navigate(['news']);
+        }
+
+  }
+
+  /**************************************************************************** */
+
+  @Component({
+    selector: 'app-default',
+    template: '<h1>I love you, Nils-Holger...</h1>'
+  })
+  export class DefaultComponent { }
+
+
+   /**************************************************************************** */
+
+  @Component({
+    selector: 'app-news',
+    template: '<h1>What's New?</h1>'
+  })
+  export class NewsComponent  { }
+
+
+   /**************************************************************************** */
+
+  import { NgModule } from '@angular/core';
+  import { BrowserModule } from '@angular/platform-browser';
+  import { RouterModule, Routes } from '@angular/router';
+  import { LocationStrategy, HashLocationStrategy } from '@angular/common';
+
+  const appRoutes: Routes = [
+    { path: 'news', component: NewsComponent },
+    { path: '**', component: DefaultComponent }
+  ];
+
+  @NgModule({
+    declarations: [
+      AppComponent,
+      DefaultComponent,
+      NewsComponent
+    ],
+    imports: [
+      BrowserModule,
+      RouterModule.forRoot(appRoutes)
+    ],
+    providers: [
+      { provide: LocationStrategy, useClass: HashLocationStrategy }
+    ],
+    bootstrap: [AppComponent]
+  })
+  export class AppModule { }
+
+
+// nested view with route parameters && child routes
+import { Component } from '@angular/core';
+  import { Router, ActivatedRoute } from '@angular/router';
+
+  @Component({
+    selector: 'app-root',
+    template: \`
+              <h1>Root Component</h1>
+              <a [routerLink]="['']"
+                 [routerLinkActive]="'active-navlink'"
+                 [routerLinkActiveOptions]="{exact: true}">
+                 Default
+              </a>
+              <a [routerLink]="['news']"
+                 [routerLinkActive]="'active-navlink'"
+                 [routerLinkActiveOptions]="{exact: true}">
+                 News
+              </a>
+              <router-outlet></router-outlet>
+    \`,
+    styles: [\`
+        .active-navlink {
+          color: red;
+          text-transform: uppercase;
+        }
+    \`]
+  })
+  export class AppComponent {
+
+        constructor(private router: Router) { }
+
+        visitDefault() {
+          this.router.navigate(['']);
+        }
+
+        visitNews() {
+          this.router.navigate(['news']);
+        }
+
+  }
+
+  /**************************************************************************** */
+
+  @Component({
+    selector: 'app-default',
+    template: '<h1>I love you, Nils-Holger...</h1>'
+  })
+  export class DefaultComponent { }
+
+
+   /**************************************************************************** */
+
+  @Component({
+    selector: 'app-news',
+    template: \`
+            <h2>News Component!</h2>
+            <router-outlet></router-outlet>
+    \`
+  })
+  export class NewsComponent  { }
+
+
+   /**************************************************************************** */
+
+   @Component({
+    selector: 'app-news-list',
+    template: \`
+            <h3>News List</h3>
+            <p *ngFor="let newsId of newsIds">
+                <a [routerLink]="newsId">
+                    News ({{ newsId }})
+                </a>
+            </p>
+    \`
+  })
+  export class NewsListComponent  {
+        newsIds: number[] = [1, 2, 3, 4, 5, 6, 7, 8];
+
+  }
+
+   /**************************************************************************** */
+
+   @Component({
+    selector: 'app-news-detail',
+    template: \`
+              <h1>News Detail</h1>
+              <p>Showing News {{ newsId }}</p>
+              <a [routerLink]="'../'">Back Up</a>
+    \`
+  })
+  export class NewsDetailComponent  {
+                newsId: number;
+
+                constructor(private activatedRoute: ActivatedRoute) {
+                    this.activatedRoute.params
+                        .subscribe(params => this.newsId = params['newsId']);
+                }
+
+  }
+
+
+   /**************************************************************************** */
+
+  import { NgModule } from '@angular/core';
+  import { BrowserModule } from '@angular/platform-browser';
+  import { RouterModule, Routes } from '@angular/router';
+
+  const appRoutes: Routes = [
+    { path: 'news', component: NewsComponent,
+      children: [
+        { path: '', component: NewsListComponent },
+        { path: ':newsId', component: NewsDetailComponent }
+      ]
+  },
+    { path: '**', component: DefaultComponent }
+  ];
+
+  @NgModule({
+    declarations: [
+      AppComponent,
+      DefaultComponent,
+      NewsComponent,
+      NewsListComponent,
+      NewsDetailComponent
+    ],
+    imports: [
+      BrowserModule,
+      RouterModule.forRoot(appRoutes)
+    ],
+    providers: [],
+    bootstrap: [AppComponent]
+  })
+  export class AppModule { }
+
+
+// routing arrays && matrix url parameters
+import { Component } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
+
+@Component({
+  selector: 'app-root',
+  template: \`
+            <h1>Root Component</h1>
+            <a [routerLink]="['']">
+               Default
+            </a>
+            <a [routerLink]="['news', {listData: 'foo bar baz'}]">
+               News
+            </a>
+            <router-outlet></router-outlet>
+  \`
+})
+export class AppComponent { }
+
+/**************************************************************************** */
+
+@Component({
+  selector: 'app-default',
+  template: '<h1>I love you, Nils-Holger...</h1>'
+})
+export class DefaultComponent { }
+
+
+ /**************************************************************************** */
+
+@Component({
+  selector: 'app-news',
+  template: \`
+          <h2>News Component!</h2>
+          <router-outlet></router-outlet>
+  \`
+})
+export class NewsComponent  { }
+
+
+ /**************************************************************************** */
+
+ @Component({
+  selector: 'app-news-list',
+  template: \`
+          <h3>News List</h3>
+          <p *ngFor="let newsId of newsIds">
+              <a [routerLink]="[newsId, { detailData: 'oof rab zab'}]">
+                  News ({{ newsId }})
+              </a>
+          </p>
+  \`
+})
+export class NewsListComponent  {
+      newsIds: number[] = [1, 2, 3, 4, 5, 6, 7, 8];
+
+      constructor(private activatedRoute: ActivatedRoute) {
+                  this.activatedRoute.params.subscribe(params => {
+                      console.log('List params:');
+                      console.log(window.location.href);
+                      console.log(params);
+                  });
+      }
+
+}
+
+ /**************************************************************************** */
+
+ @Component({
+  selector: 'app-news-detail',
+  template: \`
+            <h1>News Detail</h1>
+            <p>Showing News {{ newsId }}</p>
+            <a [routerLink]="'../'">Back Up</a>
+  \`
+})
+export class NewsDetailComponent  {
+              newsId: number;
+
+              constructor(private activatedRoute: ActivatedRoute) {
+                  this.activatedRoute.params
+                      .subscribe(params => {
+                        console.log('Detail params:');
+                        console.log(window.location.href);
+                        console.log(params);
+                        this.newsId = params['newsId'];
+                  });
+              }
+
+}
+
+
+ /**************************************************************************** */
+
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { RouterModule, Routes } from '@angular/router';
+
+const appRoutes: Routes = [
+  { path: 'news', component: NewsComponent,
+    children: [
+      { path: '', component: NewsListComponent },
+      { path: ':newsId', component: NewsDetailComponent }
+    ]
+},
+  { path: '**', component: DefaultComponent }
+];
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    DefaultComponent,
+    NewsComponent,
+    NewsListComponent,
+    NewsDetailComponent
+  ],
+  imports: [
+    BrowserModule,
+    RouterModule.forRoot(appRoutes)
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+
+
+// route authentication controls with route guards
+import { Component, Injectable, OnDestroy } from '@angular/core';
+import { Router, ActivatedRoute, CanActivate } from '@angular/router';
+
+import { Observable } from 'rxjs/Observable';
+import { Subscription } from 'rxjs/Subscription';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/take';
+
+@Injectable({
+  rpovidedIn: 'root'
+})
+export class AuthenticationService {
+      private authenticationSubject = new BehaviorSubject(null);
+      userNameEmitter: Observable<string>;
+
+      private setAuthenticationState(userName: string): void {
+        this.authenticationSubject.next(userName);
+      }
+
+      constructor() {
+        this.userNameEmitter = this.authenticationSubject.asObservable();
+        this.logOut();
+      }
+
+      logIn(userName: string): void {
+        this.setAuthenticationState(userName);
+      }
+
+      logOut(): void {
+        this.setAuthenticationState(null);
+      }
+
+}
+
+/**************************************************************************** */
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AuthGuard implements CanActivate {
+
+      constructor(private router: Router,
+                  private authenticationService: AuthenticationService) { }
+
+      canActivate(): Observable<boolean> {
+        return this.authenticationService.userNameEmitter.map((userName) => {
+                  if (!userName) {
+                    this.router.navigate(['login']);
+                  } else {
+                    return true;
+                  }
+        }).take(1);
+      }
+}
+
+/**************************************************************************** */
+
+@Injectable({
+  providedIn: 'root'
+})
+export class LogOutGuard implements CanActivate {
+
+      constructor(private router: Router,
+                  private authenticationService: AuthenticationService) { }
+
+      canActivate(): boolean {
+        this.authenticationService.logOut();
+        this.router.navigate(['']);
+        return true;
+      }
+}
+
+
+
+@Component({
+  selector: 'app-root',
+  template: \`
+            <h3 *ngIf="!!(userName | async)">
+                Hi, {{ userName | async }}.
+            </h3>
+            <a routerLink="">Default</a>
+            <a routerLink="profile">Profile</a>
+
+            <a *ngIf="!(userName | async)" routerLink="login">LogIn</a>
+            <a *ngIf="!!(userName | async)" routerLink="logout">LogOut</a>
+
+            <router-outlet></router-outlet>
+  \`
+})
+export class AppComponent {
+          userName: Observable<string>;
+
+          constructor(private authenticationService: AuthenticationService) {
+            this.userName = this.authenticationService.userNameEmitter;
+          }
+}
+
+/**************************************************************************** */
+
+@Component({
+  selector: 'app-default',
+  template: '<h1>I love you, Nils-Holger...</h1>'
+})
+export class DefaultComponent { }
+
+
+ /**************************************************************************** */
+
+@Component({
+  selector: 'app-login',
+  template: \`
+          <h2>LogIn View</h2>
+          <input #box>
+          <button (click)="logIn(box.value)">LogIn</button>
+  \`
+})
+export class LogInComponent implements OnDestroy  {
+      private userNameSubscription: Subscription;
+
+      constructor(private router: Router,
+                  private authenticationService: AuthenticationService) { }
+
+      logIn(newUserName: string): void {
+        this.authenticationService.logIn(newUserName);
+        this.userNameSubscription = this.authenticationService.
+                                    userNameEmitter.subscribe(userName => {
+                                      if (!!userName) {
+                                        this.router.navigate(['']);
+                                      }
+                                    });
+      }
+
+      ngOnDestroy() {
+        this.userNameSubscription &&
+        this.userNameSubscription.unsubscribe();
+      }
+
+}
+
+
+ /**************************************************************************** */
+
+ @Component({
+  selector: 'app-logout',
+  template: \` \`
+})
+export class LogOutComponent  { }
+
+ /**************************************************************************** */
+
+ @Component({
+  selector: 'app-profile',
+  template: \`
+            <h1>Profile View</h1>
+            UserName: <input #box value="{{ userName | async }}">
+            <button (click)="upDate(box.value)">Update</button>
+  \`
+})
+export class ProfileComponent  {
+              userName: Observable<string>;
+
+              constructor(private authenticationService: AuthenticationService) {
+                  this.userName = this.authenticationService.userNameEmitter;
+              }
+
+              upDate(userName: string): void {
+                this.authenticationService.logIn(userName);
+              }
+
+}
+
+
+ /**************************************************************************** */
+
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { RouterModule, Routes } from '@angular/router';
+
+
+const appRoutes: Routes = [
+  { path: 'login', component: LogInComponent },
+  { path: 'logout', component: LogOutComponent, canActivate: [LogOutGuard] },
+  { path: 'profile', component: ProfileComponent, canActivate: [ AuthGuard] },
+  { path: '**', component: DefaultComponent }
+];
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    DefaultComponent,
+    LogInComponent,
+    LogOutComponent,
+    ProfileComponent
+  ],
+  imports: [
+    BrowserModule,
+    RouterModule.forRoot(appRoutes)
+  ],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+
+
+// inject simple service in component
+import { Component, Injectable } from '@angular/core';
+
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class NewsService {
+          private title = \`
+'The biggest joy was on the way home. in my cockpit window every two minutes
+— the Earth, the Moon, the Sun, and a whole 360-degree panorama of the heavens.
+And that was a powerful, overwhelming experience. And suddenly I realized that the
+ molecules of my body, and the molecules of the spacecraft, the molecules in the body
+  of my partners, were prototyped and manufactured in some ancient generation of stars.
+   And that was an overwhelming sense of oneness, of connectedness.
+   It wasn’t them and us, it was — that’s me, that’s all of it, it’s one thing.
+   And it was accompanied by an ecstasy, a sense of 'oh my god, wow, yes,' an insight,
+    an epiphany.'– Edgar Mitchell
+          \`;
+
+         getTitle() {
+           return this.title;
+         }
+
+  }
+
+  /**************************************************************************** */
+
+
+  @Component({
+    selector: 'app-news',
+    template: \`
+          <h1>News Component</h1>
+          <button (click)="getArticle()">Show Article</button>
+          <h2>{{ title }}</h2>
+    \`
+  })
+  export class NewsComponent {
+      title: string;
+
+      constructor(private newsService: NewsService) { }
+
+      getArticle(): void {
+        this.title = this.newsService.getTitle();
+      }
+
+  }
+
+
+// service instance creation and injection with ngModule
+import { NgModule, Component, Injectable } from '@angular/core';
+
+
+@Injectable({
+  providedIn: 'root'
+})
+export class NewsService {
+        private title = \`Mars is there, waiting to be reached.\`;
+
+       getTitle() {
+         return this.title;
+       }
+
+}
+
+/**************************************************************************** */
+
+
+@Component({
+  selector: 'app-news',
+  template: \`
+        <h1>News Component</h1>
+        <h2>{{ title }}</h2>
+  \`
+})
+export class NewsComponent {
+    title: string;
+
+    constructor(private newsService: NewsService) {
+      this.title = this.newsService.getTitle();
+    }
+
+}
+
+/**************************************************************************** */
+
+
+@NgModule({
+  declarations: [ NewsComponent ],
+  bootstrap: [ NewsComponent ],
+  exports: [ NewsComponent ]
+})
+export class NewsModule { }
+
+/**************************************************************************** */
+
+Root App Component
+<app-news></app-news>
+<app-news></app-news>
+<app-news></app-news>
+
+
+
+// service injection aliasing with useclass && useexisting
+import { Component, Injectable } from '@angular/core';
+
+  export interface NewsSourceInterface {
+    getNews(): News;
+  }
+
+  export interface News {
+    title: string;
+    body: string;
+    notes?: string;
+  }
+
+
+  @Injectable()
+  export class NewsService implements NewsSourceInterface {
+          private title = \`The Will To Win Is Nothing Without The Will To Prepare.\`;
+          private body = 'I have met my hero, he is me. I love you, Nils-Holger.';
+
+         getNews() {
+           return  {
+             title: this.title,
+             body: this.body
+           };
+         }
+
+  }
+
+  /**************************************************************************** */
+
+  @Injectable()
+  export class EditorNewsService extends NewsService implements NewsSourceInterface {
+          private notes = 'WORK HARD | BE KIND | DO MORE ... Code With Passion.';
+
+         constructor() {
+           super();
+         }
+
+         getNews(): News {
+           console.log(super.getNews());
+           return Object.assign({}, super.getNews(), { notes: this.notes});
+         }
+
+  }
+
+  /**************************************************************************** */
+
+  @Component({
+    selector: 'app-default-view',
+    template: \`
+          <h3>Default View</h3>
+          <ng-content></ng-content>
+    \`,
+    providers: [ NewsService ]
+  })
+  export class DefaultViewComponent { }
+
+
+  /**************************************************************************** */
+
+  @Component({
+    selector: 'app-editor-view',
+    template: \`
+          <h3>Editor View</h3>
+          <ng-content></ng-content>
+    \`,
+    providers: [
+      { provide: NewsService, useClass: EditorNewsService }
+     ]
+  })
+  export class EditorViewComponent { }
+
+
+  /**************************************************************************** */
+
+  @Component({
+    selector: 'app-news',
+    template: \`
+          <h1>News Component</h1>
+          <h2> {{ news.title }}</h2>
+          <p>{{ news.body }}</p>
+          <p *ngIf="news.notes">
+            <i>Notes: {{ news.notes }}</i>
+          </p>
+    \`
+  })
+  export class NewsComponent {
+      news: News;
+
+      constructor(private newsService: NewsService) {
+        this.news = this.newsService.getNews();
+      }
+
+  }
+
+  /**************************************************************************** */
+
+  Root App Component
+
+    <app-default-view>
+        <app-news></app-news>
+    </app-default-view>
+    <hr>
+    <app-editor-view>
+      <app-news></app-news>
+    </app-editor-view>
+
+
+// unit test with karma, jasmine && ng core testing tools
+import { Component } from '@angular/core';
+
+  @Component({
+    selector: 'app-news',
+    template: \`
+          <h1>We are DRIVEN. Use Your Superpowers To Do Good.</h1>
+            <h3>{{ title }}</h3>
+    \`
+  })
+  export class NewsComponent {
+        title = \`Never stop thinking about tomorrow.\`;
+
+  }
+
+  /**************************************************************************** */
+
+  import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+
+  import { NewsComponent } from './news.component';
+
+  describe('NewsComponent', () => {
+    let component: NewsComponent;
+    let fixture: ComponentFixture<NewsComponent>;
+
+  beforeEach(async(() => {
+    TestBed.configureTestingModule({
+      declarations: [ NewsComponent ]
+    })
+    .compileComponents();
+  }));
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(NewsComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('should have correct title', () => {
+    expect(component.title).toBe(\`Never stop thinking about tomorrow.\`);
+  });
+
+  it('should render title in an h3 tag', async(() => {
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('h3').textContent)
+          .toContain(component.title);
+
+  }));
+
+});
+
+
+// simple e2e test with protractor
+import { browser, by, element } from 'protractor';
+
+export class AppPage {
+  navigateTo() {
+    return browser.get('/');
+  }
+
+  getHeaderText() {
+    return element(by.css('app-root h1')).getText();
+  }
+}
+
+/**************************************************************************** */
+
+import { AppPage } from './app.po';
+
+describe('ng5-apis App', () => {
+let page: AppPage;
+
+beforeEach(() => {
+  page = new AppPage();
+});
+
+it('should have correct h1 text', () => {
+  page.navigateTo();
+  expect(page.getHeaderText()).toEqual('Use Your Superpowers To Do Good.');
+});
+});
+
+
+// unit test synchronous service
+import { Injectable } from '@angular/core';
+
+@Injectable()
+export class MagicQuoteService {
+  private values: string[];
+  private lastIndex: number;
+
+  constructor() {
+    this.values = [
+      'Never stop thinking about tomorrow',
+      'Use your superpowers to do good',
+      'Work hard, be kind, do more ...',
+      'Improve, improve, improve'
+    ];
+    this.lastIndex = this.getIndex();
+   }
+
+   private getIndex(): number {
+     return Math.floor(Math.random() * this.values.length);
+   }
+
+   reveal(): string {
+     let newIdx = this.getIndex();
+     if (newIdx === this.lastIndex) {
+       newIdx = (++newIdx) % this.values.length;
+     }
+     this.lastIndex = newIdx;
+     return this.values[newIdx];
+   }
+
+}
+
+/**************************************************************************** */
+
+import { TestBed, inject } from '@angular/core/testing';
+
+import { MagicQuoteService } from './magic-quote.service';
+
+describe('MagicQuoteService', () => {
+    beforeEach(() => {
+      TestBed.configureTestingModule({
+      providers: [MagicQuoteService]
+  });
+});
+
+it('should be created', inject([MagicQuoteService],
+  (magicQuoteService: MagicQuoteService) => {
+  expect(magicQuoteService).toBeTruthy();
+}));
+
+it('should return a string with nonzero length', inject([MagicQuoteService],
+  (magicQuoteService: MagicQuoteService) => {
+      const result = magicQuoteService.reveal();
+      expect(result).toEqual(jasmine.any(String));
+      expect(result.length).toBeGreaterThan(0);
+  }));
+
+  it('should not return the same value twice in a row', inject([MagicQuoteService],
+    (magicQuoteService: MagicQuoteService) => {
+        let last;
+        for (let i = 0; i < 100; ++i) {
+          const next = magicQuoteService.reveal();
+          expect(next).not.toEqual(last);
+          last = next;
+        }
+    }));
+
+});
+
+
+// unit test with stub
+import { Component } from '@angular/core';
+
+import { MagicQuoteService } from '../magic-quote.service';
+
+@Component({
+  selector: 'app-magic-quote',
+  template: \`
+              <button (click)="update()">Click me!</button>
+              <h1>{{ result }}</h1>
+  \`
+})
+export class MagicQuoteComponent {
+      result = '';
+
+      constructor(private magicQuoteService: MagicQuoteService) { }
+
+      update() {
+        this.result = this.magicQuoteService.reveal();
+      }
+
+}
+
+/**************************************************************************** */
+
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+
+import { MagicQuoteComponent } from './magic-quote.component';
+import { MagicQuoteService } from './../magic-quote.service';
+
+describe('MagicQuoteComponent', () => {
+let component: MagicQuoteComponent;
+let fixture: ComponentFixture<MagicQuoteComponent>;
+
+const getHeaderElement = () => fixture.nativeElement.querySelector('h1');
+const magicQuoteResponse = 'Answer unclear';
+const magicQuoteServiceStub = {
+  reveal: () => magicQuoteResponse
+};
+
+beforeEach(async(() => {
+  TestBed.configureTestingModule({
+    declarations: [ MagicQuoteComponent ],
+    providers: [
+      {
+        provide: MagicQuoteService,
+        useValue: magicQuoteServiceStub
+      }
+    ]
+  })
+  .compileComponents();
+}));
+
+beforeEach(() => {
+  fixture = TestBed.createComponent(MagicQuoteComponent);
+  component = fixture.componentInstance;
+  fixture.detectChanges();
+});
+
+it('should create', () => {
+  expect(component).toBeTruthy();
+});
+
+it('should begin with no text', () => {
+      fixture.detectChanges();
+      expect(getHeaderElement().textContent).toEqual('');
+});
+
+it('should show text after click', async(() => {
+      fixture.debugElement.query(By.css('button'))
+      .triggerEventHandler('click', null);
+      fixture.detectChanges();
+      expect(getHeaderElement().textContent).toEqual(magicQuoteResponse);
+}));
+});
+
+
+// unit test component with spies
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+
+import { MagicQuoteComponent } from './magic-quote.component';
+import { MagicQuoteService } from './../magic-quote.service';
+
+describe('MagicQuoteComponent', () => {
+  let component: MagicQuoteComponent;
+  let fixture: ComponentFixture<MagicQuoteComponent>;
+
+  const getHeaderElement = () => fixture.nativeElement.querySelector('h1');
+  const magicQuoteResponse = 'Answer unclear';
+  let magicQuoteService;
+  let revealSpy;
+
+  const clickButton = () => {
+    fixture.debugElement.query(By.css('button')).triggerEventHandler('click', null);
+  };
+
+  beforeEach(async(() => {
+    TestBed.configureTestingModule({
+      declarations: [ MagicQuoteComponent ],
+      providers: [ MagicQuoteService ]
+    })
+    .compileComponents();
+  }));
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(MagicQuoteComponent);
+    magicQuoteService = fixture.debugElement.injector.get(MagicQuoteService);
+    revealSpy = spyOn(magicQuoteService, 'reveal').and.returnValue(magicQuoteResponse);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('should begin with no text', () => {
+        fixture.detectChanges();
+        expect(getHeaderElement().textContent).toEqual('');
+  });
+
+  it('should call reveal after a click', () => {
+    clickButton();
+    expect(revealSpy.calls.count()).toBe(1);
+    expect(revealSpy.calls.mostRecent().returnValue).toBe(magicQuoteResponse);
+});
+
+  it('should show text after click', async(() => {
+        fixture.debugElement.query(By.css('button'))
+        .triggerEventHandler('click', null);
+        fixture.detectChanges();
+        expect(getHeaderElement().textContent).toEqual(magicQuoteResponse);
+  }));
+});
+
+
+// impure pipe
+import { Pipe, PipeTransform } from '@angular/core';
+
+@Pipe({
+  name: 'addRandom',
+  pure: false
+})
+export class AddRandomPipe implements PipeTransform {
+
+  transform(value: string): string {
+    return value + Math.random();
+  }
+
+}
+
+/**************************************************************************** */
+
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+
+@Component({
+selector: 'app-news',
+template: \`
+      <h1>Never stop thinking about tomorrow.</h1>
+        <input #box>
+        <button (click)="update(box.value)">Update</button>
+        <h1>{{ title | addRandom }}</h1>
+\`,
+changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class NewsComponent {
+    title = '';
+
+    update(newTitle: string): void {
+      this.title = newTitle;
+    }
+
+}
+
+
+// list for ngzone events
+import { Component, NgZone } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: \`
+          <button (click)="foo()">Foo</button>
+  \`
+})
+export class AppComponent {
+
+    constructor(private zone: NgZone) {
+      zone.onStable.subscribe(() => console.log('stable'));
+      zone.onUnstable.subscribe(() => console.log('unstable'));
+    }
+
+    foo() {
+      setTimeout(() => console.log('timeout handler'), 1000);
+    }
+
+}
+
+
+// execution inside && outside angular zone
+import { Component, NgZone } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: \`
+          <h3>Progress: {{ progress }}%</h3>
+          <button (click)="runInsideAngularZone()">
+              Run inside Angular Zone
+          </button>
+          <button (click)="runOutsideAngularZone()">
+            Run outside Angular Zone
+          </button>
+  \`
+})
+export class AppComponent {
+  progress = 0;
+  startTime = 0;
+
+  constructor(private zone: NgZone) { }
+
+  runInsideAngularZone() {
+    this.start();
+    this.step(() => this.finish('Inside Angular Zone'));
+  }
+
+  runOutsideAngularZone() {
+    this.start();
+    this.zone.runOutsideAngular(() => {
+      this.step(() => this.finish('Outside Angular Zone'));
+    });
+  }
+
+  start() {
+    this.progress = 0;
+    this.startTime = performance.now();
+  }
+
+  finish(location: string) {
+    this.zone.run(() => {
+        console.log(location);
+        console.log(\`Took \${performance.now() - this.startTime} ms\`);
+    });
+  }
+
+  step(doneCallback: () => void) {
+    if (++this.progress < 100) {
+      setTimeout(() => {
+        this.step(doneCallback);
+      }, 10);
+    } else {
+      doneCallback();
+    }
+  }
+
+}
+
+
+// explicit change detection with on push
+import { Component, Input, ChangeDetectionStrategy,
+  ChangeDetectorRef, OnInit } from '@angular/core';
+
+import { Observable } from 'rxjs/Observable';
+
+@Component({
+selector: 'app-news',
+template: \`
+ <h1>{{ title }}</h1>
+  <p>Likes {{ count }}</p>
+\`,
+changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class NewsComponent implements OnInit {
+@Input() likes: Observable<Event>;
+title = 'Never stop thinking about tomorrow.';
+count = 0;
+
+constructor(private changeDetectorRef: ChangeDetectorRef) { }
+
+ngOnInit() {
+ this.likes.subscribe((evt: Event) => {
+     ++this.count;
+     this.changeDetectorRef.markForCheck();
+ });
+}
+
+}
+
+/**************************************************************************** */
+
+import { Component } from '@angular/core';
+
+import { Observable } from 'rxjs/Observable';
+import { Subject } from 'rxjs/Subject';
+
+@Component({
+selector: 'app-root',
+template: \`
+ <button (click)="likeSubject.next($event)">Like!</button>
+ <app-news [likes]="likeEmitter"></app-news>
+\`
+})
+export class AppComponent {
+
+likeSubject = new Subject<Event>();
+likeEmitter = this.likeSubject.asObservable();
+
+}
+
+
+
+// view encapsulation for maximum efficiency
+import { Component, ViewEncapsulation} from '@angular/core';
+
+
+@Component({
+  selector: 'app-news',
+  template: \`
+        <h1>{{ title }}</h1>
+  \`,
+  encapsulation: ViewEncapsulation.Emulated,
+  styles: [\`
+    h1 {
+      color: red;
+    }
+  \`]
+})
+export class NewsComponent {
+      title = 'Never stop thinking about tomorrow ...';
+
+}
+
+
+// performance matters: lazy loading
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { Routes, RouterModule } from '@angular/router';
+
+import { AppComponent } from './app.component';
+import { LinkComponent } from './link/link.component';
+
+const appRoutes: Routes = [
+      {
+        path: 'news',
+        loadChildren: 'app/news/news.module#NewsModule'
+      },
+      {
+        path: '**',
+        component: LinkComponent
+      }
+];
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    LinkComponent
+  ],
+  imports: [
+    BrowserModule,
+    RouterModule.forRoot(appRoutes)
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+
+/**************************************************************************** */
+
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  template: \`
+        <h1>Root Component</h1>
+        <router-outlet></router-outlet>
+  \`
+})
+export class AppComponent { }
+
+/**************************************************************************** */
+
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-link',
+  template: \`
+        <a routerLink="/news">News</a>
+  \`
+})
+export class LinkComponent { }
+
+/**************************************************************************** */
+
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-news',
+  template: \`
+          <h1>{{ title }}</h1>
+  \`
+})
+export class NewsComponent {
+    title = \`Never stop thinking about tommorrow.
+              Use your Superpowers to do good.\`;
+
+}
+
+/**************************************************************************** */
+
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Routes, RouterModule } from '@angular/router';
+
+import { NewsComponent } from './news.component';
+
+const newsRoutes: Routes = [
+    { path: '', component: NewsComponent }
+];
+
+@NgModule({
+  imports: [
+    CommonModule,
+    RouterModule.forChild(newsRoutes)
+  ],
+  declarations: [ NewsComponent ],
+  exports: [ NewsComponent ]
+})
+export class NewsModule { }
+
+
+
+  `,
+  blockQuote: `
+  Wir beabsichtigen zum Mond zu fliegen in diesem Jahrzehnt und andere Sachen zu tun, nicht weil sie einfach sind,
+  sondern weil sie schwer sind, weil das Ziel uns dienen wird zu organisieren und messen die Beste unserer Energien
+  und Kompetenzen, weil diese Herausforderung ist eine welche wir annehmen, eine die wir nicht vertagen wollen
+  und eine die wir vorhaben zu gewinnen.
+  `,
+  imageFooterUrl: 'assets/img/post12.jpg',
+  footerQuote: 'Wir sind alle miteinander verbunden; zueinander biologisch. Zu der Erde, chemisch. Zum Rest des Universums, atomar.'
 }
   ];
 
@@ -18166,7 +20773,10 @@ E1.foo(); // "P.foo"
     if (this.articleId === 'you-do-not-know-javascript-part-2') {
       this.articleId = 11;
     }
-    if (!(+this.articleId) || +this.articleId > 11) {
+    if (this.articleId === 'angular-basics-4') {
+      this.articleId = 12;
+    }
+    if (!(+this.articleId) || +this.articleId > 12) {
       this.isNotFound = true;
       this.router.navigate(['page-not-found']);
     }
