@@ -20716,9 +20716,6 @@ const newsRoutes: Routes = [
   exports: [ NewsComponent ]
 })
 export class NewsModule { }
-
-
-
   `,
   blockQuote: `
   Wir beabsichtigen zum Mond zu fliegen in diesem Jahrzehnt und andere Sachen zu tun, nicht weil sie einfach sind,
@@ -20727,6 +20724,25 @@ export class NewsModule { }
   und eine die wir vorhaben zu gewinnen.
   `,
   imageFooterUrl: 'assets/img/post12.jpg',
+  footerQuote: 'Wir sind alle miteinander verbunden; zueinander biologisch. Zu der Erde, chemisch. Zum Rest des Universums, atomar.'
+},
+{
+  id: 13,
+  imageHeaderUrl: 'url(assets/img/post13-bg.jpg)',
+  heading: 'Javascript, Basis- Teil 3',
+  subHeading: 'Scope && Closures',
+  metaPublishedDate: 'am 05 Januar, 2020',
+  sectionHeading: 'Scope && Closures',
+  code: `
+  hallo welt! :-)
+  `,
+  blockQuote: `
+  Wir beabsichtigen zum Mond zu fliegen in diesem Jahrzehnt und andere Sachen zu tun, nicht weil sie einfach sind,
+  sondern weil sie schwer sind, weil das Ziel uns dienen wird zu organisieren und messen die Beste unserer Energien
+  und Kompetenzen, weil diese Herausforderung ist eine welche wir annehmen, eine die wir nicht vertagen wollen
+  und eine die wir vorhaben zu gewinnen.
+  `,
+  imageFooterUrl: 'assets/img/post13.jpg',
   footerQuote: 'Wir sind alle miteinander verbunden; zueinander biologisch. Zu der Erde, chemisch. Zum Rest des Universums, atomar.'
 }
   ];
@@ -20776,7 +20792,10 @@ export class NewsModule { }
     if (this.articleId === 'angular-basics-4') {
       this.articleId = 12;
     }
-    if (!(+this.articleId) || +this.articleId > 12) {
+    if (this.articleId === 'you-do-not-know-javascript-part-3') {
+      this.articleId = 13;
+    }
+    if (!(+this.articleId) || +this.articleId > 13) {
       this.isNotFound = true;
       this.router.navigate(['page-not-found']);
     }
