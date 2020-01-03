@@ -20734,7 +20734,182 @@ export class NewsModule { }
   metaPublishedDate: 'am 05 Januar, 2020',
   sectionHeading: 'Scope && Closures',
   code: `
-  hallo welt! :-)
+let greeting = 'Hi';
+console.log(greeting);
+greeting = .'Hello'; // Identifier expected.
+
+console.log('Howdy');
+saySomething('Hello', 'Hi');
+// Duplicate identifier 'greeting'.
+const saySomething = (greeting, greeting) =>  console.log(greeting);
+
+const saySomething1 = () => {
+  const greeting1 = 'Hello';
+  {
+      greeting1 = 'Howdy';
+      let greeting1 = 'Hi';
+      console.log(greeting1);
+  }
+};
+saySomething1();
+// Block-scoped variable 'greeting1' used before its declaration.
+
+
+// compiler speak
+const students = [
+  { id: 14, name: 'Karl' },
+  { id: 73, name: 'Nils-Holger' },
+  { id: 112, name: 'Frank' },
+  { id: 6, name: 'Susanne' }
+];
+
+const getStudentName = (studentID) => {
+  for (const student of students) {
+      if (student.id === studentID) {
+          return student.name;
+      }
+  }
+}
+
+const nextStudent = getStudentName(73);
+
+console.log(nextStudent);
+// Nils-Holger
+
+
+// cheating run-time scope modifications
+function badIdea() {
+  eval("const oops = 'Ugh!';"); // Uncaught ReferenceError: oops is not defined
+  console.log(oops);
+}
+
+badIdea();
+
+
+// with keyword turns object into local scope
+const badIdea = {
+  oops: 'Ugh!'
+};
+
+with (badIdea) { // Module parse failed: 'with' in strict mode
+  console.log(oops);
+  // Ugh!
+}
+
+
+// shadowing
+const studentName = 'Johanna';
+
+const printStudent = (studentName) => { // Shadowed name: 'studentName'
+    studentName = studentName.toUpperCase();
+    console.log(studentName);
+}
+
+printStudent('Nils-Holger');
+// NILS-HOLGER
+
+printStudent(studentName);
+// JOHANNA
+
+console.log(studentName);
+// Johanna
+
+
+// global unshadowing trick
+var studentName = 'Suzy';
+
+const printStudent = (studentName) => {
+    console.log(studentName);
+    console.log(window.studentName);
+};
+
+printStudent('Frank');
+// 'Frank'
+// 'Suzy'
+
+
+var special = 42;
+
+const lookingFor = (special) => {
+    // special in this scope is inaccessible from
+    // inside keepLooking()
+
+    const keepLooking = () => {
+        const special = 3.141592;
+        console.log(special);
+        console.log(window.special);
+    }
+
+    keepLooking();
+}
+
+lookingFor(112358132134);
+// 3.141592
+// 42
+
+
+// copying is not accessing
+const special = 42;
+
+const lookingFor = (special) => {
+    const another = {
+        special
+    };
+
+    const keepLooking = () => {
+        const special = 3.141592;
+        console.log(special);
+        console.log(another.special);  // tricky
+        console.log(window.special);
+    };
+
+    keepLooking();
+}
+
+lookingFor(112358132134);
+// 3.141592
+// 112358132134
+// undefined
+
+
+// pole principle
+
+const diff = (x, y) => {
+  if (x > y) {
+      const tmp = x;
+      x = y;
+      y = tmp;
+  }
+  return y - x;
+};
+
+console.log(diff(6, 10));  // 4
+console.log(diff(9, 7));   // 2
+
+
+// caching
+const cache = {};
+
+const factorial = (x) => (x < 2) ? 1 : (!(x in cache)) ? cache[x] = x * factorial(x - 1) : cache[x];
+
+console.log(factorial(6));
+// 720
+console.log(cache);
+// {
+//     "2": 2,
+//     "3": 6,
+//     "4": 24,
+//     "5": 120,
+//     "6": 720
+// }
+console.log(factorial(7));
+// 5040
+
+
+
+
+
+
   `,
   blockQuote: `
   Wir beabsichtigen zum Mond zu fliegen in diesem Jahrzehnt und andere Sachen zu tun, nicht weil sie einfach sind,
@@ -20805,8 +20980,6 @@ export class NewsModule { }
     this.location.back();
   }
 }
-
-
 
 
 
