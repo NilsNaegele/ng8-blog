@@ -20730,9 +20730,9 @@ export class NewsModule { }
   id: 13,
   imageHeaderUrl: 'url(assets/img/post13-bg.jpg)',
   heading: 'Javascript, Basis- Teil 3',
-  subHeading: 'Scope && Closures',
+  subHeading: 'Scope && Closures, , Sync && Async',
   metaPublishedDate: 'am 05 Januar, 2020',
-  sectionHeading: 'Scope && Closures',
+  sectionHeading: 'Scope && Closures, Sync && Async',
   code: `
 let greeting = 'Hi';
 console.log(greeting);
@@ -21147,6 +21147,158 @@ for (let i = 1; i <= 5; i++) {
 }
 
 
+// module pattern, aka revealing module pattern
+const CoolModule = () => {
+  const something = 'cool';
+  const another = [1, 2, 3, 4, 5, 6];
+
+  const doSomething = () => console.log(something);
+  const doAnother = () => console.log(another.join( ' ! ' ) );
+
+  return {
+      doSomething,
+      doAnother
+  };
+};
+
+const foo = CoolModule();
+foo.doSomething(); // cool
+foo.doAnother(); // 1 ! 2 ! 3 ! 4 ! 5 ! 6
+
+
+// slight variation, singleton of sorts
+const CoolModule = (() => {
+  const something = 'super cool';
+  const another = [1, 2, 3, 4, 5, 6, 7, 8];
+
+  const doSomething = () => console.log(something);
+  const doAnother = () => console.log(another.join( ' ! ' ) );
+
+  return {
+      doSomething,
+      doAnother
+  };
+})();
+
+CoolModule.doSomething(); // super cool
+CoolModule.doAnother(); // 1 ! 2 ! 3 ! 4 ! 5 ! 6 ! 7 ! 8
+
+
+// modules are just functions, they can receive parameters
+const CoolModule = (id) => {
+  const identify = () => console.log( id );
+  return {
+      identify
+  };
+};
+
+const foo1 = CoolModule('foobazbar1');
+const foo2 = CoolModule('foobazbar2');
+
+foo1.identify(); // foobazbar1
+foo2.identify(); // foobazbar2
+
+
+// module pattern, name returning object as public api
+const foo = ((id) => {
+  const identify2 = () => console.log(id.toUpperCase());
+  const change = () =>  publicAPI.identify = identify2;
+  const identify1 = () => console.log(id);
+
+  const publicAPI = {
+      change,
+      identify: identify1
+  };
+  return publicAPI;
+})('foo module');
+
+foo.identify(); // foo module
+foo.change();
+foo.identify(); // FOO MODULE
+
+
+
+// modern modules
+const MyModules = (() => {
+  const modules = {};
+
+  const define = (name, deps, impl) => {
+      for (let i = 0; i < deps.length; i++) {
+          deps[i] = modules[deps[i]];
+      }
+      modules[name] = impl.apply(impl, deps);
+  };
+
+  const get = (name) => modules[name];
+
+  return {
+      define,
+      get
+  };
+})();
+
+MyModules.define('bar', [], () => {
+  const hello = (who) => 'Let me introduce: ' + who;
+
+  return {
+      hello
+  };
+});
+
+
+// use it to defines some modules
+MyModules.define('foo', ['bar'], (bar1) => {
+  const hungry = 'tiger';
+  const awesome = () => console.log( bar1.hello(hungry).toUpperCase() );
+  return {
+      awesome
+  };
+});
+
+const bar = MyModules.get('bar');
+const foo = MyModules.get('foo');
+
+console.log(
+  bar.hello('tiger')
+); // Let me introduce: tiger
+
+foo.awesome(); // LET ME INTRODUCE: TIGER
+
+
+// es6 modules
+// bar.js
+function hello(who) {
+  return 'Let me introduce: ' + who;
+}
+
+export hello;
+
+// foo.js
+// import only hello() from the 'bar' module
+import hello from 'bar';
+
+var hungry = 'zebra';
+
+function awesome() {
+    console.log(
+        hello(hungry).toUpperCase()
+    );
+}
+
+export awesome;
+
+
+// import the entire 'foo' and 'bar' modules
+module foo from 'foo';
+module bar from 'bar';
+
+console.log(
+    bar.hello('hippo')
+); // Let me introduce: hippo
+
+foo.awesome(); // LET ME INTRODUCE: ZEBRA
+
+
 
 
   `,
@@ -21219,6 +21371,9 @@ for (let i = 1; i <= 5; i++) {
     this.location.back();
   }
 }
+
+
+
 
 
 
