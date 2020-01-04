@@ -20906,6 +20906,245 @@ console.log(factorial(7));
 // 5040
 
 
+// outer/global scope
+function hideTheCache() {
+  // middle scope, cache is hidden
+  const cache = {};
+
+  function factorial(x) {
+      // inner scope
+      if (x < 2) { return 1; }
+      if (!(x in cache)) {
+          cache[x] = x * factorial(x - 1);
+      }
+      return cache[x];
+  }
+
+  return factorial;
+}
+
+const factorial1 = hideTheCache();
+
+console.log(factorial1(6));
+// 720
+
+console.log(factorial1(7));
+// 5040
+
+
+// function expression
+const factorial1 = (() => {
+  const cache = {};
+
+  const factorial = (x) => {
+      if (x < 2) { return 1; }
+      if (!(x in cache)) {
+          cache[x] = x * factorial(x - 1);
+      }
+      return cache[x];
+  };
+
+  return factorial;
+})();
+
+console.log(factorial1(6));
+// 720
+
+console.log(factorial1(7));
+// 5040
+
+
+// IIFE
+// outer scope
+
+(() => {
+
+  // inner hidden scope
+
+})();
+
+// more outer scope
+
+
+// scoping with blocks
+
+{
+  const thisIsNowAScope = true;
+
+  for (let i = 0; i < 5; i++) {
+      // this is also a scope, activated each iteration
+
+      if (i % 2 === 0) {
+          // this is just a block, not a scope
+          console.log(i);
+      }
+  }
+}
+
+// 0 2 4
+
+
+// explicit block
+if (somethingHappened) {
+  // this is a block, but not a scope
+
+  {
+      // this is an explicit block scope
+      let msg = somethingHappened.message();
+      notifyOthers(msg);
+  }
+
+  recoverFromSomething();
+}
+
+
+// explicit block scope
+function getNextMonthStart(dateStr) {
+  let nextMonth;
+  let year;
+
+  {
+      let curMonth;
+      [ , year, curMonth ] = dateStr.match(/(\d{4})-(\d{2})-\d{2}/) || [];
+      nextMonth = (Number(curMonth) % 12) + 1;
+  }
+
+  // did we cross a year boundary?
+  if (nextMonth === 1) {
+      year++;
+  }
+
+  return \`\${ year }-\${ String(nextMonth).padStart(2, '0') }-01\`;
+}
+
+console.log(getNextMonthStart('2019-12-25'));
+// 2020-01-01
+
+
+// minimize scope exposure
+const sortNamesByLength = (names) => {
+  const buckets = [];
+
+  for (const firstName of names) {
+      if (buckets[firstName.length] === undefined) {
+          buckets[firstName.length] = [];
+      }
+      buckets[firstName.length].push(firstName);
+  }
+
+  // block to narrow the scope
+  {
+      let sortedNames = [];
+
+      for (const bucket of buckets) {
+          if (bucket) {
+              // sort bucket alphanumerically
+              bucket.sort();
+
+              // append sorted names to running list
+              sortedNames = [ ...sortedNames, ...bucket ];
+          }
+      }
+
+      return sortedNames;
+  }
+}
+
+console.log(sortNamesByLength([
+  'Nils-Holger',
+  'Markus',
+  'Peter',
+  'Barbara',
+  'Johanna',
+  'Willfrid'
+]));
+// ["Peter", "Markus", "Barbara", "Johanna", "Willfrid", "Nils-Holger"]
+
+
+// closure
+const foo = () => {
+  const a = 421;
+
+  const bar = () => {
+      console.log(a);
+  };
+
+  return bar;
+};
+
+const baz = foo();
+
+baz(); // 421
+
+// functions passed around as values, all examples of closure
+function foo1() {
+  const a = 22;
+
+  function baz1() {
+      console.log(a ; // 22
+  }
+
+  bar1(baz1);
+}
+
+function bar1(fn) {
+  fn(); // closure
+}
+
+
+// indirect passing of functions
+var fn;
+
+function foo() {
+    var a = 42;
+
+    function baz() {
+        console.log(a);
+    }
+
+    fn = baz; // assign baz to global variable
+}
+
+function bar() {
+    fn(); // closure!
+}
+
+foo();
+
+bar(); // 2
+
+// using closure
+const wait = (message) => {
+  setTimeout(() => {
+      console.log(message);
+  }, 1000 );
+
+};
+
+wait('hello, closure!');
+
+
+// IIFE, not strictly sample of closure
+const a = 421;
+
+(function IIFE() {
+    console.log(a);
+})();
+
+
+// canonical example closure
+for (let i = 1; i <= 10; i++) {
+  setTimeout(() => console.log(i), i * 100);
+}
+
+// IIFE with for loop as closure
+for (let i = 1; i <= 5; i++) {
+  ((j) => {
+      setTimeout(() => {
+          console.log(j);
+      }, j * 1000 );
+  })(i);
+}
 
 
 
@@ -20980,7 +21219,6 @@ console.log(factorial(7));
     this.location.back();
   }
 }
-
 
 
 
