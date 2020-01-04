@@ -20730,7 +20730,7 @@ export class NewsModule { }
   id: 13,
   imageHeaderUrl: 'url(assets/img/post13-bg.jpg)',
   heading: 'Javascript, Basis- Teil 3',
-  subHeading: 'Scope && Closures, , Sync && Async',
+  subHeading: 'Scope && Closures, Sync && Async',
   metaPublishedDate: 'am 05 Januar, 2020',
   sectionHeading: 'Scope && Closures, Sync && Async',
   code: `
@@ -21299,6 +21299,177 @@ console.log(
 foo.awesome(); // LET ME INTRODUCE: ZEBRA
 
 
+// sync && async
+// consider: program in chunks
+// ajax(..) arbitrary ajax function given by any library
+const data = ajax('http://some.url.42');
+
+console.log(data); // data generally won't have the ajax results
+
+// callback function, wait from now until later
+ajax('http://some.url.42', function myCallbackFunction(data1){
+
+      console.log(data1); // got the data!
+
+});
+
+
+
+// now and later
+const now = () => 10.5;
+let answer = now();
+
+const later = () => {
+  answer = answer * 4;
+  console.log('meaning of life:', answer);
+};
+
+
+setTimeout(later, 1000); // meaning of life: 42
+
+// safe, trust, friendlier for input
+const addNumbers = (x, y) => {
+  // ensure numerical input
+  x = Number(x);
+  y = Number(y);
+
+  // + will safely do numeric addition
+  return x + y;
+};
+
+console.log(addNumbers(30, 12));	// 42
+console.log(addNumbers(30, '13'));	// 43
+
+// timeout cancel event
+const timeoutify = (fn, delay) => {
+	let intv = setTimeout(() => {
+			intv = null;
+			fn(new Error('timeout!' ));
+		}, delay );
+
+	return function() {
+		// timeout hasn't happened yet?
+		if (intv) {
+			clearTimeout(intv);
+			fn.apply(this,[null].concat( [].slice.call(arguments)));
+		}
+	};
+};
+
+// using 'error-first style' callback design
+const foo = (err, data) => {
+	if (err) {
+		console.error(err);
+	}
+	else {
+		console.log(data);
+	}
+}
+let ajax;
+ajax('http://some.url.42', timeoutify(foo, 300) );
+
+
+
+// promises
+let x, y = 2;
+
+console.log( x + y ); // NaN, x is not set yet
+
+
+// promise es7
+const amISatisfied = true;
+
+// Promise
+const willIGetNewPhone = new Promise(
+    (resolve, reject) => {
+        if (amISatisfied) {
+            const phone = {
+                brand: 'Samsung',
+                color: 'silver'
+            };
+            resolve(phone);
+        } else {
+            const reason = new Error('I am not satisfied');
+            reject(reason);
+        }
+
+    }
+);
+
+// 2nd promise
+async function showOff(phone) {
+    return new Promise(
+        (resolve, reject) => {
+            const message = 'Hey dude, I have a new ' +
+                phone.color + ' ' + phone.brand + ' phone';
+            resolve(message);
+        }
+    );
+};
+
+// call our promise
+async function askMyself() {
+    try {
+        console.log('before asking myself');
+
+        const phone = await willIGetNewPhone;
+        const message = await showOff(phone);
+
+        console.log(message);
+        console.log('after asking myself');
+    } catch (error) {
+        console.log(error.message);
+    }
+}
+
+(async () => {
+    await askMyself();
+})();
+
+
+
+const p3 = new Promise((resolve, reject) => {
+	resolve('B');
+} );
+
+const p1 = new Promise((resolve, reject) => {
+	resolve(p3);
+} );
+
+const p2 = new Promise((resolve, reject) => {
+	resolve('A');
+} );
+
+p1.then((v) => console.log(v));
+
+p2.then((v) => console.log(v));
+
+// B A
+
+
+// chaining promises
+const delay = (time) =>  new Promise((resolve, reject) => {
+		setTimeout( resolve, time );
+  });
+
+
+delay(100) // step 1
+.then(() => {
+	console.log('step 2 (after 100ms)');
+	return delay(200);
+})
+.then(() => {
+	console.log('step 3 (after another 200ms)');
+})
+.then(() => {
+	console.log('step 4 (next job)');
+	return delay(50);
+})
+.then(() => {
+	console.log('step 5 (after another 50ms)');
+});
+
+
 
 
   `,
@@ -21371,9 +21542,6 @@ foo.awesome(); // LET ME INTRODUCE: ZEBRA
     this.location.back();
   }
 }
-
-
-
 
 
 
