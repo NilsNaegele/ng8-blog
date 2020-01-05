@@ -21631,6 +21631,197 @@ console.log('duration:', (end - start));
   `,
   imageFooterUrl: 'assets/img/post13.jpg',
   footerQuote: 'Wir sind alle miteinander verbunden; zueinander biologisch. Zu der Erde, chemisch. Zum Rest des Universums, atomar.'
+},
+{
+  id: 14,
+  imageHeaderUrl: 'url(assets/img/post14-bg.jpg)',
+  heading: 'Angular 8/9, Basis- Teil 5',
+  subHeading: 'Angular Entwicklungs Bausteine',
+  metaPublishedDate: 'am 06 Januar, 2020',
+  sectionHeading: 'ES6, TS, Dekoratoren, Direktiven, Interpolation, Kontext',
+  code: `
+  // es6 class
+  export class Widget {
+
+    constructor(public id, private x, private y) {
+      this.setPosition(x, y);
+     }
+
+    setPosition(x, y) {
+      this.x = x;
+      this.y = y;
+    }
+
+  }
+
+  const myWidget = new Widget(1, 10, 20);
+  console.log(myWidget.id);
+
+
+  // es6 inheritance
+  export class Widget {
+    constructor(private id, private x, private y) {
+      this.setPosition(x, y);
+     }
+
+    setPosition(x, y) {
+      this.x = x;
+      this.y = y;
+    }
+  }
+
+  export class TextBox extends Widget {
+    constructor(id, x, y, private width, private height) {
+      super(id, x, y);
+      this.setSize(width, height);
+    }
+
+    setSize(width, height) {
+      this.width = width;
+      this.height = height;
+    }
+
+    reset() {
+      this.setPosition(0, 0);
+      this.setSize(0, 0);
+    }
+  }
+
+
+  // es6 arrow functions
+  const books = [
+    { name: 'Angular 9.01 Up and Down', read: true },
+    { name: 'ReactJS 16.9 Fast', read: true },
+    { name: 'VueJS 2.6 In Depth', read: false }
+  ];
+
+  const booksToRead = books.filter(b => !b.read);
+
+  console.log(booksToRead);
+
+  books.map(value => console.log(value.name));
+
+  const groupBy = (objectArray, property) => {
+    return objectArray.reduce((acc, obj) => {
+      const key = obj[property];
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(obj);
+      return acc;
+    }, {});
+  }
+
+  const res = groupBy(books, 'read');
+  console.log(res);
+
+
+  // es6 statement bodies
+  const books = [
+    { name: 'Angular 9.01 Up and Down', read: true },
+    { name: 'ReactJS 16.9 Fast', read: true },
+    { name: 'VueJS 2.6 In Depth', read: false }
+  ];
+
+  books.forEach(book => {
+    if (book.read) {
+      console.log(book.name);
+    }
+  });
+
+  const button = document.getElementById('the-button');
+  button.addEventListener('click', () => {
+    console.log('Clicked');
+  });
+
+  setTimeout(() => {
+        console.log('First callback');
+        setTimeout(() => {
+          console.log('Second callback');
+        }, 1);
+  }, 1);
+
+
+  // es 6 lexical this
+  const books = [
+      { name: 'Angular 9.01 Up and Down', read: true },
+      { name: 'ReactJS 16.9 Fast', read: true },
+      { name: 'VueJS 2.6 In Depth', read: false }
+    ];
+
+  this.books.forEach(book => {
+      if (!book.read) {
+        this.booksToRead.push(book);
+      }
+    });
+
+  function ProgressBar() {
+      this.progress = 0;
+
+      setInterval(() => {
+        this.progress++;
+      }, 1000);
+    }
+
+  const p = new ProgressBar();
+
+
+// es6 template literals
+let point = { x: 100, y: 200 };
+
+console.log(\`Position is \${point.x}: \${point.y}\`);
+
+let title = 'Angular Development';
+
+let component = {
+    template: \`
+          <h1>\${title}</h1>
+          <div class="grid">
+                <div class="col-6"></div>
+                <div class="col-6"></div>
+          </div>
+    \`
+};
+
+
+// es 6 default parameter values
+const playSound = (file, volume = 100) => {
+  console.log(\`playing \${file} with volume \${volume}\`);
+};
+
+playSound('test.mp3');
+
+playSound('test1.mp3', 200);
+
+
+// es6 rest parameter
+const logMessages = (...messages) => {
+  for (const message of messages) {
+    console.log(message);
+  }
+};
+
+logMessages('Hi', 'Nils-Holger', 'I', 'love', 'you.');
+
+
+// es6 spread operator
+const positive = [10, 20, 30];
+const negative = [-30, -20, -10];
+
+const numbers = [...negative, 0, ...positive];
+
+console.log(numbers);
+
+
+  `,
+  blockQuote: `
+  Wir beabsichtigen zum Mond zu fliegen in diesem Jahrzehnt und andere Sachen zu tun, nicht weil sie einfach sind,
+  sondern weil sie schwer sind, weil das Ziel uns dienen wird zu organisieren und messen die Beste unserer Energien
+  und Kompetenzen, weil diese Herausforderung ist eine welche wir annehmen, eine die wir nicht vertagen wollen
+  und eine die wir vorhaben zu gewinnen.
+  `,
+  imageFooterUrl: 'assets/img/post14.jpg',
+  footerQuote: 'Wir sind alle miteinander verbunden; zueinander biologisch. Zu der Erde, chemisch. Zum Rest des Universums, atomar.'
 }
   ];
 
@@ -21682,7 +21873,10 @@ console.log('duration:', (end - start));
     if (this.articleId === 'you-do-not-know-javascript-part-3') {
       this.articleId = 13;
     }
-    if (!(+this.articleId) || +this.articleId > 13) {
+    if (this.articleId === 'angular-basics-5') {
+      this.articleId = 14;
+    }
+    if (!(+this.articleId) || +this.articleId > 14) {
       this.isNotFound = true;
       this.router.navigate(['page-not-found']);
     }
@@ -21692,6 +21886,15 @@ console.log('duration:', (end - start));
     this.location.back();
   }
 }
+
+
+// es6 destructuring assignment array
+
+
+
+
+
+
 
 
 
