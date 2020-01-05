@@ -21470,6 +21470,147 @@ delay(100) // step 1
 });
 
 
+// promise constructor
+const promise1 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    resolve('foo');
+  }, 300);
+});
+
+promise1.then((value) => {
+  console.log(value);
+  // foo
+});
+
+console.log(promise1);
+// ZoneAwarePromise {__zone_symbol__state: null, __zone_symbol__value: Array(4)}
+
+
+// create promise
+const myFirstPromise = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    resolve('success!');
+  }, 250);
+});
+
+myFirstPromise.then((successMessage) => {
+ console.log('YOLO ' + successMessage);
+});
+
+
+// generators
+let x = 1;
+
+const foo = () => {
+	x++;
+	bar();
+	console.log('x:', x); // 3
+}
+
+function bar() {
+	x++;
+}
+
+foo();
+
+
+
+// iterators
+let x = 1;
+
+function *foo() {
+	x++;
+	yield; // pause!
+	console.log('x:', x);
+}
+
+function bar() {
+	x++;
+}
+
+// construct an iterator it to control the generator
+const it = foo();
+
+// start foo() here!
+it.next();
+console.log(x);						// 2
+bar();
+console.log(x);						// 3
+it.next();				// x: 3
+
+
+// generator function
+function *foo(x, y) {
+	return x * y;
+}
+
+const it = foo(6, 7);
+
+const result = it.next();
+
+console.log(result.value);		// 42
+
+
+// iteration messaging
+function *foo(x) {
+	const y = x * (yield);
+	return y;
+}
+
+const it = foo( 6 );
+
+// start foo(..)
+it.next();
+
+const res = it.next(8);
+
+console.log(res.value);		// 48
+
+
+// iterables
+const a = [2, 4, 8, 16, 32];
+
+const it = a[Symbol.iterator]();
+
+console.log(it.next().value);	// 2
+console.log(it.next().value);	// 4
+console.log(it.next().value);	// 8
+
+
+
+// synchronous thunk
+const foo = (x, y) => {
+	return x * y;
+};
+
+const fooThunk = () => {
+	return foo(6, 7);
+};
+
+// later
+console.log(fooThunk());	// 42
+
+
+// asynchronous thunk
+function foo1(x, y, cb) {
+	setTimeout(() => {
+		cb(x * y);
+	}, 1000 );
+}
+
+function fooThunk1(cb) {
+	foo1(6, 7, cb);
+}
+
+// later
+
+fooThunk1((multiply) => {
+	console.log(multiply);		// 42
+});
+
+
+
+
 
 
   `,
