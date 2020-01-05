@@ -21609,9 +21609,18 @@ fooThunk1((multiply) => {
 });
 
 
+// benchmarking (wrong way)
+const start = (new Date()).getTime();	// or Date.now()
+
+// do some operation
+
+const end = (new Date()).getTime();
+
+console.log('duration:', (end - start));
 
 
-
+// use https://benchmarkjs.com/
+// and https://jsperf.com/
 
   `,
   blockQuote: `
