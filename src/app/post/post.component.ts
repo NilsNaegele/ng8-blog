@@ -21813,6 +21813,1294 @@ const numbers = [...negative, 0, ...positive];
 console.log(numbers);
 
 
+// es6 destructuring assignment array
+const words = ['Hi', 'Nils-Holger', 'I', 'love', 'you!'];
+
+const [first, second] = words;
+
+console.log(first);
+console.log(second);
+
+const getWords = () => {
+  return ['the', 'will', 'to', 'win', 'is'];
+};
+
+const [one, two] = getWords();
+console.log(\`\${one} \${two}\`);
+
+let third;
+let fourth;
+
+[third, fourth] = ['to', 'win'];
+
+console.log(third);
+console.log(fourth);
+
+const word = ['hello'];
+
+const [fifth= 'hey', sixth= 'there'] = word;
+
+console.log(fifth);
+console.log(sixth);
+
+let seventh = 'hello';
+let eight = 'world';
+
+[seventh, eight] = [eight, seventh];
+console.log(seventh, eight);
+
+const [o, t, , , f] = words;
+
+console.log(\`\${o} \${t} \${f}\`);
+
+const command = ['greet', 'Tina', 'Susanne', 'Ulrike'];
+
+const [action, ...girlies] = command;
+
+console.log(action);
+console.log(girlies);
+
+
+// es6 object destructuring
+const obj = {
+  id: 1,
+  userName: 'mmustermann',
+  firstName: 'Max',
+  lastName: 'Mustermann'
+};
+
+const { id, userName } = obj;
+
+console.log(id);
+console.log(userName);
+
+const { id: uid, userName: login } = obj;
+
+console.log(uid);
+console.log(login);
+
+const { log } = console;
+log('hi baby');
+
+class MyClass {
+
+sayHello(message) {
+  console.log(\`Hello, \${message}\`);
+}
+
+sayBye(message) {
+  console.log(\`Bye, \${message}\`);
+}
+
+}
+
+const myClass = new MyClass();
+const { sayHello, sayBye } = myClass;
+
+sayHello('Are you there yet?');
+sayBye('See you later, alligator');
+
+const { sayHello: hello, sayBye: bye } = myClass;
+
+hello('Are you ready to conquer the world?');
+bye('Bye, bye baby');
+
+const showDialog = ({message = 'Message',
+                  size = { width: 200, height: 200 },
+                  position = { x: 300, y: 400 }} ) => {
+                  console.log(\`message: \${message}\`);
+                  console.log(\`size: \${size.width}: \${size.height}\`);
+                  console.log(\`position: \${position.x}: \${position.y}\`);
+                  };
+
+showDialog({message: 'are we there yet?', size: {width: 100, height: 100}});
+
+
+// es6 modules
+export function log(message) { console.log(message); }
+
+  export const defaultMessage = 'The will to win is nothing without the will to prepare.';
+
+  export class MyClass {
+          constructor() {
+            console.log('Work Hard | Be Kind | Do More ...');
+          }
+  }
+
+  import * as logger from '../app.component';
+
+  console.log(logger.defaultMessage);
+
+  console.log(new logger.MyClass());
+
+
+// typescript basic types
+let isEnabled: boolean = true;
+
+let isEmpty = (herString: boolean) => !herString;
+
+console.log(isEmpty(isEnabled));
+
+let decimal: number = 6;
+let hex: number = 0xf00d;
+let binary: number = 0b1010;
+let octal: number = 0o744;
+
+let firstName: string = 'Anne';
+let lastName: string = 'Nette';
+let fullName: string = \`\${firstName} \${lastName}\`;
+
+let template: string = \`
+              <h1>Title</h1>
+              <p>Hello, \${fullName}</p>
+\`;
+
+let arr1: string[] = [];
+let arr2: Array<string> = [];
+
+let arr3: string[] = ['hello', 'world'];
+let arr4: Array<string> = ['hello', 'world'];
+
+let flags: boolean[] = [true, false, true, false];
+let flags2: boolean[] = new Array(true, false);
+
+let numbers: number[] = [];
+numbers.push(1);
+console.log('First number: ' + numbers[0]);
+
+enum Suit { Club, Diamond, Heart, Spade }
+let d: Suit = Suit.Diamond;
+console.log(Suit[1]);
+
+let obj: any = {
+  log(message) {
+    console.log(message);
+  }
+};
+obj.log('She takes any and wants many ...');
+
+class Logger {
+  log(message: string): void {
+    console.log(message);
+  }
+}
+
+let fun = (x: () => void) => x();
+
+interface Logger {
+  log(message: string): void;
+  warn(message: string): void;
+  error(message: string): void;
+}
+
+
+// ts classes
+class MyComponent {
+
+  constructor(private id: number) { }
+
+  render() {
+    console.log(\`Rendering component "\${this.id}"\`);
+  }
+
+}
+
+let component = new MyComponent(1);
+component.render();
+
+class User {
+  constructor(private _firstName: string, private _lastName: string) { }
+
+  get firstName(): string {
+    return this._firstName;
+  }
+
+  set firstName(value: string) {
+    if (value) {
+        this._firstName = value.trim();
+  }
+}
+
+get fullName(): string {
+return \`\${this._firstName} \${this._lastName}\`;
+}
+}
+
+let user = new User('Mick', 'Long');
+console.log(\`User full name is: \${user.fullName}\`);
+user.firstName = 'Mickey';
+console.log(user.firstName);
+
+
+// ts methods
+class Sprite {
+
+  constructor(private a = 1, private b = 2) { }
+
+  render() {
+    console.log(\`rendering component as \${this.a}: \${this.b}\`);
+  }
+
+  moveTo(a: number, b: number) {
+    this.a = a;
+    this.b = b;
+    this.render();
+  }
+}
+
+let sprite = new Sprite();
+sprite.moveTo(3, 4);
+
+class NTLComponent {
+    text = 'Some text here ...';
+
+    constructor(private id = '1', private value = 100) {}
+
+    getId(): string {
+      return 'number1';
+    }
+
+    getValue(): number {
+      return 100;
+    }
+
+    log(message = 'Unknown error', level?: number) {
+      if (level === undefined) {
+        level = 1;
+      }
+      console.log(\`(\${level}): \${message}\`);
+    }
+
+    showErrors(...errors: string[]) {
+      for (let error of errors) {
+        console.log(error);
+      }
+    }
+
+    reset(): void {
+      this.text = '';
+    }
+}
+
+
+// ts inheritance
+class Animal {
+
+  constructor(private name: string) { }
+
+  makeSound() {
+    console.log('Unknown sound');
+  }
+
+}
+
+class Dog extends Animal {
+
+  constructor(name: string) {
+    super(name);
+  }
+
+  makeSound() {
+    console.log('Woof-woof');
+  }
+}
+
+class Chicken extends Animal {
+
+  constructor(name: string) {
+      super(name);
+  }
+
+  makeSound() {
+    console.log('Chicken soup');
+  }
+
+}
+
+let dog = new Dog('Barnie');
+let chicken = new Chicken('Kiki');
+dog.makeSound();
+chicken.makeSound();
+
+
+// access modifiers
+class User {
+
+  public firstName: string;
+
+  private lastName: string;
+
+  readonly id: number;
+
+  protected renderContent() { }
+
+}
+
+
+// interfaces
+interface TextComponent {
+  text: string;
+  render(): void;
+}
+
+class PlainTextComponent implements TextComponent {
+  text: string;
+  render() {
+    console.log('rendering plain text component');
+  }
+
+}
+
+
+// abstract classes
+abstract class PageComponent {
+
+  abstract renderContent(): void;
+
+  renderHeader() {}
+
+  renderFooter() {}
+}
+
+class HomePageComponent extends PageComponent {
+
+      renderContent() {
+        this.renderHeader();
+        console.log('rendering home page');
+        this.renderFooter();
+      }
+}
+
+
+// class decorators
+function LogClass(constructor: Function) {
+  console.log('LogClass decorator executed for the constructor');
+  console.log(constructor);
+}
+
+@LogClass
+class TextComponent {
+
+    constructor(private text = 'this is some default text') { }
+
+    render() {
+      console.log(\`Rendering text: \${this.text}\`);
+    }
+}
+
+let component = new TextComponent();
+component.render();
+
+
+
+// decorators with parameters
+function LogClassWithParams(prefix: string, suffix: string) {
+  return (constructor: Function) => {
+    console.log(\`\${prefix}
+                LogClassWithParams decorator called for:
+                \${constructor}
+                \${suffix}\`);
+  };
+}
+
+@LogClassWithParams('BEGIN:', 'END:')
+class TextComponent {
+
+    constructor(private text = 'this is some default text') { }
+
+    render() {
+      console.log(\`Rendering text: \${this.text}\`);
+    }
+}
+
+let component = new TextComponent();
+component.render();
+
+
+// method decorators
+function LogMethod(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  console.log(target);
+  console.log(propertyKey);
+  console.log(descriptor);
+}
+
+
+class TextComponent {
+
+    constructor(private text = 'this is some default text') { }
+
+    @LogMethod
+    render() {
+      console.log(\`Rendering text: \${this.text}\`);
+    }
+}
+
+let component = new TextComponent();
+component.render();
+
+
+
+// accessor decorators
+function LogAccessor(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  console.log('LogAccessor decorator called');
+  console.log(target);
+  console.log(propertyKey);
+  console.log(descriptor);
+}
+
+
+class TextComponent {
+
+    constructor(private _text = 'default text') { }
+
+    @LogAccessor
+    get text(): string {
+      return this._text;
+    }
+
+    set text(value: string) {
+      this._text = value;
+    }
+}
+
+let component = new TextComponent();
+
+
+***************************************************************
+
+function LogAccessorWithParams(message: string) {
+return (target: any,
+        propertyKey: string,
+        descriptor: PropertyDescriptor) => {
+          console.log(\`Message from decorator: \${ message }\`);
+        };
+}
+
+
+class TextComponent {
+
+  constructor(private _text = 'default text') { }
+
+  @LogAccessorWithParams('hello')
+  @LogAccessorWithParams('baby')
+  get text(): string {
+    return this._text;
+  }
+
+  set text(value: string) {
+    this._text = value;
+  }
+}
+
+let component = new TextComponent();
+
+
+// property decorators
+function LogProperty(target: any, propertyKey: string) {
+  console.log('LogProperty decorator called');
+  console.log(target);
+  console.log(propertyKey);
+}
+
+class TextComponent {
+
+@LogProperty
+id: string;
+
+constructor(id: string) {
+      this.id = id;
+}
+}
+
+let component = new TextComponent('text1');
+
+
+// parameter decorators
+function LogParameter(target: any, propertyName: string, propertyIndex: number) {
+  console.log('LogParameter decorator called');
+  console.log(target);
+  console.log(propertyName);
+  console.log(propertyIndex);
+}
+
+  class TextComponent {
+
+      render(@LogParameter positionX: number,
+             @LogParameter positionY: number) {}
+}
+
+let component = new TextComponent();
+component.render(10, 20);
+
+
+// angular interpolation
+import { Component } from '@angular/core';
+
+
+@Component({
+  selector: 'app-root',
+  template: \`
+          <h1>{{ title }}</h1>
+          <h2>My favorite technology is: {{ myTechnology }}</h2>
+  \`
+})
+export class AppComponent {
+  title = 'Tour Of Technologies';
+  myTechnology = 'JavaScript';
+}
+
+
+// ngfor
+import { Component } from '@angular/core';
+
+
+@Component({
+  selector: 'app-root',
+  template: \`
+          <h1>{{ title }}</h1>
+          <h2>My favorite technology is: {{ myTechnology }}</h2>
+          <p>Technologies:</p>
+          <ul>
+              <li *ngFor="let technology of technologies">
+                    {{ technology }}
+              </li>
+          </ul>
+  \`
+})
+export class AppComponent {
+  title = 'Tour Of Technologies';
+  technologies = ['Angular 9', 'ES6/7/8/9', 'HTML5', 'CSS3'];
+  myTechnology = this.technologies[0];
+
+}
+
+
+
+// data class
+import { Component } from '@angular/core';
+
+export class Technology {
+  constructor(public id: number, public name: string) { }
+}
+
+
+@Component({
+  selector: 'app-root',
+  template: \`
+          <h1>{{ title }}</h1>
+          <h2>My favorite technology is: {{ myTechnology.name }}</h2>
+          <p>Technologies:</p>
+          <ul>
+              <li *ngFor="let technology of technologies">
+                    {{ technology.name }}
+              </li>
+          </ul>
+  \`
+})
+export class AppComponent {
+  title = 'Tour Of Technologies';
+  technologies = [
+                  new Technology(1, 'Angular 9'),
+                  new Technology(2, 'ES6/7/8/9'),
+                  new Technology(3, 'HTML5'),
+                  new Technology(4, 'CSS3')
+                ];
+  myTechnology = this.technologies[0];
+
+}
+
+
+// ngif
+import { Component } from '@angular/core';
+
+export class Technology {
+  constructor(public id: number, public name: string) { }
+}
+
+
+@Component({
+  selector: 'app-root',
+  template: \`
+          <h1>{{ title }}</h1>
+          <h2>My favorite technology is: {{ myTechnology.name }}</h2>
+          <p>Technologies:</p>
+          <ul>
+              <li *ngFor="let technology of technologies">
+                    {{ technology.name }}
+              </li>
+          </ul>
+          <p *ngIf="technologies.length > 3">There are many technologies!</p>
+  \`
+})
+export class AppComponent {
+  title = 'Tour Of Technologies';
+  technologies = [
+                  new Technology(1, 'Angular 9'),
+                  new Technology(2, 'ES6/7/8/9'),
+                  new Technology(3, 'HTML5'),
+                  new Technology(4, 'CSS3')
+                ];
+  myTechnology = this.technologies[0];
+
+}
+
+
+// interpolation revisited
+import { Component } from '@angular/core';
+
+export class Technology {
+  constructor(public id: number, public name: string) { }
+}
+
+
+@Component({
+  selector: 'app-root',
+  template: \`
+          <h1>{{ title }}</h1>
+          <h2>My favorite technology is: {{ myTechnology.name }}</h2>
+          <h3>
+              <img src="{{ technologyImageUrl }}" style="height: 30px;">
+          </h3>
+          <p>The sum of 1 + 1 is {{ 1 + 1 }}</p>
+          <p>The sum of 1 + 1 is not {{ 1 + 1 + getVal() }}</p>
+  \`
+})
+export class AppComponent {
+  title = 'Tour Of Technologies';
+  technologies = [
+                  new Technology(1, 'Angular 9'),
+                  new Technology(2, 'ES6/7/8/9'),
+                  new Technology(3, 'HTML5'),
+                  new Technology(4, 'CSS3')
+                ];
+  myTechnology = this.technologies[0];
+
+  technologyImageUrl = 'https://angular.io/assets/images/logos/angular/angular.svg';
+
+  getVal() {
+    return 1;
+  }
+
+}
+
+
+// expression context
+import { Component } from '@angular/core';
+
+export class Technology {
+  constructor(public id: number, public name: string) { }
+}
+
+
+@Component({
+  selector: 'app-root',
+  template: \`
+          <h1>{{ title }}</h1>
+          <span [hidden]="isUnchanged">changed</span>
+          <div *ngFor="let technology of technologies">
+                {{ technology.name }}
+          </div>
+          <input #technologyInput (keyup)="0"> {{ technologyInput.value }}
+  \`
+})
+export class AppComponent {
+  title = 'Tour Of Technologies';
+  technologies = [
+                  new Technology(1, 'Angular 9'),
+                  new Technology(2, 'ES6/7/8/9'),
+                  new Technology(3, 'HTML5'),
+                  new Technology(4, 'CSS3')
+                ];
+  isUnchanged = false;
+
+}
+
+
+
+// statement context
+import { Component } from '@angular/core';
+
+export class Technology {
+  constructor(public id: number, public name: string) { }
+}
+
+
+@Component({
+  selector: 'app-root',
+  template: \`
+          <h1>{{ title }}</h1>
+          <button (click)="onSave($event)">Save</button>
+          <button *ngFor="let technology of technologies"
+                  (click)="deleteTechnology(technology)">{{ technology.name }}</button>
+          <form #tForm (ngSubmit)="onSubmit(tForm)">...</form>
+  \`
+})
+export class AppComponent {
+  title = 'Tour Of Technologies';
+  technologies = [
+                  new Technology(1, 'Angular 9'),
+                  new Technology(2, 'ES6/7/8/9'),
+                  new Technology(3, 'HTML5'),
+                  new Technology(4, 'CSS3')
+                ];
+  deleteTechnology(technology: Technology): void {
+    const index = this.technologies.indexOf(technology);
+    this.technologies.splice(index, 1);
+  }
+
+  onSave(evt): void {
+    console.log(evt);
+  }
+
+  onSubmit(form) {
+    console.log(form);
+  }
+
+}
+
+
+// stockitem component
+import { Component, OnInit } from '@angular/core';
+
+import { Stock } from '../../model/stock';
+
+@Component({
+  selector: 'app-stock-item',
+  template: \`
+          <div class="stock-container">
+              <div class="name"><h3>{{ stock.name }}</h3> -
+              <h4>({{ stock.code }})</h4></div>
+              <div class="price"
+              [class]="stock.isPositiveChange() ? 'positive' : 'negative'"
+              >€ {{ stock.price }}</div>
+              <button (click)="toggleFavorite($event)" [disabled]="stock.favorite">
+                Add to Favorite
+              </button>
+          </div>
+  \`,
+  styles: [\`
+  .stock-container {
+    border: 1px solid black;
+    border-radius: 5px;
+    display: inline-block;
+    padding: 10px;
+  }
+  .stock-container .name h3, .stock-container .name h4 {
+    display: inline-block;
+  }
+  .positive {
+    color: red;
+  }
+  .negative {
+    color: green;
+  }
+  \`]
+})
+export class StockItemComponent implements OnInit {
+
+  stock: Stock;
+
+  constructor() { }
+
+  ngOnInit() {
+    this.stock = new Stock('XYZ Stock Company', 'ASC', 115, 80);
+  }
+
+  toggleFavorite(event) {
+    console.log('Toggling the favorite state for this stock', event);
+    this.stock.favorite = !this.stock.favorite;
+  }
+
+}
+
+
+***********************************************************************
+
+export class Stock {
+  favorite = false;
+
+  constructor(public name: string,
+              public code: string,
+              public price: number,
+              public previousPrice: number) { }
+
+  isPositiveChange(): boolean {
+    return this.price >= this.previousPrice;
+  }
+}
+
+
+// productitem component
+import { Component, OnInit } from '@angular/core';
+
+import { Product } from '../../model/product';
+
+@Component({
+  selector: 'app-product-item',
+  template: \`
+        <div class="product-item" [class]="product.isOnSale ? 'product-item sale' : ''">
+            <div class="image">
+              <img [src]="product.imageUrl">
+            </div>
+            <div class="details">
+              <div>{{ product.name }}</div>
+              <div>€ {{ product.price }}</div>
+            <div>
+            <button [disabled]="product.quantityInCart === 0"
+            (click)="decrementInCart()">-</button>
+            <span>{{ product.quantityInCart }}</span>
+            <button (click)="incrementInCart()">+</button>
+        </div>
+      </div>
+    </div>
+  \`,
+  styles: [\`
+    .product-item {
+      border: 1px solid black;
+      border-radius: 5px;
+      padding: 10px;
+      display: inline-block;
+    }
+    .product-item .details {
+      text-align: center;
+      color: white;
+    }
+    .product-item.sale {
+      background-color: red;
+    }
+  \`]
+})
+export class ProductItemComponent implements OnInit {
+  product: Product;
+
+  constructor() { }
+
+  ngOnInit() {
+    this.product = {
+      name: 'XYZ Product',
+      imageUrl: 'http://via.placeholder.com/150x150',
+      price: 75,
+      isOnSale: true,
+      quantityInCart: 0
+    };
+  }
+
+  incrementInCart() {
+    this.product.quantityInCart++;
+  }
+
+  decrementInCart() {
+    if (this.product.quantityInCart > 0) {
+      this.product.quantityInCart--;
+    }
+  }
+
+}
+
+***********************************************************************
+
+export interface Product {
+  name: string;
+  imageUrl: string;
+  price: number;
+  isOnSale: boolean;
+  quantityInCart: number;
+}
+
+
+// ngclass
+import { Component, OnInit } from '@angular/core';
+
+import { Stock } from '../../model/stock';
+
+@Component({
+  selector: 'app-stock-item',
+  template: \`
+          <div class="stock-container">
+              <div class="name"><h3>{{ stock.name }}</h3> -
+              <h4>({{ stock.code }})</h4></div>
+              <div class="price"
+              [ngClass]="stockClasses"
+              >€ {{ stock.price }}</div>
+              <button (click)="toggleFavorite($event)" [disabled]="stock.favorite">
+                Add to Favorite
+              </button>
+          </div>
+  \`,
+  styles: [\`
+  .stock-container {
+    border: 1px solid black;
+    border-radius: 5px;
+    display: inline-block;
+    padding: 10px;
+  }
+  .stock-container .name h3, .stock-container .name h4 {
+    display: inline-block;
+  }
+  .positive {
+    color: red;
+  }
+  .negative {
+    color: green;
+  }
+  .large-change {
+    font-size: 1.5em;
+  }
+  .small-change {
+    font-size: 0.8em;
+  }
+  \`]
+})
+export class StockItemComponent implements OnInit {
+
+  stock: Stock;
+  stockClasses;
+
+  constructor() { }
+
+  ngOnInit() {
+    this.stock = new Stock('ABC Stock Company', 'ASC', 105, 90);
+    let diff = (this.stock.price / this.stock.previousPrice) - 1;
+    let largeChange = Math.abs(diff) > 0.01;
+    this.stockClasses = {
+      'positive': this.stock.isPositiveChange(),
+      'negative': !this.stock.isPositiveChange(),
+      'large-change': largeChange,
+      'small-change': !largeChange
+    };
+  }
+
+  toggleFavorite(event) {
+    console.log('Toggling the favorite state for this stock', event);
+    this.stock.favorite = !this.stock.favorite;
+  }
+
+}
+
+
+// ngstyle
+import { Component, OnInit } from '@angular/core';
+
+import { Stock } from '../../model/stock';
+
+@Component({
+  selector: 'app-stock-item',
+  template: \`
+          <div class="stock-container">
+              <div class="name"><h3>{{ stock.name }}</h3> -
+              <h4>({{ stock.code }})</h4></div>
+              <div class="price"
+              [ngStyle]="stockStyles"
+              >€ {{ stock.price }}</div>
+              <button (click)="toggleFavorite($event)" [disabled]="stock.favorite">
+                Add to Favorite
+              </button>
+          </div>
+  \`,
+  styles: [\`
+  .stock-container {
+    border: 1px solid black;
+    border-radius: 5px;
+    display: inline-block;
+    padding: 10px;
+  }
+  .stock-container .name h3, .stock-container .name h4 {
+    display: inline-block;
+  }
+  \`]
+})
+export class StockItemComponent implements OnInit {
+
+  stock: Stock;
+  stockStyles;
+
+  constructor() { }
+
+  ngOnInit() {
+    this.stock = new Stock('ABC Stock Company', 'ASC', 105, 90);
+    let diff = (this.stock.price / this.stock.previousPrice) - 1;
+    let largeChange = Math.abs(diff) > 0.01;
+    this.stockStyles = {
+        'color': this.stock.isPositiveChange() ? 'red' : 'green',
+        'font-size': largeChange ? '2.5em' : '0.8em'
+    };
+  }
+
+  toggleFavorite(event) {
+    console.log('Toggling the favorite state for this stock', event);
+    this.stock.favorite = !this.stock.favorite;
+  }
+
+}
+
+
+// alternative class && style binding syntax
+import { Component, OnInit } from '@angular/core';
+
+  import { Stock } from '../../model/stock';
+
+  @Component({
+    selector: 'app-stock-item',
+    template: \`
+            <div class="stock-container">
+                <div class="name"><h3>{{ stock.name }}</h3> -
+                <h4>({{ stock.code }})</h4></div>
+                <div class="price"
+                [class.positive]="stock.isPositiveChange()"
+                [class.negative]="!stock.isPositiveChange()"
+                [style.font-size]="isLargeChange ? '3.5em' : '0.8em'"
+                >€ {{ stock.price }}</div>
+                <button (click)="toggleFavorite($event)" [disabled]="stock.favorite">
+                  Add to Favorite
+                </button>
+            </div>
+    \`,
+    styles: [\`
+    .stock-container {
+      border: 1px solid black;
+      border-radius: 5px;
+      display: inline-block;
+      padding: 10px;
+    }
+    .stock-container .name h3, .stock-container .name h4 {
+      display: inline-block;
+    }
+    .positive {
+      color: red;
+    }
+    .negative {
+      color: green;
+    }
+    \`]
+  })
+  export class StockItemComponent implements OnInit {
+
+    stock: Stock;
+    isLargeChange: boolean;
+
+    constructor() { }
+
+    ngOnInit() {
+      this.stock = new Stock('ABC Stock Company', 'ASC', 105, 90);
+      let diff = (this.stock.price / this.stock.previousPrice) - 1;
+      this.isLargeChange = Math.abs(diff) > 0.01;
+    }
+
+    toggleFavorite(event) {
+      console.log('Toggling the favorite state for this stock', event);
+      this.stock.favorite = !this.stock.favorite;
+    }
+
+  }
+
+
+// ngif desugared
+<div *ngIf="stock.favorite">
+<button>Remove from favorite</button>
+</div>
+
+<div ng-template="ngIf stock.favorite">
+<button>Remove from favorite</button>
+</div>
+
+<ng-template [ngIf]="stock.favorite">
+<div>
+  <button>Remove from favorite</button>
+</div>
+</ng-template>
+
+
+// ngif
+import { Component, OnInit } from '@angular/core';
+
+import { Stock } from '../../model/stock';
+
+@Component({
+  selector: 'app-stock-item',
+  template: \`
+          <div class="stock-container">
+              <div class="name"><h3>{{ stock.name }}</h3> -
+              <h4>({{ stock.code }})</h4></div>
+              <div class="price"
+              [class]="stock.isPositiveChange() ? 'positive' : 'negative'"
+              >€ {{ stock.price }}</div>
+              <button (click)="toggleFavorite($event)" *ngIf="!stock.favorite">
+                Add to Favorite
+              </button>
+          </div>
+  \`,
+  styles: [\`
+  .stock-container {
+    border: 1px solid black;
+    border-radius: 5px;
+    display: inline-block;
+    padding: 10px;
+  }
+  .stock-container .name h3, .stock-container .name h4 {
+    display: inline-block;
+  }
+  .positive {
+    color: red;
+  }
+  .negative {
+    color: green;
+  }
+  \`]
+})
+export class StockItemComponent implements OnInit {
+
+  stock: Stock;
+  isLargeChange: boolean;
+
+  constructor() { }
+
+  ngOnInit() {
+    this.stock = new Stock('ABC Stock Company', 'ASC', 105, 90);
+    this.stock.favorite = true;
+  }
+
+  toggleFavorite(event) {
+    console.log('Toggling the favorite state for this stock', event);
+    this.stock.favorite = !this.stock.favorite;
+  }
+
+}
+
+
+// ngforof
+import { Component, OnInit } from '@angular/core';
+
+import { Stock } from '../../model/stock';
+
+@Component({
+  selector: 'app-stock-item',
+  template: \`
+          <div class="stock-container" *ngFor="let stock of stocks; index as i;">
+              <div class="name"><h3>{{ stock.name }}</h3> -
+              <h4>({{ stock.code }})</h4></div>
+              <div class="price"
+              [class]="stock.isPositiveChange() ? 'positive' : 'negative'">
+              € {{ stock.price }}
+              </div>
+              <button (click)="toggleFavorite($event, i)" [disabled]="stock.favorite">
+                Add to Favorite
+              </button>
+          </div>
+  \`,
+  styles: [\`
+  .stock-container {
+    border: 1px solid black;
+    border-radius: 5px;
+    display: inline-block;
+    padding: 10px;
+  }
+  .stock-container .name h3, .stock-container .name h4 {
+    display: inline-block;
+  }
+  .positive {
+    color: red;
+  }
+  .negative {
+    color: green;
+  }
+  \`]
+})
+export class StockItemComponent implements OnInit {
+
+  stocks: Stock[] = [];
+
+  constructor() { }
+
+  ngOnInit() {
+    this.stocks = [
+            new Stock('ABC Stock Company', 'ASC', 105, 90),
+            new Stock('MNO Stock Company', 'MSC', 10, 20),
+            new Stock('XYZ Stock Company', 'XYZ', 863, 752)
+    ];
+  }
+
+  toggleFavorite(event, index) {
+    console.log('Toggling the favorite state for this stock', event);
+    this.stocks[index].favorite = !this.stocks[index].favorite;
+  }
+
+}
+
+
+// trackby option, performance matters
+import { Component, OnInit } from '@angular/core';
+
+import { Stock } from '../../model/stock';
+
+@Component({
+  selector: 'app-stock-item',
+  template: \`
+          <div class="stock-container"
+              *ngFor="let stock of stocks; index as i; trackBy: trackStockByCode;">
+              <div class="name"><h3>{{ stock.name }}</h3> -
+              <h4>({{ stock.code }})</h4></div>
+              <div class="price"
+              [class]="stock.isPositiveChange() ? 'positive' : 'negative'">
+              € {{ stock.price }}
+              </div>
+              <button (click)="toggleFavorite($event, i)" [disabled]="stock.favorite">
+                Add to Favorite
+              </button>
+          </div>
+  \`,
+  styles: [\`
+  .stock-container {
+    border: 1px solid black;
+    border-radius: 5px;
+    display: inline-block;
+    padding: 10px;
+  }
+  .stock-container .name h3, .stock-container .name h4 {
+    display: inline-block;
+  }
+  .positive {
+    color: red;
+  }
+  .negative {
+    color: green;
+  }
+  \`]
+})
+export class StockItemComponent implements OnInit {
+
+  stocks: Stock[] = [];
+
+  constructor() { }
+
+  ngOnInit() {
+    this.stocks = [
+            new Stock('ABC Stock Company', 'ASC', 105, 90),
+            new Stock('MNO Stock Company', 'MSC', 10, 20),
+            new Stock('XYZ Stock Company', 'XYZ', 863, 752)
+    ];
+  }
+
+  trackStockByCode(index, stock) {
+    return stock.code;
+  }
+
+  toggleFavorite(event, index) {
+    console.log('Toggling the favorite state for this stock', event);
+    this.stocks[index].favorite = !this.stocks[index].favorite;
+  }
+
+}
+
+
+// ngswitch
+<div [ngSwitch]="security.type">
+<app-stock *ngSwitchCase="'stock'" [item]="security"></app-stock>
+<app-option *ngSwitchCase="'option'" [item]="security"></app-option>
+<app-derivative *ngSwitchCase="'derivative'" [item]="security"></app-derivative>
+<app-mutual-fund *ngSwitchCase="'mutual-fund'" [item]="security"></app-mutual-fund>
+<app-unknown *ngSwitchDefault [item]="security"></app-unknown>
+</div>
+
   `,
   blockQuote: `
   Wir beabsichtigen zum Mond zu fliegen in diesem Jahrzehnt und andere Sachen zu tun, nicht weil sie einfach sind,
@@ -21888,7 +23176,6 @@ console.log(numbers);
 }
 
 
-// es6 destructuring assignment array
 
 
 
