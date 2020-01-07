@@ -23116,7 +23116,7 @@ export class StockItemComponent implements OnInit {
   imageHeaderUrl: 'url(assets/img/post15-bg.jpg)',
   heading: 'Angular 8/9, Projekte- Teil 1',
   subHeading: 'Angular Projekte, Grundlagen',
-  metaPublishedDate: 'am 09 Januar, 2020',
+  metaPublishedDate: 'am 07 Januar, 2020',
   sectionHeading: 'Angular Projekte, Grundlagen',
   code: `
 // view encapsulation
@@ -23554,8 +23554,2185 @@ export class AppComponent implements OnInit, OnChanges, OnDestroy, DoCheck,
 
 
 // app component unit test
+import { AppComponent } from './app.component';
+import { Stock } from './model/stock';
+
+describe('AppComponent', () => {
+
+  it('should instantiate stock in ngoninit', (() => {
+    const appComponent = new AppComponent();
+    expect(appComponent.stock).toBeUndefined();
+    appComponent.ngOnInit();
+    expect(appComponent.stock).toEqual(new Stock('Rocket Stock Company', 'RSC', 1000, 110));
+  }));
+
+  it('should toggle stock favorite', (() => {
+    const appComponent = new AppComponent();
+    appComponent.ngOnInit();
+    expect(appComponent.stock.favorite).toBeFalsy();
+    appComponent.onToggleFavorite(new Stock('Rocket Test', 'RT', 104, 105));
+    expect(appComponent.stock.favorite).toBeTruthy();
+    appComponent.onToggleFavorite(new Stock('Rocket Test', 'RT', 104, 105));
+    expect(appComponent.stock.favorite).toBeFalsy();
+  }));
+});
 
 
+// stock item component unit test
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+
+import { StockItemComponent } from './stock-item.component';
+import { Stock } from '../../model/stock';
+
+describe('StockItemComponent', () => {
+  let component: StockItemComponent;
+  let fixture: ComponentFixture<StockItemComponent>;
+
+  beforeEach(async(() => {
+    TestBed.configureTestingModule({
+      declarations: [ StockItemComponent ]
+    })
+    .compileComponents();
+  }));
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(StockItemComponent);
+    component = fixture.componentInstance;
+    component.stock = new Stock('Rocket Testing Stock', 'RTS', 100, 50);
+    fixture.detectChanges();
+  });
+
+  it('should create stock component and render stock data', () => {
+    const nameEl = fixture.debugElement.query(By.css('.name'));
+    expect(nameEl.nativeElement.textContent).toEqual('Rocket Testing Stock - (RTS)');
+    const priceEl = fixture.debugElement.query(By.css('.positive'));
+    expect(priceEl.nativeElement.textContent.trim()).toEqual('€ 100');
+    const addToFavoriteButtonEl = fixture.debugElement.query(By.css('button'));
+    expect(addToFavoriteButtonEl).toBeDefined();
+  });
+
+  it('should trigger event emitter on add to favorite', () => {
+    let selectedStock: Stock;
+    component.toggleFavorite.subscribe((stock: Stock) => selectedStock = stock);
+    const addToFavoriteButtonEl = fixture.debugElement.query(By.css('button'));
+
+    expect(selectedStock).toBeUndefined();
+    addToFavoriteButtonEl.triggerEventHandler('click', null);
+    expect(selectedStock).toEqual(component.stock);
+  });
+});
+
+
+// testing component interactions
+import { TestBed, async, ComponentFixture } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+
+import { AppComponent } from './app.component';
+import { StockItemComponent } from './stock/stock-item/stock-item.component';
+import { Stock } from './model/stock';
+
+describe('AppComponent', () => {
+
+  describe('Angular Component Interaction Test', () => {
+          let component;
+          let fixture;
+
+          beforeEach(async(() => {
+              TestBed.configureTestingModule({
+                  declarations: [ AppComponent, StockItemComponent]
+              }).compileComponents();
+          }));
+          beforeEach(() => {
+              fixture = TestBed.createComponent(AppComponent);
+              component = fixture.componentInstance;
+              fixture.detectChanges();
+          });
+          it('should load stock with default values', () => {
+                const titleEl = fixture.debugElement.query(By.css('h1'));
+                expect(titleEl.nativeElement.textContent.trim())
+                                .toEqual('Tour Of Stocks');
+
+                const nameEl = fixture.debugElement.query(By.css('.name'));
+                expect(nameEl.nativeElement.textContent)
+                                .toEqual('Rocket Stock Company - (RSC)');
+                const priceEl = fixture.debugElement.query(By.css('.positive'));
+                expect(priceEl.nativeElement.textContent.trim()).toEqual('€ 1000');
+                const addToFavoriteButtonEl = fixture.debugElement.query(By.css('button'));
+                expect(addToFavoriteButtonEl).toBeDefined();
+          });
+  });
+});
+
+
+// template driven forms
+import { Component } from '@angular/core';
+
+import { Stock } from '../model/stock';
+
+
+@Component({
+  selector: 'app-create-stock',
+  template: \`
+          <h2>Create Stock Form</h2>
+          <div class="form-group">
+              <form (ngSubmit)="submit()">
+                  <div class="stock-name">
+                      <input type="text" placeholder="Name"
+                             name="name" [(ngModel)]="stock.name">
+                  </div>
+                  <div class="stock-code">
+                      <input type="text" placeholder="Code"
+                             name="code" [(ngModel)]="stock.code">
+                  </div>
+                  <div class="stock-price">
+                    <input type="text" placeholder="Price"
+                         name="price" [ngModel]="stock.price"
+                         (ngModelChange)="setStockPrice($event)">
+                  </div>
+                  <div class="stock-exchange">
+                       <select name="exchange" [(ngModel)]="stock.exchange">
+                            <option *ngFor="let exchange of exchanges" [ngValue]="exchange">
+                              {{ exchange }}
+                            </option>
+                       </select>
+                  </div>
+                  <div class="stock-confirm">
+                          <input type="checkbox" name="confirm" [(ngModel)]="confirmed">
+                          I confirm that the information above is accurate!
+                  </div>
+                  <button [disabled]="!confirmed" type="submit">Submit</button>
+              </form>
+          </div>
+          <h4>Stock Data is {{ stock | json }}</h4>
+          <h4>Data has been confirmed: {{ confirmed }}</h4>
+  \`,
+  styles: [\`
+        .stock-name .ng-valid,
+        .stock-code .ng-pristine,
+        .stock-price .ng-untouched {
+          background-color: red;
+        }
+        .stock-name .ng-invalid,
+        .stock-code .ng-dirty,
+        .stock-price .ng-touched {
+          background-color: green;
+        }
+
+  \`]
+})
+export class CreateStockComponent {
+
+  stock: Stock;
+  confirmed = false;
+  exchanges = ['DAX', 'NYSE', 'NASDAQ'];
+
+  constructor() {
+    this.stock = new Stock('Test', '', 0, 0, 'DAX');
+  }
+
+  setStockPrice(price) {
+    this.stock.price = price;
+    this.stock.previousPrice = price;
+  }
+
+  submit() {
+    console.log('Creating Stock', this.stock);
+  }
+
+}
+
+
+
+// performance matters: lazy loading routes
+AppModule
+
+  import { NgModule } from '@angular/core';
+  import { BrowserModule } from '@angular/platform-browser';
+  import { RouterModule } from '@angular/router';
+  import { FormsModule } from '@angular/forms';
+
+  import { AppComponent } from './app.component';
+  import { HomeComponent } from './home/home.component';
+
+
+
+  @NgModule({
+    declarations: [
+      AppComponent,
+      HomeComponent
+    ],
+    imports: [
+      BrowserModule,
+      FormsModule,
+      RouterModule.forRoot([
+        {path: '', component: HomeComponent},
+        {path: 'about', loadChildren: './about/about.module#AboutModule'}
+      ])
+    ],
+    providers: [],
+    bootstrap: [AppComponent]
+  })
+  export class AppModule { }
+
+  ***********************************************************************
+  About Module
+
+  import { NgModule } from '@angular/core';
+  import { CommonModule } from '@angular/common';
+  import { RouterModule } from '@angular/router';
+
+  import { AboutComponent } from './about.component';
+
+@NgModule({
+  imports: [
+    CommonModule,
+    RouterModule.forChild([
+      { path: '', component: AboutComponent }
+    ])
+  ],
+  declarations: [AboutComponent]
+})
+  export class AboutModule { }
+
+  ***********************************************************************
+  AppComponent
+
+  import { Component } from '@angular/core';
+
+
+  @Component({
+  selector: 'app-root',
+  template: \`
+          <h1>{{ title }}</h1>
+          <div>
+                <a routerLink="/">Home</a>
+                <a routerLink="/about">About</a>
+          </div>
+          <router-outlet></router-outlet>
+  \`
+  })
+export class AppComponent  {
+  title = 'Angular 9 Level Up';
+
+}
+
+
+// preloading strategy: preload all modules
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { RouterModule, PreloadAllModules } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+
+import { AppComponent } from './app.component';
+import { HomeComponent } from './home/home.component';
+
+
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    HomeComponent
+  ],
+  imports: [
+    BrowserModule,
+    FormsModule,
+    RouterModule.forRoot([
+      {path: '', component: HomeComponent},
+      {path: 'about', loadChildren: './about/about.module#AboutModule'}
+    ],
+    { preloadingStrategy: PreloadAllModules }
+  )
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+
+
+// custom preloading strategy
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { RouterModule, PreloadAllModules,
+         PreloadingStrategy, Route } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+
+import { AppComponent } from './app.component';
+import { HomeComponent } from './home/home.component';
+
+import { Observable } from 'rxjs/Observable';
+import { of } from 'rxjs/observable/of';
+
+export class ConfigBasedStrategy implements PreloadingStrategy {
+  preload(route: any, load: Function): Observable<any> {
+        return route.data && route.data.preload ? load() : of(null);
+  }
+}
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    HomeComponent
+  ],
+  imports: [
+    BrowserModule,
+    FormsModule,
+    RouterModule.forRoot([
+      {path: '', component: HomeComponent},
+      {path: 'about', loadChildren: './about/about.module#AboutModule',
+      data: { preload: true } }
+    ],
+    { preloadingStrategy: ConfigBasedStrategy }
+  )
+  ],
+  providers: [ConfigBasedStrategy],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+
+
+// performance tips
+
+ng serve --aot
+ng build --prod --named-chunks
+ng build --prod -sm
+source-map-explorer
+
+ng new my-awesome-project --service-worker
+
+
+// quick caching strategy
+import { Component } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+
+import { map, switchMap, startWith } from 'rxjs/operators';
+
+
+@Component({
+  selector: 'app-home',
+  template: \`
+                <div *ngFor="let repository of repositories | async">
+                      {{ repository.name }} - {{ repository.description }}
+                </div>
+  \`
+})
+export class HomeComponent {
+  repositories;
+
+  constructor(private http: HttpClient) {
+    const path =
+          'https://api.github.com/search/repositories?q=angular&sort=stars&order=desc';
+    this.repositories = this.http.get<any>(path).pipe(
+    map(response => response.items)
+    );
+
+    this.repositories.subscribe(itemList => {
+        localStorage['itemListCache'] = JSON.stringify(itemList);
+    });
+
+    this.repositories = this.repositories.pipe(
+      startWith(JSON.parse(localStorage['itemListCache'] | '[]'))
+    );
+
+   }
+
+}
+
+
+
+// lifecycle hooks
+import { Component, ElementRef, AfterContentInit } from '@angular/core';
+
+@Component({
+  selector: 'app-tab',
+  template: \`
+            <div class="tab">
+                <button class="tablink" (click)="openTab($event, 'Berlin')">Berlin</button>
+                <button class="tablink" (click)="openTab($event, 'London')">London</button>
+                <button class="tablink" (click)="openTab($event, 'Paris')">Paris</button>
+            </div>
+            <div id="Berlin" class="tabcontent">
+                <h3>Berlin</h3>
+                <p>Berlin is the capital city of Germany.</p>
+            </div>
+            <div id="London" class="tabcontent">
+                <h3>London</h3>
+                <p>London is the capital city of England.</p>
+            </div>
+            <div id="Paris" class="tabcontent">
+                <h3>Paris</h3>
+                <p>Paris is the capital city of France.</p>
+            </div>
+  \`,
+  styles: [\`
+    div.tab {
+      overflow: hidden;
+      border: 1px solid #ccc;
+      background-color: #f1f1f1;
+    }
+    div.tab button {
+      background-color: inherit;
+      float: left;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      padding: 14px 16px;
+      transition: 0.3s;
+    }
+    div.tab button:hover {
+      background-color: #ddd;
+    }
+    div.tab button.active {
+      background-color: #ccc;
+    }
+    .tabcontent {
+      display: none;
+      padding: 6px 12px;
+      border: 1px solid #ccc;
+      border-top: none;
+    }
+
+  \`]
+})
+export class TabComponent implements AfterContentInit {
+
+  tabContents: Array<HTMLElement>;
+  tabLinks: Array<HTMLElement>;
+
+  constructor(private el: ElementRef) { }
+
+  ngAfterContentInit() {
+    this.tabContents = this.el.nativeElement.querySelectorAll('.tabcontent');
+    this.tabLinks = this.el.nativeElement.querySelectorAll('.tablink');
+
+    this.tabContents[0].style.display = 'block';
+    this.tabLinks[0].className = ' active';
+  }
+
+  openTab(event, cityName) {
+    for (let i = 0; i < this.tabContents.length; i++) {
+      this.tabContents[i].style.display = 'none';
+    }
+    for (let i = 0; i < this.tabLinks.length; i++) {
+      this.tabLinks[i].className = this.tabLinks[i].className.replace(' active', '');
+    }
+
+    this.el.nativeElement.querySelector(\`#\${cityName}\`).style.display = 'block';
+    event.currentTarget.className += ' active';
+  }
+
+}
+
+****************************************************************************************
+
+import { Component, OnInit } from '@angular/core';
+
+
+@Component({
+selector: 'app-root',
+template: \`
+        <div class="container">
+              <h1>{{ title }}</h1>
+              <h4 *ngIf="loading">Please wait ...</h4>
+              <app-tab></app-tab>
+              <ul>
+                    <li *ngFor="let item of items">
+                          {{ item }}
+                    </li>
+              </ul>
+        </div>
+\`,
+styles: [\`
+    .container {
+      width: 800px;
+      margin: auto;
+    }
+    ul {
+      display: flex;
+      justify-content: space-between;
+    }
+\`]
+})
+export class AppComponent implements OnInit  {
+title = 'Angular TypeScript 3.x';
+items: Array<string> = [];
+loading = false;
+
+ngOnInit() {
+  this.loading = true;
+  setTimeout(() => {
+  this.items = ['Computer', 'Mobile', 'Watch', 'Passport', 'Keys', 'Cash'];
+  this.loading = false;
+    }, 3000);
+}
+
+}
+
+
+// component communication
+import { Component, Input } from '@angular/core';
+
+  @Component({
+    selector: 'app-comment-item',
+    template: \`
+              <h3>{{ comment.author }}</h3>
+              <p>{{ comment.content }}</p>
+    \`,
+    styles: [\`
+          :host {
+            display: block;
+          }
+
+          :host:hover {
+            background: #e1e1e1;
+            cursor: pointer;
+          }
+
+    \`]
+  })
+  export class CommentItemComponent {
+
+          private _comment;
+
+          get comment() {
+            return this._comment;
+          }
+
+          @Input()
+          set comment(comment) {
+            this._comment = Object.assign(comment, { author: comment.author.toUpperCase() });
+          }
+
+  }
+
+  ****************************************************************************************
+
+  import { Component, Input, EventEmitter, Output } from '@angular/core';
+
+  @Component({
+    selector: 'app-comment-list',
+    template: \`
+
+              <app-comment-item *ngFor="let comment of comments"
+                                 [comment]="comment"
+                                 (click)="showComment(comment)">
+              </app-comment-item>
+    \`
+  })
+  export class CommentListComponent {
+        @Input() comments;
+        @Output() onShowComment = new EventEmitter();
+
+
+        showComment(comment) {
+          this.onShowComment.emit(comment);
+        }
+
+  }
+
+  ****************************************************************************************
+
+  import { Component } from '@angular/core';
+
+  @Component({
+    selector: 'app-counter',
+    template: \`
+              <h5>
+                    {{ counter }}
+              </h5>
+    \`
+  })
+  export class CounterComponent {
+
+    counter = 0;
+
+    increment() {
+      this.counter++;
+    }
+
+    decrement() {
+      this.counter--;
+    }
+
+  }
+
+  ****************************************************************************************
+
+  import { Component, ViewChild } from '@angular/core';
+
+  import { CounterComponent } from './counter/counter.component';
+
+@Component({
+  selector: 'app-root',
+  template: \`
+          <div class="container">
+                <h2>Comments</h2>
+          <app-comment-list
+                          [comments]="comments"
+                          (onShowComment)="onShowComment($event)">
+          </app-comment-list>
+                <h2>Counter</h2>
+          <app-counter></app-counter>
+          <button (click)="counterComponent.increment()">++</button>
+          <button (click)="counterComponent.decrement()">---</button>
+          </div>
+  \`,
+  styles: [\`
+      .container {
+        width: 800px;
+        margin: auto;
+      }
+  \`]
+})
+export class AppComponent  {
+      @ViewChild(CounterComponent, { static: false }) counterComponent: CounterComponent;
+
+      comments = [
+            {
+              author: 'Nils-Holger',
+              content: 'VueJS is awesome.'
+            },
+            {
+              author: 'Tina',
+              content: 'I have fallen in love with React.'
+            },
+            {
+              author: 'Joe',
+              content: 'The Angular CLI rocks.'
+            }
+      ];
+
+      onShowComment(comment) {
+        alert(comment.content);
+      }
+
+}
+
+
+// services
+import { Injectable } from '@angular/core';
+  import { Subject } from 'rxjs/Subject';
+
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class CommentService {
+
+    private commentSelectedSource = new Subject<any>();
+    commentSelected$ = this.commentSelectedSource.asObservable();
+
+    private comments: Array<any> = [
+            {
+              author: 'Nils-Holger',
+              content: 'The will to win is nothing without the will to prepare.'
+            },
+            {
+              author: 'Julia',
+              content: 'I have met my hero, she is me.'
+            },
+            {
+              author: 'Andy',
+              content: 'Somebody may beat me, but they are going to have to bleed to do it.'
+            }
+    ];
+
+    getAll() {
+      return this.comments;
+    }
+
+    remove(commentToRemove) {
+      const index = this.comments.findIndex(comment =>
+                comment.author === commentToRemove.author
+      );
+      this.comments.splice(index, 1);
+      return this.comments;
+    }
+
+    show(comment) {
+      this.commentSelectedSource.next(comment);
+    }
+
+    parse(comment: string) {
+      const commentArr = comment.split(':');
+      const parsedComment = {
+        author: commentArr[0].trim(),
+        content: commentArr[1].trim()
+      };
+      return parsedComment;
+    }
+
+    add(comment) {
+      this.comments.unshift(comment);
+    }
+
+  }
+
+  ****************************************************************************************
+
+  import { Component, OnInit } from '@angular/core';
+
+  import { CommentService } from './../comment.service';
+
+@Component({
+  selector: 'app-comment-detail',
+  template: \`
+
+          <div class="card" *ngIf="comment.author">
+                  <div class="card-header">{{ comment.author }}</div>
+                  <div class="card-body">
+                        {{ comment.content }}
+                  </div>
+          </div>
+  \`
+})
+export class CommentDetailComponent implements OnInit {
+
+  comment: any = {
+    author: '',
+    content: ''
+  };
+
+  constructor(private commentService: CommentService) { }
+
+  ngOnInit() {
+    this.commentService.commentSelected$.subscribe(comment => {
+            this.comment = comment;
+    });
+  }
+
+}
+
+  ****************************************************************************************
+
+  import { Component, OnInit} from '@angular/core';
+
+  import { CommentService } from './../comment.service';
+
+@Component({
+  selector: 'app-comment-list',
+  template: \`
+                <button class="btn btn-primary" (click)="prompt()">
+                    Add Comment
+                </button>
+                <div class="list-group" style="margin-top: 5px;">
+                      <a href="#" class="list-group-item"
+                                  *ngFor="let comment of comments"
+                                  (dblclick)="remove(comment)"
+                                  (click)="show(comment)">
+                      <h4 class="list-group-item-heading">{{ comment.author }}</h4>
+                      <h4 class="list-group-item-text">{{ comment.content }}</h4>
+                    </a>
+                </div>
+
+  \`
+})
+export class CommentListComponent implements OnInit {
+
+      comments: any[];
+
+      constructor(private commentService: CommentService) { }
+
+      ngOnInit() {
+        this.comments = this.commentService.getAll();
+      }
+
+      remove(comment) {
+        this.commentService.remove(comment);
+      }
+
+      show(comment) {
+        this.commentService.show(comment);
+      }
+
+      prompt() {
+        const commentString = window.prompt('Please enter username and content: ',
+        'username: content');
+        const parsedComment = this.commentService.parse(commentString);
+        this.commentService.add(parsedComment);
+      }
+
+}
+
+
+  ****************************************************************************************
+
+  import { Component } from '@angular/core';
+
+
+  @Component({
+    selector: 'app-root',
+    template: \`
+            <div class="container">
+                  <h2 class="text-center">Comments</h2>
+                  <div class="col-md-4 col-md-offset-2">
+                        <app-comment-list></app-comment-list>
+                  </div>
+                  <div class="col-md-4">
+                        <app-comment-detail></app-comment-detail>
+                  </div>
+            </div>
+    \`,
+    styles: [\`
+        h2 {
+          color: palevioletred;
+        }
+    \`]
+  })
+  export class AppComponent  { }
+
+
+// template-driven forms
+import { Component } from '@angular/core';
+
+  import { Flight } from '../flight';
+
+  @Component({
+    selector: 'app-flight-form',
+    template: \`
+
+            <form #flightForm="ngForm" (ngSubmit)="submitForm()">
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" class="form-control"
+                           [(ngModel)]="flightModel.fullName"
+                           name="fullName" #name="ngModel" required minlength="6">
+                    <div *ngIf="name.invalid && (name.dirty || name.touched)"
+                                class="text-danger">
+                            <div *ngIf="name.errors.required">
+                                Name is required.
+                            </div>
+                            <div *ngIf="name.errors.minlength">
+                              Name must be at least 6 characters long.
+                            </div>
+                        </div>
+                </div>
+                <div class="row">
+                      <div class="col-md-6">
+                      <label for="from">From</label>
+                      <select type="text" id="from" class="form-control"
+                              [(ngModel)]="flightModel.from" name="from">
+                          <option *ngFor="let city of cities" value="{{city}}">
+                              {{ city }}
+                          </option>
+                        </select>
+                      </div>
+                      <div class="col-md-6">
+                      <label for="to">To</label>
+                      <select type="text" id="to" class="form-control"
+                              [(ngModel)]="flightModel.to" name="to">
+                          <option *ngFor="let city of cities" value="{{city}}">
+                              {{ city }}
+                          </option>
+                        </select>
+                      </div>
+                </div>
+                <div class="row" style="margin-top: 15px;">
+                      <div class="col-md-5">
+                            <label for="type" style="display: block;">Trip Type</label>
+                            <label class="radio-inline">
+                              <input type="radio" name="type" [(ngModel)]="flightModel.type"
+                                     value="One Way">One Way
+                            </label>
+                            <label class="radio-inline">
+                              <input type="radio" name="type" [(ngModel)]="flightModel.type"
+                                     value="Return">Return
+                            </label>
+                      </div>
+                      <div class="col-md-4">
+                            <label for="departure">Departure</label>
+                            <input type="date" id="departure" class="form-control"
+                                   [(ngModel)]="flightModel.departure" name="departure">
+                      </div>
+                      <div class="col-md-3">
+                            <label for="arrival">Arrival</label>
+                            <input type="date" id="arrival" class="form-control"
+                             [(ngModel)]="flightModel.arrival" name="arrival">
+                      </div>
+              </div>
+              <div class="row" style="margin-top: 15px;">
+                      <div class="col-md-4">
+                          <label for="adults">Adults</label>
+                          <input type="number" id="adults" class="form-control"
+                          [(ngModel)]="flightModel.adults" name="adults">
+                      </div>
+                      <div class="col-md-4">
+                          <label for="children">Children</label>
+                          <input type="number" id="children" class="form-control"
+                          [(ngModel)]="flightModel.children" name="children">
+                      </div>
+                      <div class="col-md-4">
+                          <label for="infants">Infants</label>
+                          <input type="number" id="infants" class="form-control"
+                          [(ngModel)]="flightModel.infants" name="infants">
+                      </div>
+              </div>
+              <div class="form-group" style="margin-top: 15px;">
+                    <button class="btn btn-primary btn-block" [disabled]="!flightForm.valid">
+                      Submit
+                    </button>
+              </div>
+            </form>
+    \`
+  })
+  export class FlightFormComponent {
+
+    flightModel: Flight;
+
+    cities: string[] = [
+      'Berlin',
+      'Hamburg',
+      'Stuttgart',
+      'Munich',
+      'London',
+      'Paris',
+      'Amsterdam',
+      'Brussels',
+      'Barcelona',
+      'New York',
+      'San Francisco',
+      'Rio de Janeiro',
+      'Cape Town',
+      'Sydney',
+      'Tokyo'
+    ];
+
+    constructor() {
+      this.flightModel = new Flight('', '', '', '', 0, '', '', 0, 0);
+    }
+
+    submitForm() {
+      console.log(this.flightModel);
+    }
+
+  }
+
+  *******************************************************************************
+
+  export class Flight {
+
+    constructor(public fullName: string,
+                public from: string,
+                public to: string,
+                public type: string,
+                public adults: number,
+                public departure: string,
+                public arrival: string,
+                public children?: number,
+                public infants?: number) { }
+  }
+
+
+
+// events
+import { Component } from '@angular/core';
+
+
+@Component({
+  selector: 'app-root',
+  template: \`
+          <div class="container" (keypress)="showKey($event)" tabindex="1">
+                  <div class="row">
+                      <h3 class="text-center">
+                            {{ counter }}
+                      </h3>
+                      <div class="buttons">
+                          <div class="btn btn-danger" (click)="increment()">
+                              Increment
+                          </div>
+                          <div class="btn btn-success" (dblclick)="decrement()">
+                              Decrement
+                          </div>
+                      </div>
+                  </div>
+                  <div class="key-bg" *ngIf="keyPressed">
+                        <h1>{{ key }}</h1>
+                  </div>
+          </div>
+  \`,
+  styles: [\`
+    .container {
+      padding-top: 100px;
+      height: 100%;
+      outline: none;
+      position: relative;
+    }
+    .buttons {
+      display: flex;
+      justify-content: center;
+      margin-top: 30px;
+    }
+    .buttons div:first-child {
+      margin-right: 15px;
+    }
+    .key-bg {
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      left: 0;
+      top: 0;
+      background: #fff;
+      opacity: 0.7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .key-bg h1 {
+      font-size: 150px;
+    }
+  \`]
+})
+export class AppComponent  {
+
+  counter = 0;
+  keyPressed = false;
+  key = '';
+
+  increment() {
+    this.counter++;
+  }
+
+  decrement() {
+    this.counter <= 0 ? this.counter = 0 : this.counter--;
+  }
+
+  showKey($event) {
+    this.keyPressed = true;
+    this.key = $event.key.toUpperCase();
+    console.log(this.key);
+    setTimeout(() => {
+      this.keyPressed = false;
+    }, 500);
+  }
+
+}
+
+
+// directives
+import { Directive, Input, TemplateRef, ViewContainerRef } from '@angular/core';
+
+@Directive({
+  selector: '[appWhen]'
+})
+export class WhenDirective {
+  private hasView = false;
+  @Input() set appWhen(condition: boolean) {
+    if (condition && !this.hasView) {
+      this.viewContainerRef.createEmbeddedView(this.templateRef);
+      this.hasView = true;
+    } else if (!condition && this.hasView) {
+      this.viewContainerRef.clear();
+      this.hasView = false;
+    }
+  }
+
+  constructor(private templateRef: TemplateRef<any>,
+              private viewContainerRef: ViewContainerRef) { }
+
+}
+
+*********************************************************************************
+
+
+import { Directive, OnInit, Input, ElementRef, HostListener } from '@angular/core';
+
+@Directive({
+selector: '[appUiButton]'
+})
+export class UiButtonDirective implements OnInit {
+@Input() bgColor: string;
+@Input() hoverBgColor: string;
+
+constructor(private el: ElementRef) { }
+
+
+ngOnInit() {
+  console.log(this.bgColor);
+  Object.assign(this.el.nativeElement.style, {
+        backgroundColor: this.bgColor || '#ff00a6',
+        padding: '7px 15px',
+        fontSize: '16px',
+        color: '#fff',
+        border: 'none',
+        borderRadius: '5px'
+  });
+
+}
+
+@HostListener('mouseenter') onMouseEnter() {
+  console.log(this.bgColor);
+  this.el.nativeElement.style.backgroundColor = this.hoverBgColor || '#000';
+}
+
+@HostListener('mouseleave') onMouseLeave() {
+  this.el.nativeElement.style.backgroundColor = this.bgColor || '#ff00a6';
+}
+
+}
+
+*********************************************************************************
+
+import { Component } from '@angular/core';
+
+
+@Component({
+selector: 'app-root',
+template: \`
+        <h3 style="text-align:center" *appWhen="toggle">Hi, sexy Directive</h3>
+        <div class="container">
+                  <button appUiButton bgColor="red" hoverBgColor="green"
+                          (click)="updateToggle()">
+                          Click Me!!!
+                  </button>
+        </div>
+\`,
+styles: [\`
+  .container {
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 100px;
+    display: flex;
+    justify-content: center;
+  }
+\`]
+})
+export class AppComponent  {
+  toggle = false;
+  updateToggle() {
+    this.toggle = !this.toggle;
+  }
+
+}
+
+
+// pipes
+import { Pipe, PipeTransform } from '@angular/core';
+
+@Pipe({
+  name: 'reverse'
+})
+export class ReversePipe implements PipeTransform {
+
+  transform(value: string, args?: any): string {
+    if (args) {
+      return value.split(' ').reverse().join(' ');
+    } else {
+      return value.split('').reverse().join('');
+    }
+  }
+
+}
+
+***********************************************************************
+
+import { Component } from '@angular/core';
+
+
+@Component({
+selector: 'app-root',
+template: \`
+        <div class="container">
+                <h2>{{ 0.767 | percent }}</h2>
+                <h2>{{ 75.989 | currency:'EUR' }}</h2>
+                <h2>{{ 'when the going gets tough ...' | reverse:true }}</h2>
+        </div>
+\`,
+styles: [\`
+  .container {
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 100px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+  }
+\`]
+})
+export class AppComponent  {
+
+}
+
+
+// routing
+import { Routes } from '@angular/router';
+
+import { HomeComponent } from './home/home.component';
+import { AboutComponent } from './about/about.component';
+import { ContactComponent } from './contact/contact.component';
+
+
+export const routes: Routes = [
+      {
+        path: '',
+        redirectTo: '/home',
+        pathMatch: 'full'
+      },
+      {
+        path: 'home',
+        component: HomeComponent
+      },
+      {
+        path: 'about',
+        component: AboutComponent
+      },
+      {
+        path: 'contact',
+        component: ContactComponent
+      },
+      {
+        path: '**',
+        component: HomeComponent
+      }
+];
+
+
+
+// mvc pattern
+export class User {
+
+  constructor(private _email: string, private _password) { }
+
+  get email(): string {
+    return this._email;
+  }
+
+  get password(): string {
+    return this._password;
+  }
+
+  set email(email: string) {
+    this._email = email;
+  }
+
+  set password(password: string) {
+    this._password = password;
+  }
+
+}
+***************************************************************************
+
+import { User } from './user';
+import { ApiService } from './api.service';
+
+export class UserModel {
+
+    private user: User;
+    private _loading = false;
+
+    constructor(private apiService: ApiService) { }
+
+    signin(email: string, password: string) {
+
+        this._loading = true;
+
+        this.apiService.getUser(new User(email, password)).then(
+          user => {
+            this.user = user;
+            this._loading = false;
+          }
+        );
+    }
+
+    signup(email: string, password: string) {
+      this._loading = true;
+      this.apiService.postUser(new User(email, password)).then(
+        user => {
+          this.user = user;
+          this._loading = false;
+        }
+      );
+    }
+
+    get loading(): boolean {
+      return this._loading;
+    }
+
+}
+
+***************************************************************************
+
+import { Injectable } from '@angular/core';
+import { User } from './user';
+
+
+@Injectable()
+export class ApiService {
+
+getUser(user: User): Promise<User> {
+
+    return new Promise<User>(
+      (resolve, reject) => {
+        return user;
+      });
+}
+
+postUser(user: User): Promise<User> {
+
+    return new Promise<User>(
+      (resolve, reject) => {
+        return user;
+      });
+}
+
+}
+
+***************************************************************************
+
+import { Component } from '@angular/core';
+
+import { UserModel } from './user.model';
+import { ApiService } from './api.service';
+
+@Component({
+selector: 'app-root',
+template: \`
+
+    <form (ngSubmit)="onSignin(this.email1.value, this.password1.value);">
+
+        Email: <input name="email" type="text" #email1>
+        Password: <input name="password" type="password" #password1>
+        <input [hidden]="userModel.loading" type="submit">
+        <i [hidden]="!userModel.loading" class="fa fa-spinner"
+            aria-hidden="true">loading</i>
+    </form>
+
+    <h1>Signup</h1>
+
+    <form (ngSubmit)="onSignup(this.email2.value, this.password2.value);">
+
+        email: <input name="email" type="text" #email2>
+        password: <input name="password" type="password" #password2>
+        <input [hidden]="userModel.loading" type="submit">
+        <i [hidden]="!userModel.loading" class="fa fa-spinner"
+            aria-hidden="true">loading</i>
+    </form>
+\`
+})
+export class AppComponent  {
+
+  userModel: UserModel;
+
+  constructor(apiService: ApiService) {
+    this.userModel = new UserModel(apiService);
+  }
+
+  onSignin(email: string, password: string) {
+    console.log(email, password);
+    this.userModel.signin(email, password);
+    return false;
+  }
+
+  onSignup(email: string, password: string) {
+    this.userModel.signup(email, password);
+    return false;
+  }
+
+}
+  `,
+  blockQuote: `
+  Wir beabsichtigen zum Mond zu fliegen in diesem Jahrzehnt und andere Sachen zu tun, nicht weil sie einfach sind,
+  sondern weil sie schwer sind, weil das Ziel uns dienen wird zu organisieren und messen die Beste unserer Energien
+  und Kompetenzen, weil diese Herausforderung ist eine welche wir annehmen, eine die wir nicht vertagen wollen
+  und eine die wir vorhaben zu gewinnen.
+  `,
+  imageFooterUrl: 'assets/img/post15.jpg',
+  footerQuote: 'Wir sind alle miteinander verbunden; zueinander biologisch. Zu der Erde, chemisch. Zum Rest des Universums, atomar.'
+},
+{
+  id: 16,
+  imageHeaderUrl: 'url(assets/img/post16-bg.jpg)',
+  heading: 'Angular 8/9, Projekte- Teil 2',
+  subHeading: 'Angular Projekte, P1',
+  metaPublishedDate: 'am 09 Januar, 2020',
+  sectionHeading: 'Angular Projekte, P1',
+  code: `
+ // interpolation
+ import { Component } from '@angular/core';
+
+
+ @Component({
+   selector: 'app-root',
+   template: \`
+             <h1>{{ title }}</h1>
+             <p>{{ title.length }}</p>
+             <p>Reversed: {{ getReversed(title) }}</p>
+  \`
+ })
+ export class AppComponent  {
+           title = 'Angular 9 Projects';
+           getReversed(str: string): string {
+             let reversed = '';
+             for (let i = str.length; i >= 0; i--) {
+               reversed += str.substring(i, i + 1);
+             }
+             return reversed;
+           }
+ }
+
+
+// attribute binding
+import { Component } from '@angular/core';
+
+import { Car } from './car';
+
+
+@Component({
+  selector: 'app-root',
+  template: \`
+            <h1>{{ title }}</h1>
+            <ul>
+                  <li *ngFor="let car of cars">
+                        <span [attr.id]="car.id"
+                              [attr.data-desc]="car.make + ' ' +  car.model"
+                        [attr.data-article]="car.article">
+                        {{ car.year }}&nbsp;
+                        {{ car.make }}&nbsp;
+                        {{ car.model }}&nbsp;
+                        <button (click)="showCar($event)">View</button>
+                        </span>
+                  </li>
+            </ul>
+  \`
+})
+export class AppComponent  {
+          title = 'Angular 9 Projects';
+
+      cars = [
+        new Car('car1', 2020, 'porsche', '911',
+                                         'https://en.wikipedia.org/wiki/Porsche_911'),
+        new Car('car2', 2021, 'bmw', 'x3', 'https://en.wikipedia.org/wiki/BMW_X3'),
+        new Car('car3', 2026, 'audi', 'r8', 'https://en.wikipedia.org/wiki/Audi_R8')
+      ];
+
+      showCar(event) {
+        const desc = event.target.parentElement.dataset.desc;
+        if (window.confirm(\`Ok will redirect to an article about \${desc}.
+                            Cancel will load this web site.\`)) {
+                              window.location.href =
+                              event.target.parentElement.dataset.article;
+                            }
+      }
+
+}
+
+
+// ngmodel
+import { Component } from '@angular/core';
+
+
+
+@Component({
+  selector: 'app-root',
+  template: \`
+            <h1>{{ title }}</h1>
+            <p>
+                Foreground: <input [(ngModel)]="fg">
+            </p>
+            <p>
+                Background: <input [(ngModel)]="bg">
+            </p>
+            <div [ngStyle]="{'color': fg, 'background-color': bg, 'padding': '5px'}">
+              Test
+            </div>
+  \`
+})
+export class AppComponent  {
+          title = 'Angular 9 Projects';
+
+          fg = '#ffffff';
+          bg = '#000000';
+
+}
+
+
+// viewchild
+import { Component, AfterViewInit, ViewChild } from '@angular/core';
+
+
+
+@Component({
+  selector: 'app-root',
+  template: \`
+            <h1>{{ title }}</h1>
+            <input #box type="text" (input)="textInput($event)" value="">
+            <hr>
+            Upper-Case: {{ upperCase }}
+            <br>
+            Lower-Case: {{ lowerCase }}
+  \`
+})
+export class AppComponent implements AfterViewInit  {
+          title = 'Angular 9 Projects';
+
+          upperCase = '';
+          lowerCase = '';
+
+          @ViewChild('box', { static: false })  inputBox;
+
+          textInput(event) {
+            this.upperCase = event.target.value.toUpperCase();
+            this.lowerCase = event.target.value.toLowerCase();
+          }
+
+          ngAfterViewInit() {
+            this.inputBox.nativeElement.focus();
+          }
+
+}
+
+
+// ngif
+
+import { Component } from '@angular/core';
+
+
+@Component({
+  selector: 'app-root',
+  template: \`
+            <h1>{{ title }}</h1>
+
+            <div *ngIf="this.showName" class="box">
+                  Name: Nils
+            </div>
+            <div *ngIf="!this.showName" class="box">
+                  Address: Berlin
+            </div>
+            <button (click)="toggle()">Toggle</button>
+  \`,
+  styles: [\`
+        div.box {
+          width: 200px;
+          padding: 20px;
+          margin: 20px;
+          border: 1px solid black;
+          color: white;
+          background-color: green;
+        }
+  \`]
+})
+export class AppComponent {
+          title = 'Angular 9 Projects';
+
+          showName = true;
+
+          toggle() {
+            this.showName = !this.showName;
+          }
+
+}
+
+
+// ngfor
+import { Component } from '@angular/core';
+
+
+@Component({
+  selector: 'app-root',
+  template: \`
+            <h1>{{ title }}</h1>
+
+            <div *ngFor="let technology of technologies; let i = index;">
+                    <span>({{ i + 1 }}): {{ technology }}</span>
+            </div>
+  \`
+})
+export class AppComponent {
+          title = 'Angular 9 Projects';
+
+         technologies = ['Angular 9.01', 'Angular CLI 8.2.3', 'Angular Material 8.2.2'];
+}
+
+
+// ngswitch
+import { Component } from '@angular/core';
+
+
+  @Component({
+    selector: 'app-root',
+    template: \`
+              <h1>{{ title }}</h1>
+
+              <select [(ngModel)]="selection">
+                  <option *ngFor="let option of options">
+                      {{ option }}
+                  </option>
+              </select>
+
+              <div [ngSwitch]="selection">
+                      <div class="block1" *ngSwitchCase="options[0]">Angular 9</div>
+                      <div class="block2" *ngSwitchCase="options[1]">Angular CLI 8.2.3</div>
+                      <div class="block3" *ngSwitchDefault>Angular Material 8.2.2</div>
+              </div>
+    \`,
+    styles: [\`
+      .block1 {
+        background-color: #d5f4e6;
+        margin: 10px;
+        padding: 10px;
+      }
+      .block2 {
+        background-color: #d5f4ff;
+        margin: 10px;
+        padding: 10px;
+      }
+      .block3 {
+        background-color: #d5cce6;
+        margin: 10px;
+        padding: 10px;
+      }
+    \`]
+  })
+  export class AppComponent {
+           title = 'Angular 9 Projects';
+
+           selection = 'technologies';
+           options = ['Angular 9', 'Angular CLI 8.2.3', 'Angular Material 8.2.2'];
+
+  }
+
+
+// ngclass
+import { Component } from '@angular/core';
+
+
+@Component({
+  selector: 'app-root',
+  template: \`
+            <h1>{{ title }}</h1>
+
+            <div *ngFor="let animal of animals">
+                  <span [ngClass]="{'selected': animal === selectedAnimal,
+                        'unselected': animal !== selectedAnimal }"
+                        (click)="onAnimalClicked($event)">
+                        {{ animal }}
+                  </span>
+            </div>
+  \`,
+  styles: [\`
+    .selected {
+      background-color: red;
+      color: white;
+      padding: 10px;
+      margin: 10px;
+    }
+    .unselected {
+      background-color: white;
+      margin: 10px;
+      padding: 10px;
+    }
+  \`]
+})
+export class AppComponent {
+         title = 'Angular 9 Projects';
+
+         selectedAnimal = 'giraffe';
+         animals = ['lion', 'alligator', 'tiger', 'cheetah'];
+
+         onAnimalClicked(event: Event) {
+           const clickedAnimal = event.srcElement.innerHTML.trim();
+           this.selectedAnimal = clickedAnimal;
+         }
+
+}
+
+
+// ngstyle
+import { Component } from '@angular/core';
+
+
+  @Component({
+    selector: 'app-root',
+    template: \`
+              <h1>{{ title }}</h1>
+
+              <div *ngFor="let animal of animals">
+                    <div [ngStyle]="getAnimalStyle(animal)"
+                          (click)="onAnimalClicked($event)">
+                          {{ animal }}
+                    </div>
+              </div>
+    \`
+  })
+  export class AppComponent {
+           title = 'Angular 9 Projects';
+
+           selectedAnimal = 'giraffe';
+           animals = ['lion', 'tiger', 'alligator', 'cheetah'];
+
+           onAnimalClicked(event: Event) {
+             const clickedAnimal = event.srcElement.innerHTML.trim();
+             this.selectedAnimal = clickedAnimal;
+           }
+
+           getAnimalStyle(animal) {
+             const isSelected = (animal === this.selectedAnimal);
+             return {
+               'padding': '10px',
+               'margin': '10px',
+               'color': isSelected ? '#ffffff' : '#000000',
+               'background-color': isSelected ? '#ff0000' : '#ffffff'
+             };
+           }
+
+  }
+
+
+// sizer directive
+import { Directive, Input, ElementRef, Renderer, OnInit } from '@angular/core';
+
+  @Directive({
+    selector: '[appSizer]'
+  })
+  export class SizerDirective implements OnInit {
+    @Input() appSizer: string;
+
+    constructor(private elementRef: ElementRef, private renderer: Renderer) { }
+
+    ngOnInit() {
+      this.renderer.setElementStyle(this.elementRef.nativeElement,
+                                                   'font-size', this.appSizer);
+    }
+
+  }
+
+  ***********************************************************************************
+  import { Component } from '@angular/core';
+
+
+  @Component({
+      selector: 'app-root',
+      template: \`
+            <div appSizer="72px">{{ title }}</div>
+  \`
+})
+export class AppComponent {
+         title = 'Angular 9 Projects';
+
+}
+
+
+// hoverer directive
+import { Directive, Input, ElementRef, Renderer } from '@angular/core';
+
+@Directive({
+  selector: '[appHoverer]',
+  host: {
+    '(mouseenter)': 'onMouseEnter()',
+    '(mouseleave)':'onMouseLeave()'
+  }
+})
+export class HovererDirective {
+  @Input() appHoverer: string;
+
+
+  constructor(private elementRef: ElementRef,
+              private renderer: Renderer) { }
+
+  onMouseEnter() {
+    this.renderer.setElementStyle(this.elementRef.nativeElement, 'color', this.appHoverer);
+  }
+
+  onMouseLeave() {
+    this.renderer.setElementStyle(this.elementRef.nativeElement, 'color', 'black');
+  }
+
+}
+
+*************************************************************************************
+
+import { Component } from '@angular/core';
+
+
+@Component({
+selector: 'app-root',
+template: \`
+          <h1 appHoverer="red">{{ title }}</h1>
+\`
+})
+export class AppComponent {
+       title = 'Angular 9 Projects';
+
+}
+
+
+// input binding
+ import { Component, Input} from '@angular/core';
+
+  export interface Car {
+    make: string;
+    model: string;
+  }
+
+  @Component({
+    selector: 'app-car',
+    template: \`
+            <p>
+                  {{ car.make }} : {{ car.model }}
+            </p>
+    \`
+  })
+  export class CarComponent  {
+    @Input() car: Car;
+
+  }
+
+*************************************************************************
+
+
+import { Component } from '@angular/core';
+
+import { Car } from './car/car.component';
+
+@Component({
+  selector: 'app-root',
+  template: \`
+            <h1>{{ title }}</h1>
+            <app-car *ngFor="let car of cars" [car]="car"></app-car>
+  \`
+})
+export class AppComponent {
+         title = 'Angular 9 Projects';
+
+         cars: Array<Car> = [
+              { make: 'Audi', model: 'A8' },
+              { make: 'BMW', model: 'X3' },
+              { make: 'Porsche', model: '911' }
+         ];
+
+}
+
+// ngcontent
+mport { Component, ContentChildren } from '@angular/core';
+
+  @Component({
+    selector: 'app-technology',
+    template: \`
+          <div>
+                &nbsp;-&nbsp;<ng-content></ng-content>
+          </div>
+    \`
+  })
+  export class TechnologyComponent { }
+
+  @Component({
+    selector: 'app-paragraph',
+    template: \`
+          <div>
+              <ng-content></ng-content>
+              <p *ngIf="technology">Number of technologies: {{ technology.length }}</p>
+          </div>
+    \`,
+    styles: [\`
+          div {
+            border: 1px solid #c0c0c0;
+            margin: 10px;
+            padding: 10px;
+          }
+          p {
+            margin: 5px 0;
+          }
+    \`]
+  })
+  export class ParagraphComponent {
+    @ContentChildren(TechnologyComponent) technology;
+  }
+
+
+  @Component({
+    selector: 'app-root',
+    template: \`
+              <h1>{{ title }}</h1>
+              <app-paragraph>Single Page Application Frameworks
+                <app-technology>Angular 9</app-technology>
+                <app-technology>React 16</app-technology>
+                <app-technology>Vue 2</app-technology>
+              </app-paragraph>
+              <app-paragraph>CSS Frameworks
+                <app-technology>Angular Material 5</app-technology>
+                <app-technology>Bootstrap 4</app-technology>
+                <app-technology>Materialize 1 Alpha</app-technology>
+              </app-paragraph>
+    \`
+  })
+  export class AppComponent {
+           title = 'Angular 9 Projects';
+
+  }
+
+
+// ngonchanges
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+
+@Component({
+  selector: 'app-name',
+  template: \`
+        <p *ngFor="let change of changes">
+              {{ change }}
+        </p>
+  \`
+})
+export class NameComponent implements OnChanges {
+  @Input() name;
+  changes: string[] = [''];
+
+  ngOnChanges(changes: SimpleChanges) {
+    this.changes.push(JSON.stringify(changes));
+  }
+}
+
+
+@Component({
+  selector: 'app-root',
+  template: \`
+            <h1>{{ title }}</h1>
+            Change this field: <input [(ngModel)]="name">
+            <hr>
+            History
+            <app-name [name]="name"></app-name>
+
+  \`
+})
+export class AppComponent {
+         title = 'Angular 9 Projects';
+         name = '';
+
+}
+
+
+// ngoninit
+import { Component, OnInit } from '@angular/core';
+
+
+
+@Component({
+  selector: 'app-root',
+  template: \`
+            <h1>{{ title }}</h1>
+            <p *ngFor="let log of logs">
+                  {{ log }}
+            </p>
+  \`
+})
+export class AppComponent implements OnInit {
+         title = 'Angular 9 Projects';
+         logs: Array<string> = [ new Date() + '' ];
+
+         constructor() {
+           for (let i = 0; i < 1000; i++) {
+             console.log(i);
+           }
+         }
+
+         ngOnInit() {
+          this.logs.push(new Date() + '');
+         }
+
+}
+
+
+// ngdocheck
+import { Component, Input, DoCheck, IterableDiffers } from '@angular/core';
+
+
+  @Component({
+    selector: 'app-numbers',
+    template: \`
+            {{ numbers }}
+            <br>
+            <p *ngFor="let change of changes">
+                      {{ change }}
+            </p>
+    \`,
+    styles: [\`
+          p {
+            padding: 0;
+            margin: 0;
+          }
+    \`]
+  })
+  export class NumbersComponent implements DoCheck {
+    @Input() numbers: string[];
+    changes: Array<string> = [];
+    differ;
+
+    constructor(private differs: IterableDiffers) {
+      this.differ = differs.find([]).create(null);
+    }
+
+    ngDoCheck() {
+      const differences = this.differ.diff(this.numbers);
+      if (differences) {
+        if (differences.forEachAddedItem) {
+            differences.forEachAddedItem((item) => {
+                if ((item) && (item.item)) {
+                  this.changes.push('added ' + item.item);
+                }
+            });
+        }
+        if (differences.forEachRemovedItem) {
+          differences.forEachRemovedItem((item) => {
+            if ((item) && (item.item)) {
+              this.changes.push('removed ' + item.item);
+            }
+          });
+        }
+      }
+    }
+  }
+
+**************************************************************************
+
+  @Component({
+    selector: 'app-root',
+    template: \`
+              <h1>{{ title }}</h1>
+              Enter Array (comma-separated):
+              <input [(ngModel)]="numbers">
+              <br>
+              <app-numbers [numbers]="numbers.split(',')"></app-numbers>
+
+    \`
+  })
+  export class AppComponent {
+           title = 'Angular 9 Projects';
+           numbers = '';
+
+  }
+
+
+// contentchildren
+import { Component, Input, AfterContentInit,
+  ContentChildren, QueryList } from '@angular/core';
+
+
+@Component({
+selector: 'app-member',
+template: \`
+<p [style.backgroundColor]="getBackgroundColor()">
+<ng-content></ng-content>
+\`,
+styles: [\`
+p {
+padding: 5px;
+}
+\`]
+})
+export class MemberComponent {
+selected = false;
+getBackgroundColor() {
+return this.selected ? '#FFCCCC' : '#CCFFFF';
+}
+
+}
+
+**************************************************************************
+
+@Component({
+selector: 'app-crew',
+template: \`
+<p><ng-content></ng-content></p>
+\`
+})
+export class CrewComponent implements AfterContentInit {
+@ContentChildren(MemberComponent) members: QueryList<MemberComponent>;
+
+ngAfterContentInit() {
+this.members.first.selected = true;
+}
+}
+
+**************************************************************************
+
+@Component({
+selector: 'app-root',
+template: \`
+<h1>{{ title }}</h1>
+<app-crew>
+<app-member>Karen</app-member>
+<app-member>Barbie</app-member>
+<app-member>Maria</app-member>
+<app-member>Susanne</app-member>
+<app-member>Hanne</app-member>
+<app-member>Gina</app-member>
+<app-member>Nils-Holger</app-member>
+</app-crew>
+\`
+})
+export class AppComponent {
+title = 'Angular 9 Projects';
+
+}
+
+
+// contentchild
+import { Component, ContentChild, AfterContentChecked } from '@angular/core';
+
+
+  @Component({
+    selector: 'app-card',
+    template: \`
+           <ng-content></ng-content>
+    \`
+  })
+  export class CardComponent {}
+
+  **************************************************************************
+
+  const BMW_X3 = 'BMW X3';
+  const MERCEDES_PICKUP_X3 = 'Mercedes Pick-Up X3';
+
+  @Component({
+    selector: 'app-root',
+    template: \`
+              <h1>{{ title }}</h1>
+              <app-card>{{ car }}</app-card>
+              <button (click)="pickCar()">Pick a Car</button>
+    \`
+  })
+  export class AppComponent implements AfterContentChecked {
+           title = 'Angular 9 Projects';
+           car = BMW_X3;
+
+           @ContentChild(CardComponent) contentChild: CardComponent;
+
+           ngAfterContentChecked() {
+             console.log('content inside card has been checked: ' + this.car);
+           }
+
+           pickCar() {
+             this.car = this.car === BMW_X3 ? MERCEDES_PICKUP_X3 : BMW_X3;
+           }
+
+  }
+
+
+// viewchild
+import { Component, ViewChild, AfterViewInit } from '@angular/core';
+
+
+  @Component({
+    selector: 'app-root',
+    template: \`
+              <h1>{{ title }}</h1>
+              Input: <input #box (keypress)="0"> {{ box.value }}
+    \`
+  })
+  export class AppComponent implements AfterViewInit {
+           title = 'Angular 9 Projects';
+           @ViewChild('box', { static: false }) inputBox;
+
+           ngAfterViewInit() {
+             // viewchild variables are available in this method
+             // set initial focus
+             this.inputBox.nativeElement.focus();
+           }
+
+  }
+
+
+// afterviewchecked
 
 
 
@@ -23566,7 +25743,7 @@ export class AppComponent implements OnInit, OnChanges, OnDestroy, DoCheck,
   und Kompetenzen, weil diese Herausforderung ist eine welche wir annehmen, eine die wir nicht vertagen wollen
   und eine die wir vorhaben zu gewinnen.
   `,
-  imageFooterUrl: 'assets/img/post15.jpg',
+  imageFooterUrl: 'assets/img/post16.jpg',
   footerQuote: 'Wir sind alle miteinander verbunden; zueinander biologisch. Zu der Erde, chemisch. Zum Rest des Universums, atomar.'
 }
   ];
@@ -23579,7 +25756,7 @@ export class AppComponent implements OnInit, OnChanges, OnDestroy, DoCheck,
   }
   getArticle(): void {
     this.articleId = this.route.snapshot.paramMap.get('id');
-    // console.log(this.articleId);
+    console.log(this.articleId);
     if (+this.articleId === 1 || this.articleId === 'typescript-basics-1') {
       this.articleId = 1;
     }
@@ -23625,7 +25802,10 @@ export class AppComponent implements OnInit, OnChanges, OnDestroy, DoCheck,
     if (this.articleId === 'angular-projects-part-1') {
       this.articleId = 15;
     }
-    if (!(+this.articleId) || +this.articleId > 15) {
+    if (this.articleId === 'angular-projects-part-2') {
+      this.articleId = 16;
+    }
+    if (!(+this.articleId) || +this.articleId > 16) {
       this.isNotFound = true;
       this.router.navigate(['page-not-found']);
     }
