@@ -23110,6 +23110,464 @@ export class StockItemComponent implements OnInit {
   `,
   imageFooterUrl: 'assets/img/post14.jpg',
   footerQuote: 'Wir sind alle miteinander verbunden; zueinander biologisch. Zu der Erde, chemisch. Zum Rest des Universums, atomar.'
+},
+{
+  id: 15,
+  imageHeaderUrl: 'url(assets/img/post15-bg.jpg)',
+  heading: 'Angular 8/9, Projekte- Teil 1',
+  subHeading: 'Angular Projekte, Grundlagen',
+  metaPublishedDate: 'am 09 Januar, 2020',
+  sectionHeading: 'Angular Projekte, Grundlagen',
+  code: `
+// view encapsulation
+// default, component styles are encapsulated/isolated
+encapsulation: ViewEncapsulation.Emulated
+
+// ideal, Angular uses shadow roots
+encapsulation: ViewEncapsulation.Native
+
+// global CSS styles apply
+encapsulation: ViewEncapsulation.None
+
+
+// input decorator
+import { Component, Input} from '@angular/core';
+
+import { Stock } from '../../model/stock';
+
+@Component({
+  selector: 'app-stock-item',
+  template: \`
+          <div class="stock-container">
+              <div class="name"><h3>{{ stock.name }}</h3> -
+              <h4>({{ stock.code }})</h4></div>
+              <div class="price"
+              [class]="stock.isPositiveChange() ? 'positive' : 'negative'">
+              € {{ stock.price }}
+              </div>
+              <button (click)="toggleFavorite($event)" [disabled]="stock.favorite">
+                Add to Favorite
+              </button>
+          </div>
+  \`,
+  styles: [\`
+  .stock-container {
+    border: 1px solid black;
+    border-radius: 5px;
+    display: inline-block;
+    padding: 10px;
+  }
+  .stock-container .name h3, .stock-container .name h4 {
+    display: inline-block;
+  }
+  .positive {
+    color: red;
+  }
+  .negative {
+    color: green;
+  }
+  \`]
+})
+export class StockItemComponent {
+
+  @Input() stock;
+
+  constructor() { }
+
+  toggleFavorite(event) {
+    this.stock.favorite = !this.stock.favorite;
+  }
+
+}
+
+***********************************************************************
+
+import { Component, OnInit } from '@angular/core';
+
+import { Stock } from './model/stock';
+
+
+@Component({
+selector: 'app-root',
+template: \`
+        <h1>{{ title }}</h1>
+        <app-stock-item [stock]="stock"></app-stock-item>
+
+\`
+})
+export class AppComponent implements OnInit {
+title = 'Tour Of Stocks';
+stock: Stock;
+
+ngOnInit() {
+  this.stock = new Stock('Rocket Stock Company', 'RSC', 1000, 110);
+}
+
+}
+
+
+// output decorator
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+
+import { Stock } from '../../model/stock';
+
+@Component({
+  selector: 'app-stock-item',
+  template: \`
+          <div class="stock-container">
+              <div class="name"><h3>{{ stock.name }}</h3> -
+              <h4>({{ stock.code }})</h4></div>
+              <div class="price"
+              [class]="stock.isPositiveChange() ? 'positive' : 'negative'">
+              € {{ stock.price }}
+              </div>
+              <button (click)="onToggleFavorite($event)" *ngIf="!stock.favorite">
+                Add to Favorite
+              </button>
+          </div>
+  \`,
+  styles: [\`
+  .stock-container {
+    border: 1px solid black;
+    border-radius: 5px;
+    display: inline-block;
+    padding: 10px;
+  }
+  .stock-container .name h3, .stock-container .name h4 {
+    display: inline-block;
+  }
+  .positive {
+    color: red;
+  }
+  .negative {
+    color: green;
+  }
+  \`]
+})
+export class StockItemComponent {
+  @Input() stock;
+  @Output() private toggleFavorite: EventEmitter<Stock>;
+
+  constructor() {
+      this.toggleFavorite = new EventEmitter<Stock>();
+  }
+
+  onToggleFavorite(event) {
+    this.toggleFavorite.emit(this.stock);
+  }
+
+}
+
+***********************************************************************
+
+import { Component, OnInit } from '@angular/core';
+
+import { Stock } from './model/stock';
+
+
+@Component({
+selector: 'app-root',
+template: \`
+        <h1>{{ title }}</h1>
+        <app-stock-item [stock]="stock"
+              (toggleFavorite)="onToggleFavorite($event)">
+        </app-stock-item>
+\`
+})
+export class AppComponent implements OnInit {
+title = 'Tour Of Stocks';
+stock: Stock;
+
+ngOnInit() {
+  this.stock = new Stock('Rocket Stock Company', 'RSC', 1000, 110);
+}
+
+onToggleFavorite(stock: Stock) {
+  console.log('Favorite for', stock.name, 'was triggered');
+  this.stock.favorite = !this.stock.favorite;
+}
+
+}
+
+
+
+// change detection strategy
+import { Component, Input, Output } from '@angular/core';
+import { EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+
+import { Stock } from '../../model/stock';
+
+@Component({
+  selector: 'app-stock-item',
+  template: \`
+          <div class="stock-container">
+              <div class="name"><h3>{{ stock.name }}</h3> -
+              <h4>({{ stock.code }})</h4></div>
+              <div class="price"
+              [class]="stock.isPositiveChange() ? 'positive' : 'negative'">
+              € {{ stock.price }}
+              </div>
+              <button (click)="onToggleFavorite($event)" *ngIf="!stock.favorite">
+                Add to Favorite
+              </button>
+              <button (click)="changeStockPrice()">Change Price</button>
+          </div>
+  \`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: [\`
+  .stock-container {
+    border: 1px solid black;
+    border-radius: 5px;
+    display: inline-block;
+    padding: 10px;
+  }
+  .stock-container .name h3, .stock-container .name h4 {
+    display: inline-block;
+  }
+  .positive {
+    color: red;
+  }
+  .negative {
+    color: green;
+  }
+  \`]
+})
+export class StockItemComponent {
+  @Input() stock;
+  @Output() private toggleFavorite: EventEmitter<Stock>;
+
+  constructor() {
+      this.toggleFavorite = new EventEmitter<Stock>();
+  }
+
+  onToggleFavorite(event) {
+    this.toggleFavorite.emit(this.stock);
+  }
+
+  changeStockPrice() {
+    this.stock.price += 150;
+  }
+
+}
+
+***********************************************************************
+
+import { Component, OnInit } from '@angular/core';
+
+import { Stock } from './model/stock';
+
+
+@Component({
+selector: 'app-root',
+template: \`
+        <h1>{{ title }}</h1>
+        <app-stock-item [stock]="stock"
+              (toggleFavorite)="onToggleFavorite($event)">
+        </app-stock-item>
+        <button (click)="changeStockObject()">Change Stock</button>
+        <button (click)="changeStockPrice()">Change Price</button>
+\`
+})
+export class AppComponent implements OnInit {
+title = 'Tour Of Stocks';
+stock: Stock;
+private counter = 1;
+
+ngOnInit() {
+  this.stock = new Stock('Rocket Stock Company - ' + this.counter++, 'RSC', 1000, 110);
+}
+
+onToggleFavorite(stock: Stock) {
+  // will update value in child component
+  // because triggered as a result of event binding
+  // from child component
+  this.stock.favorite = !this.stock.favorite;
+}
+
+changeStockObject() {
+  // will update value in child component
+  // because creating a new reference for stock input
+  this.stock = new Stock('Rocket Stock Company - ' + this.counter++, 'RSC', 1000, 110);
+}
+
+changeStockPrice() {
+  // will NOT update value in child component
+  // because changing same reference and Angular will
+  // not check for it in OnPush Change Detection Strategy
+  this.stock.price += 150;
+}
+
+}
+
+
+// component lifecycle hooks
+import { Component, SimpleChanges, OnInit, OnChanges, Input } from '@angular/core';
+import { OnDestroy, DoCheck, AfterViewChecked,
+         Output, AfterContentInit } from '@angular/core';
+import { AfterViewInit, AfterContentChecked, EventEmitter } from '@angular/core';
+
+import { Stock } from '../../model/stock';
+
+@Component({
+  selector: 'app-stock-item',
+  template: \`
+          <div class="stock-container">
+              <div class="name"><h3>{{ stock.name }}</h3> -
+              <h4>({{ stock.code }})</h4></div>
+              <div class="price"
+              [class]="stock.isPositiveChange() ? 'positive' : 'negative'">
+              € {{ stock.price }}
+              </div>
+              <button (click)="onToggleFavorite($event)" *ngIf="!stock.favorite">
+                Add to Favorite
+              </button>
+          </div>
+  \`,
+   styles: [\`
+  .stock-container {
+    border: 1px solid black;
+    border-radius: 5px;
+    display: inline-block;
+    padding: 10px;
+  }
+  .stock-container .name h3, .stock-container .name h4 {
+    display: inline-block;
+  }
+  .positive {
+    color: red;
+  }
+  .negative {
+    color: green;
+  }
+  \`]
+})
+export class StockItemComponent implements OnInit, OnChanges, OnDestroy, DoCheck,
+             AfterContentChecked, AfterContentInit, AfterViewChecked, AfterViewInit {
+  @Input() stock;
+  @Output() private toggleFavorite: EventEmitter<Stock>;
+
+  constructor() {
+      this.toggleFavorite = new EventEmitter<Stock>();
+  }
+
+  onToggleFavorite(event) {
+    this.toggleFavorite.emit(this.stock);
+  }
+
+  ngOnInit() {
+    console.log('Stock Item Component - On Init');
+  }
+
+  ngAfterViewInit() {
+    console.log('Stock Item Component - After View Init');
+  }
+
+  ngAfterViewChecked() {
+    console.log('Stock Item Component - After View Checked');
+  }
+
+  ngAfterContentInit() {
+    console.log('Stock Item Component - After Content Init');
+  }
+
+  ngAfterContentChecked() {
+    console.log('Stock Item Component - After Content Checked');
+  }
+
+  ngDoCheck() {
+    console.log('Stock Item Component - Do Check');
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    console.log('Stock Item Component - On Changes -', changes);
+  }
+
+  ngOnDestroy() {
+    console.log('Stock Item Component - On Destroy');
+  }
+
+}
+
+***********************************************************************
+
+import { Component, OnInit, OnChanges, AfterContentInit } from '@angular/core';
+import { OnDestroy, DoCheck, AfterViewChecked } from '@angular/core';
+import { AfterViewInit, AfterContentChecked } from '@angular/core';
+
+import { Stock } from './model/stock';
+
+
+@Component({
+  selector: 'app-root',
+  template: \`
+          <h1>{{ title }}</h1>
+          <app-stock-item [stock]="stock"
+                (toggleFavorite)="onToggleFavorite($event)">
+          </app-stock-item>
+  \`
+})
+export class AppComponent implements OnInit, OnChanges, OnDestroy, DoCheck,
+             AfterContentChecked, AfterContentInit, AfterViewChecked, AfterViewInit {
+  title = 'Tour Of Stocks';
+  stock: Stock;
+
+  onToggleFavorite(stock: Stock) {
+    console.log('Favorite for stock', stock, 'was triggered');
+    this.stock.favorite = !this.stock.favorite;
+  }
+
+  ngOnInit() {
+    this.stock = new Stock('Rocket Stock Company', 'RSC', 1000, 110);
+    console.log('App Component - On Init');
+  }
+
+  ngAfterViewInit() {
+    console.log('App Component - After View Init');
+  }
+
+  ngAfterViewChecked() {
+    console.log('App Component - After View Checked');
+  }
+
+  ngAfterContentInit() {
+    console.log('App Component - After Content Init');
+  }
+
+  ngAfterContentChecked() {
+    console.log('App Component - After Content Checked');
+  }
+
+  ngDoCheck() {
+    console.log('App Component - Do Check');
+  }
+
+  ngOnChanges() {
+    console.log('App Component - On Changes');
+  }
+
+  ngOnDestroy() {
+    console.log('App Component - On Destroy');
+  }
+
+}
+
+
+
+// app component unit test
+
+
+
+
+
+  `,
+  blockQuote: `
+  Wir beabsichtigen zum Mond zu fliegen in diesem Jahrzehnt und andere Sachen zu tun, nicht weil sie einfach sind,
+  sondern weil sie schwer sind, weil das Ziel uns dienen wird zu organisieren und messen die Beste unserer Energien
+  und Kompetenzen, weil diese Herausforderung ist eine welche wir annehmen, eine die wir nicht vertagen wollen
+  und eine die wir vorhaben zu gewinnen.
+  `,
+  imageFooterUrl: 'assets/img/post15.jpg',
+  footerQuote: 'Wir sind alle miteinander verbunden; zueinander biologisch. Zu der Erde, chemisch. Zum Rest des Universums, atomar.'
 }
   ];
 
@@ -23164,7 +23622,10 @@ export class StockItemComponent implements OnInit {
     if (this.articleId === 'angular-basics-5') {
       this.articleId = 14;
     }
-    if (!(+this.articleId) || +this.articleId > 14) {
+    if (this.articleId === 'angular-projects-part-1') {
+      this.articleId = 15;
+    }
+    if (!(+this.articleId) || +this.articleId > 15) {
       this.isNotFound = true;
       this.router.navigate(['page-not-found']);
     }
