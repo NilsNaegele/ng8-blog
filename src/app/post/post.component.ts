@@ -2104,7 +2104,7 @@ import { Component, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/
       hero: Hero;
       power: string;
       title = 'DoCheck';
-      @ViewChild(DoCheckComponent) childView: DoCheckComponent;
+      @ViewChild(DoCheckComponent, { static: false }) childView: DoCheckComponent;
 
       constructor() {
         this.reset();
@@ -2150,7 +2150,7 @@ import { Component, AfterViewChecked, AfterViewInit, ViewChild } from '@angular/
     private previousHero = '';
     comment = '';
 
-    @ViewChild(ChildViewComponent) viewChild: ChildViewComponent;
+    @ViewChild(ChildViewComponent, { static: false }) viewChild: ChildViewComponent;
 
     constructor(private logger: LoggerService) {
       this.logIt('AfterView constructor');
@@ -3217,7 +3217,7 @@ import { AdItem } from '../ad-item';
 export class AdBannerComponent implements AfterViewInit, OnDestroy  {
     @Input() ads: AdItem[];
     currentAddIndex: number = -1;
-    @ViewChild(AdDirective) adHost: AdDirective;
+    @ViewChild(AdDirective, { static: false }) adHost: AdDirective;
     subscription: any;
     interval: any;
 
@@ -15395,7 +15395,7 @@ import { Technology } from '../technology';
 })
 export class TechnologyFormComponent  {
       @Input() technology: Technology;
-      @ViewChild('technologyForm') form: NgForm;
+      @ViewChild('technologyForm', { static: false }) form: NgForm;
 
       private _submitMessage = '';
 
@@ -26925,8 +26925,8 @@ import { NgModule, Component, Injectable, ViewChild } from '@angular/core';
            title = 'Angular 9 Alpha Projects';
 
            loggedIn = false;
-           @ViewChild('name') name;
-           @ViewChild('password') password;
+           @ViewChild('name', { static: false }) name;
+           @ViewChild('password', { static: false }) password;
 
           constructor(public userService: UserService) {}
 
@@ -26973,7 +26973,7 @@ import { NgModule, Component, Injectable, ViewChild } from '@angular/core';
   }
   getArticle(): void {
     this.articleId = this.route.snapshot.paramMap.get('id');
-    console.log(this.articleId);
+    // console.log(this.articleId);
     if (+this.articleId === 1 || this.articleId === 'typescript-basics-1') {
       this.articleId = 1;
     }
