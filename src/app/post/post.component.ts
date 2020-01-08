@@ -24945,7 +24945,7 @@ export class AppComponent  {
   imageHeaderUrl: 'url(assets/img/post16-bg.jpg)',
   heading: 'Angular 8/9, Projekte- Teil 2',
   subHeading: 'Angular Projekte, P1',
-  metaPublishedDate: 'am 09 Januar, 2020',
+  metaPublishedDate: 'am 08 Januar, 2020',
   sectionHeading: 'Angular Projekte, P1',
   code: `
  // interpolation
@@ -25733,8 +25733,1225 @@ import { Component, ViewChild, AfterViewInit } from '@angular/core';
 
 
 // afterviewchecked
+import { Component, ViewChild, AfterViewChecked } from '@angular/core';
 
 
+  @Component({
+    selector: 'app-root',
+    template: \`
+              <h1>{{ title }}</h1>
+              <input [(ngModel)]="input">
+              <br>
+              {{ input }}
+              <br>
+              <div #message></div>
+    \`
+  })
+  export class AppComponent implements AfterViewChecked {
+           title = 'Angular 9 Alpha Projects, are we there yet?';
+           @ViewChild('message', { static: false }) message;
+           input = '';
+
+           ngAfterViewChecked() {
+             console.log('AfterViewChecked');
+             if (isNaN(parseInt(this.input, 10))) {
+               this.message.nativeElement.innerHTML = 'Input not numeric';
+             } else {
+               this.message.nativeElement.innerHTML = 'Input is numeric';
+             }
+
+           }
+
+  }
+
+
+// oninit, ondestroy
+import { Component, OnInit, OnDestroy } from '@angular/core';
+
+
+@Component({
+  selector: 'app-root',
+  template: \`
+            <h1>{{ title }}</h1>
+            <h3>{{ count }}</h3>
+  \`
+})
+export class AppComponent implements OnInit, OnDestroy {
+         title = 'Angular 9 Alpha Projects, are we there yet?';
+         interval: any;
+         count = 0;
+
+         ngOnInit() {
+           this.interval = setInterval(() => this.count++ );
+         }
+
+         ngOnDestroy() {
+           clearInterval(this.interval);
+           delete this.interval;
+         }
+
+}
+
+
+
+// input, output event emitter
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+
+export interface Car {
+  make: string;
+  model: string;
+}
+
+************************************************************************
+
+@Component({
+      selector: 'app-car',
+      template: \`
+              <p>
+                  {{ car.make }} : {{ car.model }}
+                  <button (click)="onDelete(car)">Delete</button>
+              </p>
+      \`
+})
+export class CarComponent {
+      @Input() car: Car;
+      @Output() carDelete = new EventEmitter<Car>();
+
+      onDelete(car) {
+        this.carDelete.emit(car);
+      }
+
+}
+
+************************************************************************
+
+@Component({
+  selector: 'app-root',
+  template: \`
+            <h1>{{ title }}</h1>
+
+            <app-car *ngFor="let car of cars"
+                     (carDelete)="delete(car)" [car]="car">
+            </app-car>
+  \`
+})
+export class AppComponent {
+         title = 'Angular 9 Alpha Projects, are we there yet?';
+
+         cars: Array<Car> = [
+            { make: 'Audi', model: 'A8' },
+            { make: 'BMW', model: 'M4' },
+            { make: 'Ford', model: 'Mustang' }
+         ];
+
+         delete(car: Car) {
+           console.log('Deleting car: ' + JSON.stringify(car));
+         }
+
+}
+
+
+// component nesting
+import { Component } from '@angular/core';
+
+
+  @Component({
+        selector: 'app-customer',
+        template: \`
+                <div class="customer">
+                        [customer]
+                </div>
+        \`,
+        styles: [\`
+            .customer {
+              background-color: #fefbd8;
+              margin: 10px;
+              padding: 10px;
+            }
+        \`]
+  })
+  export class CustomerComponent { }
+
+  ************************************************************************
+
+  @Component({
+    selector: 'app-customer-list',
+    template: \`
+            <div class="customerList">
+                <p>
+                    [customer list]
+                </p>
+            </div>
+            <app-customer></app-customer>
+            <app-customer></app-customer>
+            <app-customer></app-customer>
+    \`,
+    styles: [\`
+        .customerList {
+          background-color: #80ced6;
+          margin: 10px;
+          padding: 10px;
+        }
+    \`]
+  })
+  export class CustomerListComponent { }
+
+  ************************************************************************
+
+  @Component({
+    selector: 'app-root',
+    template: \`
+              <h1>{{ title }}</h1>
+
+              <div class="app">
+                [app]
+                  <app-customer-list>
+                  </app-customer-list>
+              </div>
+    \`,
+    styles: [\`
+          .app {
+            background-color: #d5f4e6;
+            margin: 10px;
+            padding: 10px;
+          }
+    \`]
+  })
+  export class AppComponent {
+           title = 'Angular 9 Alpha Projects';
+
+  }
+
+
+// nested components with input
+import { Component, Input } from '@angular/core';
+
+
+@Component({
+      selector: 'app-customer',
+      template: \`
+              <div class="customer">
+                   {{ customer.name }} {{ customer.city }}
+              </div>
+      \`,
+      styles: [\`
+          .customer {
+            background-color: #fefbd8;
+            margin: 10px;
+            padding: 10px;
+          }
+      \`]
+})
+export class CustomerComponent {
+  @Input() customer;
+}
+
+************************************************************************
+
+@Component({
+  selector: 'app-customer-list',
+  template: \`
+          <div class="customerList">
+              <p>
+                  [customer list]
+              </p>
+            <app-customer *ngFor="let customer of customerList"
+                        [customer]="customer">
+            </app-customer>
+          </div>
+  \`,
+  styles: [\`
+      .customerList {
+        background-color: #80ced6;
+        margin: 10px;
+        padding: 10px;
+      }
+  \`]
+})
+export class CustomerListComponent {
+
+      customerList = [
+          { name: 'Tessa', city: 'Amsterdam' },
+          { name: 'Barbara', city: 'San Francisco' },
+          { name: 'Nils-Holger', city: 'Berlin'}
+      ];
+
+}
+
+************************************************************************
+
+@Component({
+  selector: 'app-root',
+  template: \`
+            <h1>{{ title }}</h1>
+
+            <div class="app">
+              [app]
+                <app-customer-list>
+                </app-customer-list>
+            </div>
+  \`,
+  styles: [\`
+        .app {
+          background-color: #d5f4e6;
+          margin: 10px;
+          padding: 10px;
+        }
+  \`]
+})
+export class AppComponent {
+         title = 'Angular 9 Alpha Projects';
+
+}
+
+
+// nested components with input, output && event emitter
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+
+
+  @Component({
+        selector: 'app-customer',
+        template: \`
+                <div class="customer" (click)="onClicked()">
+                     {{ customer.name }} {{ customer.city }}
+                </div>
+        \`,
+        styles: [\`
+            .customer {
+              background-color: #fefbd8;
+              margin: 10px;
+              padding: 10px;
+            }
+        \`]
+  })
+  export class CustomerComponent {
+    @Input() customer;
+    @Output() clicked: EventEmitter<string> = new EventEmitter<string>();
+    onClicked() {
+      this.clicked.emit(this.customer.name);
+    }
+  }
+
+  ************************************************************************
+
+  @Component({
+    selector: 'app-customer-list',
+    template: \`
+            <div class="customerList">
+                <p>
+                    [customer list]
+                </p>
+              <app-customer *ngFor="let customer of customerList"
+                          [customer]="customer" (clicked)="onCustomerClicked($event)">
+              </app-customer>
+            </div>
+    \`,
+    styles: [\`
+        .customerList {
+          background-color: #80ced6;
+          margin: 10px;
+          padding: 10px;
+        }
+    \`]
+  })
+  export class CustomerListComponent {
+
+        customerList = [
+            { name: 'Tessa', city: 'Amsterdam' },
+            { name: 'Barbara', city: 'San Francisco' },
+            { name: 'Nils-Holger', city: 'Berlin'}
+        ];
+
+        onCustomerClicked(customerName: string) {
+          alert('Customer Clicked: ' + customerName);
+        }
+
+  }
+
+  ************************************************************************
+
+  @Component({
+    selector: 'app-root',
+    template: \`
+              <h1>{{ title }}</h1>
+
+              <div class="app">
+                [app]
+                  <app-customer-list>
+                  </app-customer-list>
+              </div>
+    \`,
+    styles: [\`
+          .app {
+            background-color: #d5f4e6;
+            margin: 10px;
+            padding: 10px;
+          }
+    \`]
+  })
+  export class AppComponent {
+           title = 'Angular 9 Alpha Projects';
+
+  }
+
+
+// viewchild, elementref, afterviewinit
+import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+
+
+
+@Component({
+  selector: 'app-root',
+  template: \`
+            <h1 #title></h1>
+            The title is: {{ title.innerHTML }}
+
+  \`,
+  styles: [\`
+        h1 {
+          background-color: #d5f4e6;
+          margin: 10px;
+          padding: 10px;
+        }
+  \`]
+})
+export class AppComponent implements AfterViewInit {
+         @ViewChild('title', { static: false }) titleRef: ElementRef;
+
+         ngAfterViewInit() {
+           this.titleRef.nativeElement.innerHTML = 'Are we there yet?';
+         }
+
+}
+
+
+// viewchildren, afterviewinit
+import { Component, ViewChildren, AfterViewInit } from '@angular/core';
+
+
+
+  @Component({
+    selector: 'app-root',
+    template: \`
+                <h1>{{ title }}</h1>
+              <p #paragraph1>The will to win is nothing without the will to prepare.
+                              I have met my hero, he is me. Code with passion.
+                              It is the quality of the effect you have on others
+                              that determines your growth. Fail fast. Fail often.
+              </p>
+              <p #paragraph2>It is at the borders of pain and suffering that the
+                             the men are separated from the boys.
+                              Think big, think positive. Growth.
+                              Code, exercise, eat, sleep. Repeat. Improve, improve, improve!
+              </p>
+              <p *ngIf="note">{{ note }}</p>
+    \`,
+    styles: [\`
+          p {
+            background-color: #FFE5CC;
+            text-align: center;
+            padding: 15px;
+          }
+    \`]
+  })
+  export class AppComponent implements AfterViewInit {
+           @ViewChildren('paragraph1, paragraph2') paragraphs;
+           title = 'Angular 9 Alpha Projects';
+           note = '';
+
+           ngAfterViewInit() {
+             setTimeout(() => this.note = 'Number of Paragraphs: ' + this.paragraphs.length);
+           }
+  }
+
+
+// ngcontent transclusion
+import { Component } from '@angular/core';
+
+
+@Component({
+  selector: 'app-paragraph',
+  template: \`
+        <p>
+            <ng-content></ng-content>
+        </p>
+  \`,
+  styles: [\`
+        p {
+          border: 3px solid #c0c0c0;
+        }
+  \`]
+})
+export class ParagraphComponent { }
+
+************************************************************************
+
+@Component({
+  selector: 'app-root',
+  template: \`
+              <h1>{{ title }}</h1>
+            <p>
+            <app-paragraph>The will to win is nothing without the will to prepare.
+                            I have met my hero, he is me. Code with passion.
+                            It is the quality of the effect you have on others
+                            that determines your growth. Fail fast. Fail often.
+            </app-paragraph>
+            <app-paragraph>It is at the borders of pain and suffering that the
+                           the men are separated from the boys.
+                            Think big, think positive. Growth.
+                            Code, exercise, eat, sleep. Repeat. Improve, improve, improve!
+            </app-paragraph>
+            </p>
+  \`
+})
+export class AppComponent {
+         title = 'Angular 9 Alpha Projects';
+
+}
+
+
+// contentchild
+import { Component, ContentChild } from '@angular/core';
+
+
+@Component({
+  selector: 'app-paragraph',
+  template: \`
+        <div>
+          <strong>{{ paraTitle.nativeElement.innerHTML }}</strong>
+          <p>
+              <ng-content></ng-content>
+          </p>
+        </div>
+  \`,
+  styles: [\`
+        p {
+          border: 3px solid #c0c0c0;
+        }
+  \`]
+})
+export class ParagraphComponent {
+  @ContentChild('paraTitle') paraTitle;
+}
+
+
+
+@Component({
+  selector: 'app-root',
+  template: \`
+              <h1>{{ title }}</h1>
+            <p>
+              <app-paragraph><title #paraTitle>1st Paragraph</title>
+                            The will to win is nothing without the will to prepare.
+                            I have met my hero, he is me. Code with passion.
+                            It is the quality of the effect you have on others
+                            that determines your growth. Fail fast. Fail often.
+              </app-paragraph>
+              <app-paragraph><title #paraTitle>2nd Paragraph</title>
+                            It is at the borders of pain and suffering that the
+                            the men are separated from the boys.
+                            Think big, think positive. Growth.
+                            Code, exercise, eat, sleep. Repeat. Improve, improve, improve!
+              </app-paragraph>
+            </p>
+  \`
+})
+export class AppComponent {
+         title = 'Angular 9 Alpha Projects';
+
+}
+
+
+// injectable
+import { Component, Input, Injectable, OnInit } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class CarService {
+
+        constructor() {
+          console.log('CarService: constructor');
+        }
+
+        isSuperCharged(car: string) {
+          return car === 'Porsche 911' ? 'yes' : 'no';
+        }
+}
+
+************************************************************************
+
+@Component({
+      selector: 'app-car',
+      template: \`
+              <h3>
+                  {{ name }} is SuperCharged: {{ superCharged }}
+              </h3>
+      \`,
+      providers: [ CarService ]
+})
+export class CarComponent implements OnInit {
+  @Input() name;
+  superCharged = '';
+  constructor(private carService: CarService) { }
+
+  ngOnInit() {
+    this.superCharged = this.carService.isSuperCharged(this.name);
+  }
+}
+
+************************************************************************
+
+@Component({
+  selector: 'app-root',
+  template: \`
+              <h1>{{ title }}</h1>
+            <app-car name="BMW X3"></app-car>
+            <app-car name="Porsche 911"></app-car>
+            <app-car name="Audi A8"></app-car>
+  \`
+})
+export class AppComponent {
+         title = 'Angular 9 Alpha Projects';
+
+}
+
+
+// service injected in root component
+import { Component, Input, Injectable, OnInit } from '@angular/core';
+
+@Injectable()
+export class CarService {
+
+        constructor() {
+          console.log('CarService: constructor');
+        }
+
+        isSuperCharged(car: string) {
+          return car === 'Porsche 911' ? 'yes' : 'no';
+        }
+}
+
+@Component({
+      selector: 'app-car',
+      template: \`
+              <h3>
+                  {{ name }} is SuperCharged: {{ superCharged }}
+              </h3>
+      \`
+})
+export class CarComponent implements OnInit {
+  @Input() name;
+  superCharged = '';
+  constructor(private carService: CarService) { }
+
+  ngOnInit() {
+    this.superCharged = this.carService.isSuperCharged(this.name);
+  }
+}
+
+
+@Component({
+  selector: 'app-root',
+  template: \`
+              <h1>{{ title }}</h1>
+            <app-car name="BMW X3"></app-car>
+            <app-car name="Porsche 911"></app-car>
+            <app-car name="Audi A8"></app-car>
+  \`,
+  providers: [ CarService ]
+})
+export class AppComponent {
+         title = 'Angular 9 Alpha Projects';
+
+}
+
+
+// service injected in appmodule
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
+
+import { AppComponent, CarComponent, CarService } from './app.component';
+
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    CarComponent
+  ],
+  imports: [
+    BrowserModule,
+    FormsModule,
+    HttpClientModule
+  ],
+  providers: [ CarService ],
+  bootstrap: [AppComponent]
+})
+export class AppModule {
+
+}
+
+
+// useclass
+import { Component } from '@angular/core';
+
+  export class Watch {
+    getTime(): string {
+      return new Date() + '';
+    }
+  }
+
+  export class Rolex extends Watch {
+    getTime(): string {
+      return 'Rolex Time: ' + super.getTime();
+    }
+  }
+
+
+
+  @Component({
+    selector: 'app-root',
+    template: \`
+                <h1>{{ title }}</h1>
+                <h3>
+                      {{ watch.getTime() }}
+                </h3>
+    \`,
+    providers: [{
+      provide: Watch,
+      useClass: Rolex
+    }]
+  })
+  export class AppComponent {
+           title = 'Angular 9 Alpha Projects';
+           constructor(public watch: Watch) { }
+
+  }
+
+
+// usefactory
+import { Component, Injectable } from '@angular/core';
+
+@Injectable()
+export class LoggingService {
+  constructor(private dateAndTime: boolean) {
+    console.log('LoggingService: constructor');
+  }
+  log(message: string) {
+    console.log(this.dateAndTime ? new Date() + ': ' + message : ': ' + message);
+  }
+}
+
+
+
+@Component({
+  selector: 'app-root',
+  template: \`
+              <h1>{{ title }}</h1>
+  \`,
+  providers: [ provideLoggingService() ]
+})
+export class AppComponent {
+         title = 'Angular 9 Alpha Projects';
+         constructor(private loggingService: LoggingService) {
+           loggingService.log('Hi Nils-Holger, I love you.');
+         }
+
+}
+
+export const LOGGING_USE_DATE = true;
+
+export function provideLoggingService() {
+  return {
+    provide: LoggingService,
+    useFactory: loggingFactory
+  };
+}
+
+export function loggingFactory() {
+  return new LoggingService(LOGGING_USE_DATE);
+}
+
+
+// cardfactory
+import { Component, Injectable } from '@angular/core';
+
+  @Injectable()
+  export class CardService {
+    constructor(public suite: string, public rank: string) { }
+
+    toString(): string {
+      return 'Card is ' + this.rank + ' of ' + this.suite;
+    }
+  }
+
+
+
+  @Component({
+    selector: 'app-root',
+    template: \`
+                <h1>{{ title }}</h1>
+                <h3>{{ cardTitle }}</h3>
+    \`,
+    providers: [{
+      provide: CardService,
+      useFactory: cardFactory
+    }]
+  })
+  export class AppComponent {
+           title = 'Angular 9 Alpha Projects';
+           cardTitle = '';
+           constructor(private cardService: CardService) {
+            this.cardTitle = cardService.toString();
+           }
+
+  }
+
+  export function cardFactory() {
+    const suite = Math.floor(Math.random() * 4);
+    const suiteName =
+          suite === 0 ? 'Clubs' : suite === 1 ? 'Diamonds' :
+          suite === 2 ? 'Hearts' : 'Spades';
+    const rank = Math.floor(Math.random() * 15);
+    const rankName =
+          rank === 0 ? 'Ace' : rank === 1 ? 'Joker' :
+          rank === 2 ? 'King' : rank === 3 ? 'Queen' :
+          (rank - 3).toString();
+    return new CardService(suiteName, rankName);
+  }
+
+
+// injector
+import { Component, Injector } from '@angular/core';
+
+
+
+  @Component({
+    selector: 'app-root',
+    template: \`
+                <h1>{{ title }}</h1>
+                <h3>{{ lanTitle }}</h3>
+    \`,
+    providers: [{
+      provide: 'language',
+      useValue: 'de'
+    }]
+  })
+  export class AppComponent {
+           title = 'Angular 9 Alpha Projects';
+           lanTitle = '';
+           constructor(private injector: Injector) {
+            this.lanTitle = 'Language is: ' + injector.get('language');
+           }
+  }
+
+
+// ngboostrap radiogroup
+import { Component } from '@angular/core';
+
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+
+
+@Component({
+  selector: 'app-root',
+  template: \`
+              <h1>{{ title }}</h1>
+              <div style="padding: 10px">
+                  <h2>Please select your car:</h2>
+                  <div [(ngModel)]="model" ngbRadioGroup name="radioBasic">
+                        <label ngbButtonLabel class="btn-primary">
+                          <input ngbButton type="radio" value="Audi"> Audi
+                        </label>
+                        <label ngbButtonLabel class="btn-primary">
+                          <input ngbButton type="radio" value="BMW"> BMW
+                        </label>
+                        <label ngbButtonLabel class="btn-primary">
+                          <input ngbButton type="radio" value="Mercedes"> Mercedes
+                        </label>
+                        <label ngbButtonLabel class="btn-primary">
+                          <input ngbButton type="radio" value="Porsche"> Porsche
+                        </label>
+                        <label ngbButtonLabel class="btn-primary">
+                          <input ngbButton type="radio" value="All"> All
+                        </label>
+                  </div>
+                  <hr>
+                  Your Selection: {{ model }}
+              </div>
+  \`
+})
+export class AppComponent {
+         title = 'Angular 9 Alpha Projects';
+         model = 'BMW';
+
+}
+
+
+// angular material datepicker
+import { Component } from '@angular/core';
+
+
+
+@Component({
+  selector: 'app-root',
+  template: \`
+              <h1>{{ title }}</h1>
+              <mat-form-field>
+                  <input matInput [matDatepicker]="picker" placeholder="Choose a date">
+                  <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                  <mat-datepicker touchUi="true" #picker></mat-datepicker>
+              </mat-form-field>
+
+  \`
+})
+export class AppComponent {
+         title = 'Angular 9 Alpha Projects';
+
+}
+
+
+// routing basic
+import { NgModule, Component } from '@angular/core';
+import { RouterModule, Routes, Router, ActivatedRoute } from '@angular/router';
+
+
+@Component({
+  selector: 'app-hawaii',
+  template: \`
+        <h2>Hawaii</h2>
+        <img src="https://slice-of-pineapple.jpg">
+  \`
+})
+export class HawaiiComponent { }
+
+********************************************************************************
+
+@Component({
+  selector: 'app-everything',
+  template: \`
+        <h2>Everything</h2>
+        Size: {{ size }}
+        <img src="https://pizza-hawaii.png">
+  \`
+})
+export class EverythingComponent {
+  size: string;
+
+  constructor(private route: ActivatedRoute) {
+    this.route.params.subscribe((params: any) => this.size = params['size']);
+  }
+}
+
+********************************************************************************
+
+
+@Component({
+  selector: 'app-root',
+  template: \`
+              <h1>{{ title }}</h1>
+              <h2>Pizzas</h2>
+              <a [routerLink]="['hawaii']">Hawaii</a>
+              <a [routerLink]="['everything', 'small']">Everything Small</a>
+              <a [routerLink]="['everything', 'large']">Everything Large</a>
+              <router-outlet></router-outlet>
+  \`
+})
+export class AppComponent {
+         title = 'Angular 9 Alpha Projects';
+
+}
+
+********************************************************************************
+
+const appRoutes: Routes = [
+      { path: '', redirectTo: '/hawaii', pathMatch: 'full' },
+      { path: 'hawaii', component: HawaiiComponent },
+      { path: 'everything/:size', component: EverythingComponent }
+];
+
+@NgModule({
+  imports: [ RouterModule.forRoot(appRoutes)],
+  exports: [ RouterModule ]
+})
+export class AppRoutingModule { }
+
+
+
+// routing load children
+import { NgModule, Component } from '@angular/core';
+import { RouterModule, Routes, Router, ActivatedRoute } from '@angular/router';
+
+
+
+@Component({
+  selector: 'app-hawaii',
+  template: \`
+        <h2>Hawaii</h2>
+        <img src="slice-of-pineapple.jpg">
+  \`
+})
+export class HawaiiComponent { }
+
+*****************************************************************************
+
+@Component({
+  selector: 'app-other',
+  template: \`
+        <div>
+            <h2>Other Menu Items</h2>
+            <a [routerLink]="['pasta']" routerLinkActive="active">Pasta</a>
+            <a [routerLink]="['calzone']" routerLinkActive="active">Calzone</a>
+            <router-outlet></router-outlet>
+            <br>
+            <br>
+        </div>
+  \`
+})
+export class OtherComponent {}
+
+*****************************************************************************
+
+@Component({
+  selector: 'app-pasta',
+  template: \`
+            <div>
+              <h2>Pasta</h2>
+              <img src="https://spaghetti.jpg">
+            </div>
+  \`
+})
+export class NestedPastaComponent {}
+
+*****************************************************************************
+
+@Component({
+  selector: 'app-calzone',
+  template: \`
+            <div>
+              <h2>Calzone</h2>
+              <img src="https://calzone.jpg">
+            </div>
+  \`
+})
+export class NestedCalzoneComponent {}
+
+*****************************************************************************
+
+@Component({
+  selector: 'app-root',
+  template: \`
+              <h1>{{ title }}</h1>
+              <h2>Delivery Menu</h2>
+              <a [routerLink]="['hawaii']" routerLink="active">Hawaii</a>
+              <a [routerLink]="['other']" routerLink="active">Other Menu Items</a>
+              <router-outlet></router-outlet>
+  \`
+})
+export class AppComponent {
+         title = 'Angular 9 Alpha Projects';
+
+}
+
+*****************************************************************************
+
+const appRoutes: Routes = [
+      { path: '', redirectTo: '/hawaii', pathMatch: 'full' },
+      { path: 'hawaii', component: HawaiiComponent },
+      { path: 'other', component: OtherComponent, children: [
+        { path: '', redirectTo: 'pasta', pathMatch: 'full' },
+        { path: 'pasta', component: NestedPastaComponent },
+        { path: 'calzone', component: NestedCalzoneComponent }
+      ]
+    }
+];
+
+@NgModule({
+  imports: [ RouterModule.forRoot(appRoutes)],
+  exports: [ RouterModule ]
+})
+export class AppRoutingModule { }
+
+
+
+// routing navigation
+import { NgModule, Component } from '@angular/core';
+import { RouterModule, Routes, Router } from '@angular/router';
+import { Location } from '@angular/common';
+
+
+@Component({
+  selector: 'app-first-component',
+  template: \`
+            <h1>{{ title }}</h1>
+  \`
+})
+export class FirstComponent {
+  title = 'Component 1';
+}
+
+@Component({
+  selector: 'app-second-component',
+  template: \`
+            <h1>{{ title }}</h1>
+  \`
+})
+export class SecondComponent {
+  title = 'Component 2';
+}
+
+
+@Component({
+  selector: 'app-root',
+  template: \`
+              <h1>{{ title }}</h1>
+              <button (click)="firstComponent()">First Component</button>
+              <button (click)="secondComponent()">Second Component</button>
+              <button (click)="back()">Go Back</button>
+
+              <router-outlet></router-outlet>
+  \`
+})
+export class AppComponent {
+         title = 'Angular 9 Alpha Projects';
+
+        constructor(private router: Router, private location: Location) {}
+
+        firstComponent() {
+          this.router.navigate(['firstComponent']).then(result => {
+                  console.log('navigation result: ' + result);
+          });
+        }
+
+        secondComponent() {
+          this.router.navigateByUrl('/secondComponent');
+        }
+
+        back() {
+          this.location.back();
+        }
+}
+
+
+const appRoutes: Routes = [
+      { path: 'firstComponent', component: FirstComponent },
+      { path: 'secondComponent', component: SecondComponent },
+  ];
+
+@NgModule({
+  imports: [ RouterModule.forRoot(appRoutes)],
+  exports: [ RouterModule ]
+})
+export class AppRoutingModule { }
+
+
+// route guard
+import { NgModule, Component, Injectable, ViewChild } from '@angular/core';
+  import { RouterModule, Routes, Router, CanActivate } from '@angular/router';
+  import { Location } from '@angular/common';
+
+  @Injectable()
+  export class UserService {
+    private _authenticated = false;
+
+    get authenticated(): boolean {
+      return this._authenticated;
+    }
+
+    set authenticated(value: boolean) {
+      this._authenticated = value;
+    }
+
+    authenticate(name: string, password: string): void {
+      if ((name === 'user') && (password === 'password')) {
+        this._authenticated = true;
+      }
+    }
+
+  }
+
+  @Injectable()
+  export class ActivateService implements CanActivate {
+
+        constructor(private userService: UserService) { }
+
+        canActivate() {
+          return this.userService.authenticated;
+        }
+  }
+
+
+  @Component({
+    selector: 'app-non-authenticated-component',
+    template: \`
+            <div>
+              <h2>Non-authenticated</h2>
+              <p>This component can be accessed without authentication</p>
+            </div>
+    \`
+  })
+  export class NonAuthenticatedComponent { }
+
+  @Component({
+    selector: 'app-authenticated-component',
+    template: \`
+            <div>
+              <h2>Authenticated</h2>
+              <p>This component cannot be accessed without authentication</p>
+            </div>
+    \`
+  })
+  export class AuthenticatedComponent { }
+
+
+  @Component({
+    selector: 'app-root',
+    template: \`
+                <h1>{{ title }}</h1>
+                <span *ngIf="!userService.authenticated">
+                User: <input type="input" #name>
+                Password: <input type="input" #password>
+                <input type="button" (click)="logIn()" value="LogIn">
+                </span>
+                Authenticated: {{ userService.authenticated }}
+                <hr>
+                <a [routerLink]="['non-authenticated']">Non-Authenticated</a>
+                <a [routerLink]="['authenticated']">Authenticated</a>
+                <router-outlet></router-outlet>
+    \`
+  })
+  export class AppComponent {
+           title = 'Angular 9 Alpha Projects';
+
+           loggedIn = false;
+           @ViewChild('name') name;
+           @ViewChild('password') password;
+
+          constructor(public userService: UserService) {}
+
+          logIn() {
+            this.userService.authenticate(this.name.nativeElement.value,
+                                          this.password.nativeElement.value);
+          }
+  }
+
+
+  const appRoutes: Routes = [
+        { path: 'authenticated', component: AuthenticatedComponent,
+                                 canActivate: [ActivateService] },
+        { path: '**', component: NonAuthenticatedComponent },
+    ];
+
+  @NgModule({
+    imports: [ RouterModule.forRoot(appRoutes)],
+    exports: [ RouterModule ],
+    providers: [ActivateService, UserService ]
+  })
+  export class AppRoutingModule { }
+
+
+// work hard, be kind, do more. ;-)
 
   `,
   blockQuote: `
